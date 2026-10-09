@@ -173,3 +173,5 @@ Open `http://127.0.0.1:5000` in your browser.
 python -m scratch.test_full_suite
 ```
 All tests verify role authentication, 10-student calibrated distribution, role authorization boundaries, simulation endpoints, and SQLite persistence.
+#   C a m p u s I Q  
+ 
