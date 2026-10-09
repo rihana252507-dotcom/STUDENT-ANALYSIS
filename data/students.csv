@@ -1,0 +1,11 @@
+student_id,name,email,gender,department,department_name,semester,section,mentor,cgpa,academic_marks_pct,attendance_pct,backlogs,lms_weekly_hours,lms_engagement_score,assignment_completion_pct,extracurricular_score,placement_aptitude_score,technical_skills_score,student_feedback_score,phone
+CIQ-2026-001,Aarav Reddy,aarav.reddy@campusiq.edu,Male,CSE,Computer Science & Engineering,8,A,Dr. Sunita Rao,9.10,92.0,94.0,0,16.5,92.0,96.0,85.0,90.0,94.0,4.8,+91 9877827638
+CIQ-2026-002,Aditi Kulkarni,aditi.kulkarni@campusiq.edu,Female,IT,Information Technology,6,A,Dr. Meenakshi Sundaram,8.65,88.0,89.0,0,15.0,86.0,92.0,80.0,85.0,88.0,4.5,+91 9847295260
+CIQ-2026-003,Rohan Sharma,rohan.sharma@campusiq.edu,Male,CSE,Computer Science & Engineering,6,B,Dr. Sunita Rao,8.40,84.0,82.0,0,11.0,74.0,78.0,60.0,52.0,50.0,3.8,+91 9860806024
+CIQ-2026-004,Ananya Gupta,ananya.gupta@campusiq.edu,Female,AI&DS,Artificial Intelligence & Data Science,4,A,Prof. Neha Gupta,7.20,74.0,78.5,1,10.0,72.0,75.0,65.0,68.0,70.0,3.9,+91 9823556182
+CIQ-2026-005,Vikram Malhotra,vikram.malhotra@campusiq.edu,Male,ECE,Electronics & Communication Engineering,6,A,Dr. Amit Verma,6.95,68.0,76.0,0,7.0,62.0,66.0,58.0,64.0,62.0,3.5,+91 9831931511
+CIQ-2026-006,Sneha Patel,sneha.patel@campusiq.edu,Female,IT,Information Technology,6,B,Dr. Meenakshi Sundaram,6.80,69.0,77.0,1,9.0,68.0,72.0,50.0,74.0,76.0,2.8,+91 9811224455
+CIQ-2026-007,Divya Rao,divya.rao@campusiq.edu,Female,IT,Information Technology,6,A,Dr. Meenakshi Sundaram,6.10,58.0,61.5,2,5.0,48.0,52.0,40.0,48.0,46.0,2.4,+91 9822334455
+CIQ-2026-008,Kabir Mehta,kabir.mehta@campusiq.edu,Male,CSE,Computer Science & Engineering,4,B,Dr. Sunita Rao,5.40,50.0,68.0,3,4.5,42.0,48.0,45.0,44.0,42.0,2.2,+91 9833445566
+CIQ-2026-009,Pooja Nair,pooja.nair@campusiq.edu,Female,ECE,Electronics & Communication Engineering,6,C,Dr. Amit Verma,5.85,54.0,58.0,2,3.5,40.0,45.0,35.0,50.0,45.0,2.0,+91 9844556677
+CIQ-2026-010,Arjun Verma,arjun.verma@campusiq.edu,Male,ME,Mechanical Engineering,6,A,Dr. K. S. Pillai,5.10,48.0,65.0,2,4.0,38.0,42.0,30.0,40.0,38.0,2.1,+91 9855667788

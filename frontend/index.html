@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusIQ – AI-Powered Student Analytics & Success Platform</title>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Announcement / Hackathon Header -->
+  <header class="top-announcement">
+    <div class="announcement-content">
+      <span class="badge-kpmg">KPMG in India</span>
+      <span class="announcement-text"><strong>CampusIQ</strong> &bull; AI-Powered Student Analytics & Early Academic Risk Intervention Platform</span>
+      <div class="system-status-indicator">
+        <span class="pulse-dot"></span>
+        <span id="apiStatusText">Connecting to API...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-title">Campus<span class="highlight">IQ</span></span>
+          <span class="brand-subtitle">Student Success & Intelligence Engine</span>
+        </div>
+      </div>
+
+      <!-- View Switcher & Department Quick Filter -->
+      <div class="nav-controls">
+        <div class="role-switcher" role="tablist">
+          <button id="btnFacultyView" class="role-btn active" data-role="faculty" aria-selected="true">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Faculty / Mentor View
+          </button>
+          <button id="btnAdminView" class="role-btn" data-role="admin" aria-selected="false">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Dean / Admin View
+          </button>
+        </div>
+
+        <div class="global-dept-select">
+          <label for="globalDeptFilter" class="sr-only">Department</label>
+          <select id="globalDeptFilter" title="Select Department">
+            <option value="ALL">All Departments (University)</option>
+            <option value="CSE">Computer Science (CSE)</option>
+            <option value="IT">Information Tech (IT)</option>
+            <option value="AI&DS">AI & Data Science (AI&DS)</option>
+            <option value="ECE">Electronics (ECE)</option>
+            <option value="ME">Mechanical (ME)</option>
+            <option value="EEE">Electrical (EEE)</option>
+          </select>
+        </div>
+
+        <button id="btnOpenSimulator" class="action-pill-btn secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          What-If Simulator
+        </button>
+
+        <button id="btnExportCSV" class="action-pill-btn primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="dashboard-wrapper">
+
+    <!-- Role Context Banner -->
+    <section class="context-banner">
+      <div class="context-info">
+        <div class="context-tag" id="contextRoleTag">Faculty Advisory Mode</div>
+        <h1 class="context-heading" id="contextTitle">Early Student Academic Risk & Success Radar</h1>
+        <p class="context-subtext" id="contextSubtitle">
+          Real-time monitoring across 120 enrolled students. Powered by explainable multi-pillar feature attribution with proactive intervention suggestions.
+        </p>
+      </div>
+      <div class="ai-architecture-badge">
+        <span class="ai-dot"></span>
+        <div class="ai-badge-texts">
+          <span class="ai-badge-title">Explainable Rule Engine</span>
+          <span class="ai-badge-desc">Deterministic 5-Pillar Score &bull; ML Drop-in Ready</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Executive KPI Scorecards Row -->
+    <section class="kpi-grid">
+      <!-- KPI 1 -->
+      <div class="kpi-card card-gradient-blue">
+        <div class="kpi-header">
+          <span class="kpi-label">Total Monitored</span>
+          <div class="kpi-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpiTotalStudents">--</div>
+        <div class="kpi-meta">
+          <span class="kpi-meta-tag neutral">100% active cohort</span>
+          <span class="kpi-meta-desc">Across 6 engineering branches</span>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="kpi-card card-gradient-purple">
+        <div class="kpi-header">
+          <span class="kpi-label">Avg Success Score</span>
+          <div class="kpi-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpiAvgSuccess">--<span class="kpi-sub">/100</span></div>
+        <div class="kpi-meta">
+          <span class="kpi-meta-tag success" id="kpiAvgCgpaTag">Avg CGPA: --</span>
+          <span class="kpi-meta-desc">5-pillar composite index</span>
+        </div>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="kpi-card card-gradient-red">
+        <div class="kpi-header">
+          <span class="kpi-label">High-Risk Attention</span>
+          <div class="kpi-icon-wrapper danger-glow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+        </div>
+        <div class="kpi-value danger-text" id="kpiHighRisk">--</div>
+        <div class="kpi-meta">
+          <span class="kpi-meta-tag danger" id="kpiHighRiskPct">--% of cohort</span>
+          <span class="kpi-meta-desc">Requires immediate mentor action</span>
+        </div>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="kpi-card card-gradient-amber">
+        <div class="kpi-header">
+          <span class="kpi-label">Attendance Compliance</span>
+          <div class="kpi-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpiAttendanceRate">--%</div>
+        <div class="kpi-meta">
+          <span class="kpi-meta-tag warning" id="kpiAttendanceAvg">Avg: --%</span>
+          <span class="kpi-meta-desc">Meeting UGC &ge; 75% mandate</span>
+        </div>
+      </div>
+
+      <!-- KPI 5 -->
+      <div class="kpi-card card-gradient-emerald">
+        <div class="kpi-header">
+          <span class="kpi-label">Placement Readiness</span>
+          <div class="kpi-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          </div>
+        </div>
+        <div class="kpi-value success-text" id="kpiPlacementRate">--%</div>
+        <div class="kpi-meta">
+          <span class="kpi-meta-tag success" id="kpiPlacementCount">-- students</span>
+          <span class="kpi-meta-desc">Aptitude & Tech benchmark &ge; 75</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN EXCLUSIVE VIEW: Department Benchmarks -->
+    <section id="adminDeptBenchmarkSection" class="admin-section" style="display: none;">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div>
+            <h2 class="card-title">Dean's Institutional Department Benchmark</h2>
+            <p class="card-subtitle">Comprehensive accreditation & academic performance comparison across engineering faculties.</p>
+          </div>
+          <span class="badge-neutral">NIRF & NAAC Audit Ready</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="adminDeptTable">
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>Enrolled</th>
+                <th>High Risk Alert</th>
+                <th>Medium Risk</th>
+                <th>Safe Cohort</th>
+                <th>Avg CGPA</th>
+                <th>Avg Attendance</th>
+                <th>Success Score</th>
+                <th>Placement Ready</th>
+                <th>Audit Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminDeptTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Charts Section -->
+    <section class="charts-grid">
+      <!-- Chart 1: Risk Distribution -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Risk Profile Breakdown</h3>
+            <p class="chart-subtitle">Early academic warning distribution</p>
+          </div>
+          <span class="badge-outline">Cohort Distribution</span>
+        </div>
+        <div class="chart-canvas-container doughnut-wrap">
+          <canvas id="riskDoughnutChart"></canvas>
+        </div>
+        <div class="doughnut-legend" id="riskLegendSummary">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Chart 2: Department Performance -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Department Success Benchmark</h3>
+            <p class="chart-subtitle">Average Success Score vs CGPA</p>
+          </div>
+          <span class="badge-outline">Branch Comparison</span>
+        </div>
+        <div class="chart-canvas-container">
+          <canvas id="departmentBarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 3: Attendance vs CGPA Scatter -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Attendance vs CGPA Correlation</h3>
+            <p class="chart-subtitle">Regulatory attendance against academic marks</p>
+          </div>
+          <div class="scatter-indicators">
+            <span class="dot-label red">High Risk</span>
+            <span class="dot-label yellow">Medium</span>
+            <span class="dot-label green">Low</span>
+          </div>
+        </div>
+        <div class="chart-canvas-container">
+          <canvas id="attendanceScatterChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 4: Top Institutional Risk Factors -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Institutional Risk Bottlenecks</h3>
+            <p class="chart-subtitle">Frequency of trigger conditions across university</p>
+          </div>
+          <span class="badge-outline">Systemic Causes</span>
+        </div>
+        <div class="chart-canvas-container">
+          <canvas id="systemicRiskBarChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Student Roster & Intelligence Explorer -->
+    <section class="roster-section">
+      <div class="section-card">
+        
+        <!-- Controls & Filters Toolbar -->
+        <div class="toolbar">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="studentSearchInput" placeholder="Search by name, student ID, faculty mentor..." autocomplete="off">
+            <button id="btnClearSearch" class="btn-clear" style="display: none;">&times;</button>
+          </div>
+
+          <div class="filter-group">
+            <!-- Risk Filter Pills -->
+            <div class="risk-filter-pills" role="radiogroup">
+              <button class="pill-filter active" data-risk="ALL">All (<span id="countAll">120</span>)</button>
+              <button class="pill-filter danger" data-risk="High">High Risk (<span id="countHigh">--</span>)</button>
+              <button class="pill-filter warning" data-risk="Medium">Medium (<span id="countMed">--</span>)</button>
+              <button class="pill-filter success" data-risk="Low">Low (<span id="countLow">--</span>)</button>
+            </div>
+
+            <!-- Department dropdown -->
+            <select id="rosterDeptFilter" class="filter-select" title="Filter by Department">
+              <option value="ALL">All Departments</option>
+              <option value="CSE">CSE</option>
+              <option value="IT">IT</option>
+              <option value="AI&DS">AI&DS</option>
+              <option value="ECE">ECE</option>
+              <option value="ME">ME</option>
+              <option value="EEE">EEE</option>
+            </select>
+
+            <!-- Semester dropdown -->
+            <select id="rosterSemFilter" class="filter-select" title="Filter by Semester">
+              <option value="ALL">All Semesters</option>
+              <option value="4">Semester 4</option>
+              <option value="6">Semester 6</option>
+              <option value="8">Semester 8</option>
+            </select>
+
+            <!-- Sort By dropdown -->
+            <select id="rosterSortBy" class="filter-select" title="Sort By">
+              <option value="risk_level-asc">Sort: Risk (High first)</option>
+              <option value="success_score-asc">Success Score (Lowest first)</option>
+              <option value="success_score-desc">Success Score (Highest first)</option>
+              <option value="cgpa-asc">CGPA (Lowest first)</option>
+              <option value="cgpa-desc">CGPA (Highest first)</option>
+              <option value="attendance_pct-asc">Attendance (Lowest first)</option>
+              <option value="backlogs-desc">Backlogs (Highest first)</option>
+              <option value="name-asc">Student Name (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Roster Table Header & Table -->
+        <div class="table-info-bar">
+          <div class="result-count">
+            Showing <strong id="displayedCount">0</strong> of <strong id="totalCohortCount">120</strong> students
+          </div>
+          <div class="table-legend">
+            <span class="legend-chip"><span class="badge badge-high">High Risk</span> Immediate Action Required</span>
+            <span class="legend-chip"><span class="badge badge-medium">Medium Risk</span> Advisory Watchlist</span>
+            <span class="legend-chip"><span class="badge badge-low">Low Risk</span> Good Standing</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table student-table" id="studentsTable">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Dept & Sem</th>
+                <th>Faculty Mentor</th>
+                <th>CGPA</th>
+                <th>Attendance</th>
+                <th>Backlogs</th>
+                <th>Success Score</th>
+                <th>Risk Category</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="rosterEmptyState" class="empty-state" style="display: none;">
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <h3>No students match your filter criteria</h3>
+          <p>Try resetting the search bar, department, or risk filter pills.</p>
+          <button id="btnResetFilters" class="btn-primary-sm">Reset All Filters</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================================== -->
+  <!-- MODAL: STUDENT DETAILED PROFILE & EXPLAINABLE AI INTERVENTION HUB              -->
+  <!-- ============================================================================== -->
+  <div id="studentDetailModal" class="modal-overlay" style="display: none;" aria-hidden="true" role="dialog">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-student-identity">
+          <div class="student-avatar-lg" id="modalStudentAvatar">AR</div>
+          <div>
+            <div class="modal-title-row">
+              <h2 id="modalStudentName" class="modal-student-name">Aarav Sharma</h2>
+              <span id="modalRiskBadge" class="badge badge-high">High Risk</span>
+            </div>
+            <div class="modal-subtitle-row">
+              <span id="modalStudentID" class="chip-id">CIQ-2024-001</span>
+              <span id="modalStudentDept" class="chip-dept">Computer Science &bull; Sem 6</span>
+              <span id="modalStudentEmail" class="chip-email">aarav@campusiq.edu</span>
+            </div>
+          </div>
+        </div>
+        <button id="btnCloseModal" class="btn-close-modal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Pillar Score Gauges & Summary -->
+        <div class="detail-overview-grid">
+          <!-- Overall Success Score Gauge -->
+          <div class="score-card main-score-card">
+            <div class="score-card-label">Composite Success Score</div>
+            <div class="score-dial">
+              <div class="score-number" id="modalSuccessScore">64.2</div>
+              <div class="score-scale">/100</div>
+            </div>
+            <div class="score-progress-bar">
+              <div id="modalProgressBar" class="score-progress-fill" style="width: 64%;"></div>
+            </div>
+            <p class="score-note" id="modalScoreInterpretation">Calculated across 5 institutional pillars</p>
+          </div>
+
+          <!-- 5-Pillar Score Breakdown -->
+          <div class="pillars-container">
+            <div class="pillar-row">
+              <span class="pillar-label">1. Academic Mastery (30%)</span>
+              <div class="pillar-bar-bg">
+                <div class="pillar-bar-fill" id="pillarAcademicBar" style="width: 70%;"></div>
+              </div>
+              <span class="pillar-val" id="pillarAcademicVal">70/100</span>
+            </div>
+
+            <div class="pillar-row">
+              <span class="pillar-label">2. Attendance & Discipline (20%)</span>
+              <div class="pillar-bar-bg">
+                <div class="pillar-bar-fill" id="pillarAttendanceBar" style="width: 62%;"></div>
+              </div>
+              <span class="pillar-val" id="pillarAttendanceVal">62/100</span>
+            </div>
+
+            <div class="pillar-row">
+              <span class="pillar-label">3. Digital Learning Engagement (15%)</span>
+              <div class="pillar-bar-bg">
+                <div class="pillar-bar-fill" id="pillarLmsBar" style="width: 55%;"></div>
+              </div>
+              <span class="pillar-val" id="pillarLmsVal">55/100</span>
+            </div>
+
+            <div class="pillar-row">
+              <span class="pillar-label">4. Placement & Employability (20%)</span>
+              <div class="pillar-bar-bg">
+                <div class="pillar-bar-fill" id="pillarPlacementBar" style="width: 80%;"></div>
+              </div>
+              <span class="pillar-val" id="pillarPlacementVal">80/100</span>
+            </div>
+
+            <div class="pillar-row">
+              <span class="pillar-label">5. Holistic Wellbeing (15%)</span>
+              <div class="pillar-bar-bg">
+                <div class="pillar-bar-fill" id="pillarWellbeingBar" style="width: 65%;"></div>
+              </div>
+              <span class="pillar-val" id="pillarWellbeingVal">65/100</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Raw Academic Metrics Cards -->
+        <div class="metrics-strip">
+          <div class="metric-pill">
+            <span class="metric-title">CGPA</span>
+            <strong id="modalCgpa">7.2</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">Exam Marks</span>
+            <strong id="modalMarks">74.5%</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">Attendance</span>
+            <strong id="modalAttendance">68.2%</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">Backlogs</span>
+            <strong id="modalBacklogs">1</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">LMS Hours</span>
+            <strong id="modalLmsHours">6.5 hrs/wk</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">Assignment Rate</span>
+            <strong id="modalAssignmentRate">72%</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">Aptitude Score</span>
+            <strong id="modalAptitude">68/100</strong>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-title">Technical Score</span>
+            <strong id="modalTech">75/100</strong>
+          </div>
+        </div>
+
+        <!-- EXPLAINABLE AI RISK FACTORS SECTION -->
+        <div class="modal-section">
+          <div class="section-title-wrap">
+            <h3 class="modal-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              Explainable Risk Factors & Feature Attribution
+            </h3>
+            <span class="badge-ai">Transparent AI Model</span>
+          </div>
+          <p class="modal-section-subtitle">
+            Exact reasons pulling down this student's success score, computed by feature impact weight attribution:
+          </p>
+          <div class="factors-grid" id="modalRiskFactorsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- STANDOUT COMPETENCIES & STRENGTHS -->
+        <div class="modal-section">
+          <h3 class="modal-section-title text-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Demonstrated Strengths & Growth Areas
+          </h3>
+          <div class="strengths-grid" id="modalStrengthsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- RECOMMENDED TARGETED FACULTY INTERVENTIONS -->
+        <div class="modal-section">
+          <div class="section-title-wrap">
+            <h3 class="modal-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Automated Targeted Interventions
+            </h3>
+            <span class="badge-neutral">Recommended Action Plan</span>
+          </div>
+          <div class="interventions-list" id="modalInterventionsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- FACULTY ACTION HUB: LOG NEW COUNSELING / INTERVENTION -->
+        <div class="modal-section action-hub-section">
+          <div class="section-title-wrap">
+            <h3 class="modal-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="section-icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              Faculty Intervention Action Log
+            </h3>
+            <span class="badge-kpmg">Interactive Action Hub</span>
+          </div>
+          
+          <form id="interventionForm" class="intervention-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="formActionType">Intervention Protocol</label>
+                <select id="formActionType" required>
+                  <option value="Statutory Attendance Advisory Meeting">Statutory Attendance Advisory Meeting</option>
+                  <option value="Remedial Peer Tutoring Assignment">Remedial Peer Tutoring Assignment</option>
+                  <option value="KPMG Technical & Aptitude Mock Bootcamp">KPMG Technical & Aptitude Mock Bootcamp</option>
+                  <option value="LMS Learning Roadblock Diagnostic">LMS Learning Roadblock Diagnostic</option>
+                  <option value="Student Wellness & Stress Counseling">Student Wellness & Stress Counseling</option>
+                  <option value="Dean Academic Progress Review">Dean Academic Progress Review</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="formPriority">Action Priority</label>
+                <select id="formPriority" required>
+                  <option value="Immediate">Immediate (24 - 48 Hours)</option>
+                  <option value="High" selected>High (Within 1 Week)</option>
+                  <option value="Medium">Medium (Regular Follow-up)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="formMentorName">Faculty Advisor</label>
+                <input type="text" id="formMentorName" value="Dr. Sunita Rao" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="formNotes">Counselor Diagnostic Notes & Action Steps</label>
+              <textarea id="formNotes" rows="2" placeholder="Record minutes of discussion, student commitments, scheduled follow-up..." required></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" id="btnSubmitIntervention" class="btn-primary-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                Record Intervention
+              </button>
+              <span id="formFeedbackMsg" class="form-feedback-msg" style="display: none;"></span>
+            </div>
+          </form>
+
+          <!-- History of Logged Interventions -->
+          <div class="intervention-history-box">
+            <h4 class="history-title">Logged Action Timeline</h4>
+            <div id="modalInterventionHistory" class="history-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================================== -->
+  <!-- MODAL: WHAT-IF ACADEMIC SCENARIO SIMULATOR                                     -->
+  <!-- ============================================================================== -->
+  <div id="simulatorModal" class="modal-overlay" style="display: none;" aria-hidden="true" role="dialog">
+    <div class="modal-card simulator-card">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-student-name">CampusIQ What-If Academic Scenario Simulator</h2>
+          <p class="card-subtitle">Project how targeted interventions impact a student's risk category in real time.</p>
+        </div>
+        <button id="btnCloseSimulator" class="btn-close-modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="sim-selector-row">
+          <label for="simStudentSelect">Select Student for Simulation:</label>
+          <select id="simStudentSelect" class="filter-select">
+            <!-- Dynamically populated with High and Medium risk students -->
+          </select>
+        </div>
+
+        <div class="sim-grid">
+          <!-- Simulation Controls -->
+          <div class="sim-controls-panel">
+            <h4 class="sim-panel-title">Hypothetical Intervention Sliders</h4>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Attendance Improvement:</span>
+                <strong id="valSimAttendance">+10%</strong>
+              </div>
+              <input type="range" id="rangeSimAttendance" min="0" max="30" value="10" step="1">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Backlogs Cleared in Supplementary:</span>
+                <strong id="valSimBacklogs">1 Backlog</strong>
+              </div>
+              <input type="range" id="rangeSimBacklogs" min="0" max="3" value="1" step="1">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>LMS Weekly Self-Study Hours Boost:</span>
+                <strong id="valSimLms">+5 hrs/wk</strong>
+              </div>
+              <input type="range" id="rangeSimLms" min="0" max="15" value="5" step="1">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Assignment Completion Rate Boost:</span>
+                <strong id="valSimAssignment">+15%</strong>
+              </div>
+              <input type="range" id="rangeSimAssignment" min="0" max="30" value="15" step="1">
+            </div>
+
+            <button id="btnRunSimulation" class="btn-primary-sm full-width">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Recalculate AI Score
+            </button>
+          </div>
+
+          <!-- Simulation Projection Results -->
+          <div class="sim-results-panel">
+            <h4 class="sim-panel-title">Projected Outcome Comparison</h4>
+
+            <div class="sim-compare-cards">
+              <div class="compare-card before">
+                <span class="compare-label">Current Baseline</span>
+                <div class="compare-score" id="simCurrentScore">--</div>
+                <div id="simCurrentBadge" class="badge badge-high">High Risk</div>
+              </div>
+
+              <div class="compare-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+
+              <div class="compare-card after">
+                <span class="compare-label">Simulated Projection</span>
+                <div class="compare-score text-success" id="simProjectedScore">--</div>
+                <div id="simProjectedBadge" class="badge badge-low">Low Risk</div>
+              </div>
+            </div>
+
+            <div class="sim-summary-box" id="simSummaryBox">
+              <div class="summary-highlight" id="simDeltaHighlight">Success Score Delta: +14.5 pts</div>
+              <p id="simRecommendationText">
+                Simulated remediation effectively lifts the student above regulatory thresholds!
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <strong>CampusIQ</strong> &bull; KPMG in India Hackathon Challenge Prototype
+      </div>
+      <div class="footer-right">
+        <span>Deterministic Rule Analytics &bull; Scikit-learn/XGBoost Integration Ready &bull; Fast REST API</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusIQ – Student Success & Analytics Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2026.1">
+</head>
+<body>
+
+  <div class="dashboard-app-wrap">
+    
+    <!-- PERMANENT LEFT SIDEBAR (Electric Purple, Pink & Lilac) -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+        </div>
+        <div class="sidebar-brand-title">Campus<span>IQ</span></div>
+      </div>
+
+      <nav class="sidebar-nav-scroll" role="navigation">
+        <div class="sidebar-nav-category">Student Navigation</div>
+
+        <a class="sidebar-nav-link active" data-section="section-my-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>My Dashboard</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-my-academics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>My Academics</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-attendance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Attendance</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-my-success-score">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>My Success Score</span>
+        </a>
+
+        <div class="sidebar-nav-category">Career & Insights</div>
+
+        <a class="sidebar-nav-link" data-section="section-placement-readiness">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          <span>Placement Readiness</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-personalized-recommendations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span>Recommendations</span>
+        </a>
+
+        <div class="sidebar-nav-category">Personal Account</div>
+
+        <a class="sidebar-nav-link" data-section="section-notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notifications</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-my-profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Profile</span>
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="sidebar-nav-link logout-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Logout</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer-user">
+        <div class="user-avatar-sidebar">{{ student.name[:2].upper() }}</div>
+        <div style="display:flex; flex-direction:column; line-height:1.2;">
+          <span style="font-weight:700; font-size:0.8rem; color:#FFFFFF;">{{ student.name }}</span>
+          <span style="font-size:0.7rem; color:#C4B5FD;">{{ student.department }} &bull; {{ student.student_id }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN APP CONTENT -->
+    <main class="app-main-content">
+      
+      <!-- Enterprise Top App Bar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-mobile-toggle" id="btnToggleSidebar" aria-label="Toggle Navigation">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="topbar-breadcrumb-wrap">
+            <span class="topbar-badge-kpmg">Student Portal</span>
+            <span class="topbar-breadcrumb-slash">/</span>
+            <span class="topbar-breadcrumb-parent">{{ student.department }} Sem {{ student.semester }}</span>
+            <span class="topbar-breadcrumb-slash">/</span>
+            <span class="topbar-breadcrumb-current" id="topbarCurrentSection">Academic Radar</span>
+          </div>
+        </div>
+
+        <div class="topbar-center">
+          <div class="topbar-global-search">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="topbarSearchInput" placeholder="Search my courses, assignments, competencies...">
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button id="btnOpenStudentSim" class="btn-topbar-action" title="Run Personal What-If Grade & Attendance Scenario">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>What-If Simulator</span>
+          </button>
+
+          <button id="btnToggleNotifications" class="topbar-icon-btn" title="Academic Alerts & Advisories">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="topbar-notif-dot"></span>
+          </button>
+
+          <div class="topbar-profile-container" style="position:relative;">
+            <div class="topbar-profile-chip" id="studentProfileChipBtn" style="cursor:pointer;" title="Click for account options">
+              <div class="user-avatar-sm">{{ student.name[:2].upper() }}</div>
+              <div class="topbar-user-text">
+                <span class="user-name-text">{{ student.name }}</span>
+                <span class="user-role-text">Student &bull; Sem {{ student.semester }}</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); margin-left:4px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+
+            <div id="studentProfileDropdown" class="profile-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 8px); width:210px; background:#FFFFFF; border:1px solid var(--border-light); border-radius:12px; box-shadow:var(--shadow-lg); z-index:200; overflow:hidden;">
+              <div style="padding:12px 14px; background:#FAF9FE; border-bottom:1px solid var(--border-light);">
+                <strong style="display:block; font-size:0.8125rem; color:var(--text-primary);">{{ student.name }}</strong>
+                <span style="font-size:0.7rem; color:var(--text-muted);">{{ student.student_id }} &bull; {{ student.department }}</span>
+              </div>
+              <div style="padding:6px;">
+                <a href="javascript:void(0)" onclick="switchSection('section-my-profile')" style="display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:0.78rem; font-weight:600; color:var(--text-primary); border-radius:8px; text-decoration:none;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  <span>Student Profile</span>
+                </a>
+                <a href="{{ url_for('logout') }}" style="display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:0.78rem; font-weight:700; color:#DC2626; border-radius:8px; text-decoration:none;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                  <span>Sign Out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Notifications Dropdown Popover -->
+      <div id="notificationsDropdown" class="notifications-dropdown">
+        <div class="notifications-header">
+          <h4>Academic & Placement Alerts</h4>
+          <span style="font-size:0.7rem; color:#A78BFA;">Live Telemetry</span>
+        </div>
+        <div class="notifications-list">
+          {% if notifications %}
+            {% for n in notifications %}
+            <div class="notification-item unread">
+              <div class="notification-title">{{ n.title }}</div>
+              <p style="color:#DDD6FE; font-size:0.75rem;">{{ n.message }}</p>
+              <div class="notification-time">{{ n.created_at or 'Today' }}</div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="notification-item">
+              <div class="notification-title">Academic Telemetry Synchronized</div>
+              <p style="color:#DDD6FE; font-size:0.75rem;">Continuous evaluation metrics and biometric logs are up to date.</p>
+              <div class="notification-time">Today, 09:30 AM</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 1: MY DASHBOARD -->
+      <!-- ========================================================================= -->
+      <section id="section-my-dashboard" class="dashboard-section active-section">
+        
+        <!-- Personalized Welcome Banner -->
+        <div class="hero-context-banner">
+          <div>
+            <span class="hero-tag">Personal Academic Hub &bull; {{ student.department }} Sem {{ student.semester }}</span>
+            <h1 class="hero-title">Welcome back, <span class="gradient-text">{{ student.name }}</span>!</h1>
+            <p class="hero-desc">
+              Your overall Student Success Score is <strong>{{ student.success_score }}/100</strong>. 
+              Academic risk status: 
+              {% if student.risk_level == 'Low' %}
+                <span class="badge badge-low">Low Risk &bull; Excellent Standing</span>
+              {% elif student.risk_level == 'Medium' %}
+                <span class="badge badge-medium">Medium Risk &bull; Watchlist</span>
+              {% else %}
+                <span class="badge badge-high">High Risk &bull; Action Required</span>
+              {% endif %}
+              &bull; Assigned Faculty Mentor: <strong>{{ student.mentor_name }}</strong>.
+            </p>
+          </div>
+          <div class="hero-actions-group">
+            <button class="btn-hero-action" onclick="switchSection('section-my-success-score')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Score Breakdown</span>
+            </button>
+            <button class="btn-hero-action" onclick="switchSection('section-personalized-recommendations')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              <span>AI Action Plan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Scorecards Grid -->
+        <div class="kpi-grid">
+          
+          <!-- KPI 1: Success Score -->
+          <div class="glass-card kpi-card-glow border-purple">
+            <div class="kpi-header">
+              <span class="kpi-label">Student Success Score</span>
+              <div class="kpi-icon-box bg-purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
+            </div>
+            <div class="kpi-value text-gradient-purple">
+              {{ student.success_score }}<span class="kpi-sub">/100</span>
+            </div>
+            <div class="kpi-footer-note">
+              <span>Risk Status: </span>
+              <span class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}">{{ student.risk_level }} Risk</span>
+            </div>
+          </div>
+
+          <!-- KPI 2: CGPA -->
+          <div class="glass-card kpi-card-glow border-pink">
+            <div class="kpi-header">
+              <span class="kpi-label">Cumulative GPA</span>
+              <div class="kpi-icon-box bg-pink">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value text-gradient-pink">
+              {{ "%.2f"|format(student.cgpa) }}<span class="kpi-sub">/10.0</span>
+            </div>
+            <div class="kpi-footer-note">
+              <span>Exam Marks: <strong>{{ student.academic_marks_pct }}%</strong></span>
+            </div>
+          </div>
+
+          <!-- KPI 3: Biometric Attendance -->
+          <div class="glass-card kpi-card-glow border-cyan">
+            <div class="kpi-header">
+              <span class="kpi-label">Biometric Attendance</span>
+              <div class="kpi-icon-box bg-cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+            </div>
+            <div class="kpi-value">
+              {{ student.attendance_pct }}<span class="kpi-sub">%</span>
+            </div>
+            <div class="kpi-footer-note">
+              {% if student.attendance_pct >= 75 %}
+                <span style="color:#34D399; font-weight:700;">Compliant (&ge;75% Statutory)</span>
+              {% else %}
+                <span style="color:#F43F5E; font-weight:700;">Below Threshold (Deficit {{ "%.1f"|format(75 - student.attendance_pct) }}%)</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- KPI 4: Backlogs & Placement -->
+          <div class="glass-card kpi-card-glow border-amber">
+            <div class="kpi-header">
+              <span class="kpi-label">Backlogs & Placement</span>
+              <div class="kpi-icon-box bg-amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value">
+              {% if student.backlogs == 0 %}
+                <span style="color:#34D399;">0</span><span class="kpi-sub"> Backlogs</span>
+              {% else %}
+                <span style="color:#F43F5E;">{{ student.backlogs }}</span><span class="kpi-sub"> Active</span>
+              {% endif %}
+            </div>
+            <div class="kpi-footer-note">
+              <span>Aptitude: <strong>{{ student.placement_aptitude_score }}/100</strong> &bull; Tech: <strong>{{ student.technical_skills_score }}</strong></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 5-Pillar Radar & Breakdown -->
+        <div class="grid-2-col" style="margin-top: 24px;">
+          
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">5-Pillar Explainable Performance</h3>
+                <p class="glass-card-subtitle">Comprehensive multi-dimensional evaluation radar</p>
+              </div>
+              <span class="badge badge-accent">Weighted Radar</span>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="studentPillarRadarChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Pillar Contribution Weights</h3>
+                <p class="glass-card-subtitle">Score breakdown across all 5 evaluation components</p>
+              </div>
+              <button class="btn-sm-action" onclick="switchSection('section-my-success-score')">Explore Details</button>
+            </div>
+            
+            <div class="pillar-bars-wrap" style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span><strong>Academic Performance</strong> (30% weight)</span>
+                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.academic }}/100</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: {{ metrics.pillars.academic }}%; background: linear-gradient(90deg, #8B5CF6, #A855F7);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span><strong>Attendance & Regularity</strong> (20% weight)</span>
+                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.attendance }}/100</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: {{ metrics.pillars.attendance }}%; background: linear-gradient(90deg, #EC4899, #F43F5E);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span><strong>LMS Digital Learning & Assignments</strong> (15% weight)</span>
+                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.lms }}/100</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: {{ metrics.pillars.lms }}%; background: linear-gradient(90deg, #06B6D4, #3B82F6);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span><strong>Placement Aptitude & Technical Skills</strong> (20% weight)</span>
+                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.placement }}/100</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: {{ metrics.pillars.placement }}%; background: linear-gradient(90deg, #10B981, #059669);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span><strong>Wellbeing & Engagement</strong> (15% weight)</span>
+                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.wellbeing }}/100</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: {{ metrics.pillars.wellbeing }}%; background: linear-gradient(90deg, #F59E0B, #FBBF24);"></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:20px; padding:12px 14px; background:rgba(139, 92, 246, 0.12); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-size:0.75rem; color:#DDD6FE; display:block;">Calculated Student Archetype</span>
+                <span style="font-weight:700; color:#FFFFFF; font-size:0.875rem;">{{ metrics.segment }}</span>
+              </div>
+              <button class="btn-sm-action" onclick="switchSection('section-personalized-recommendations')">View Guidance &rarr;</button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 2: MY ACADEMICS -->
+      <!-- ========================================================================= -->
+      <section id="section-my-academics" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">My Academics & Marks Portfolio</h2>
+            <p class="section-subheading">Continuous internal assessments, semester grade points, and course performance</p>
+          </div>
+        </div>
+
+        <div class="grid-3-col" style="margin-bottom:24px;">
+          <div class="glass-card">
+            <span class="kpi-label">Cumulative GPA</span>
+            <div class="kpi-value text-gradient-pink" style="margin:8px 0;">{{ "%.2f"|format(student.cgpa) }}</div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">On 10.0 institutional scale &bull; Consistent high standing</p>
+          </div>
+
+          <div class="glass-card">
+            <span class="kpi-label">Continuous Internal Assessment</span>
+            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">{{ student.academic_marks_pct }}%</div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Average score across mid-semester exams and quizzes</p>
+          </div>
+
+          <div class="glass-card">
+            <span class="kpi-label">Arrears / Backlogs</span>
+            <div class="kpi-value" style="margin:8px 0;">
+              {% if student.backlogs == 0 %}
+                <span style="color:#34D399;">0</span>
+              {% else %}
+                <span style="color:#F43F5E;">{{ student.backlogs }}</span>
+              {% endif %}
+            </div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">
+              {% if student.backlogs == 0 %}
+                Clear academic standing with no active arrears
+              {% else %}
+                Supplementary exam coaching recommended
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <!-- Academic Performance Table -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div>
+              <h3 class="glass-card-title">Enrolled Courses & Semester Grades</h3>
+              <p class="glass-card-subtitle">Current semester academic roster and continuous evaluation</p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Course Code</th>
+                  <th>Course Name</th>
+                  <th>Credits</th>
+                  <th>Faculty Instructor</th>
+                  <th>Internal (40)</th>
+                  <th>Continuous Eval (60)</th>
+                  <th>Predicted Grade</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>{{ student.department }}301</strong></td>
+                  <td>Advanced Data Structures & Algorithms</td>
+                  <td>4</td>
+                  <td>{{ student.mentor_name }}</td>
+                  <td>36/40</td>
+                  <td>54/60</td>
+                  <td><strong>A+</strong></td>
+                  <td><span class="badge badge-low">Passed</span></td>
+                </tr>
+                <tr>
+                  <td><strong>{{ student.department }}302</strong></td>
+                  <td>Database Systems & Distributed Storage</td>
+                  <td>4</td>
+                  <td>Prof. Rajesh Kumar</td>
+                  <td>34/40</td>
+                  <td>51/60</td>
+                  <td><strong>A</strong></td>
+                  <td><span class="badge badge-low">Passed</span></td>
+                </tr>
+                <tr>
+                  <td><strong>{{ student.department }}303</strong></td>
+                  <td>Operating Systems & Cloud Architecture</td>
+                  <td>3</td>
+                  <td>Dr. Meenakshi Sundaram</td>
+                  <td>32/40</td>
+                  <td>48/60</td>
+                  <td><strong>A</strong></td>
+                  <td><span class="badge badge-low">Passed</span></td>
+                </tr>
+                <tr>
+                  <td><strong>{{ student.department }}304</strong></td>
+                  <td>Machine Learning & Predictive Intelligence</td>
+                  <td>4</td>
+                  <td>Prof. Neha Gupta</td>
+                  <td>37/40</td>
+                  <td>56/60</td>
+                  <td><strong>O (Outstanding)</strong></td>
+                  <td><span class="badge badge-low">Passed</span></td>
+                </tr>
+                <tr>
+                  <td><strong>T&P201</strong></td>
+                  <td>KPMG Campus Placement Mock Aptitude & Coding</td>
+                  <td>2</td>
+                  <td>Dr. Sunita Rao</td>
+                  <td>38/40</td>
+                  <td>58/60</td>
+                  <td><strong>O (Outstanding)</strong></td>
+                  <td><span class="badge badge-low">Passed</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 3: ATTENDANCE -->
+      <!-- ========================================================================= -->
+      <section id="section-attendance" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Biometric Attendance Telemetry</h2>
+            <p class="section-subheading">Statutory attendance compliance, subject-wise attendance, and lecture logs</p>
+          </div>
+        </div>
+
+        <div class="grid-2-col" style="margin-bottom:24px;">
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Overall Attendance Compliance</h3>
+                <p class="glass-card-subtitle">Mandatory University Statutory Threshold is 75.0%</p>
+              </div>
+              {% if student.attendance_pct >= 75 %}
+                <span class="badge badge-low">Statutory Compliant</span>
+              {% else %}
+                <span class="badge badge-high">Shortage Warning</span>
+              {% endif %}
+            </div>
+
+            <div style="text-align:center; padding:24px 0;">
+              <div style="font-size:3.5rem; font-weight:800; font-family:var(--font-heading);" class="text-gradient-purple">
+                {{ student.attendance_pct }}%
+              </div>
+              <p style="font-size:0.85rem; color:#DDD6FE; max-width:400px; margin:8px auto;">
+                {% if student.attendance_pct >= 75 %}
+                  You are eligible for all end-semester regular examinations without condonation fees.
+                {% else %}
+                  Critical warning: You are currently {{ "%.1f"|format(75 - student.attendance_pct) }}% below the statutory 75% limit. Meet your faculty advisor immediately.
+                {% endif %}
+              </p>
+            </div>
+
+            <div class="table-progress-bar" style="height:12px; border-radius:6px;">
+              <div class="table-progress-fill" style="width: {{ student.attendance_pct }}%; background: {% if student.attendance_pct >= 75 %}linear-gradient(90deg, #10B981, #059669){% else %}linear-gradient(90deg, #F43F5E, #EC4899){% endif %};"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#A78BFA; margin-top:8px;">
+              <span>0%</span>
+              <span style="color:#F59E0B; font-weight:700;">75% Mandatory Cutoff</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Course-Wise Attendance Breakdown</h3>
+                <p class="glass-card-subtitle">Classes conducted vs attended across all active subjects</p>
+              </div>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:14px; margin-top:10px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Algorithms & Problem Solving (44/48 attended)</span>
+                  <span style="color:#34D399; font-weight:700;">91.6%</span>
+                </div>
+                <div class="table-progress-bar" style="height:6px;">
+                  <div class="table-progress-fill" style="width: 91.6%; background:#34D399;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Database Systems (40/46 attended)</span>
+                  <span style="color:#34D399; font-weight:700;">86.9%</span>
+                </div>
+                <div class="table-progress-bar" style="height:6px;">
+                  <div class="table-progress-fill" style="width: 86.9%; background:#34D399;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Operating Systems Lab (26/30 attended)</span>
+                  <span style="color:#34D399; font-weight:700;">86.6%</span>
+                </div>
+                <div class="table-progress-bar" style="height:6px;">
+                  <div class="table-progress-fill" style="width: 86.6%; background:#34D399;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Machine Learning Systems (38/44 attended)</span>
+                  <span style="color:#34D399; font-weight:700;">86.3%</span>
+                </div>
+                <div class="table-progress-bar" style="height:6px;">
+                  <div class="table-progress-fill" style="width: 86.3%; background:#34D399;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 4: ASSIGNMENTS & LMS -->
+      <!-- ========================================================================= -->
+      <section id="section-assignments" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Assignments & LMS Learning Telemetry</h2>
+            <p class="section-subheading">Digital platform engagement, weekly learning hours, and coursework completions</p>
+          </div>
+        </div>
+
+        <div class="grid-3-col" style="margin-bottom:24px;">
+          <div class="glass-card">
+            <span class="kpi-label">Assignment Submission Rate</span>
+            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">{{ student.assignment_completion_pct }}%</div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Total assignments submitted before deadline</p>
+          </div>
+
+          <div class="glass-card">
+            <span class="kpi-label">LMS Weekly Learning Hours</span>
+            <div class="kpi-value text-gradient-pink" style="margin:8px 0;">{{ student.lms_weekly_hours }}<span class="kpi-sub"> hrs/wk</span></div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Active study & coding lab time on LMS portal</p>
+          </div>
+
+          <div class="glass-card">
+            <span class="kpi-label">Digital Engagement Index</span>
+            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">{{ student.lms_engagement_score }}<span class="kpi-sub">/100</span></div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Forum participation and lab exercises completed</p>
+          </div>
+        </div>
+
+        <!-- Assignments Table -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div>
+              <h3 class="glass-card-title">Recent Coursework & Lab Submissions</h3>
+              <p class="glass-card-subtitle">Verified submissions and graded evaluations</p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Assignment Title</th>
+                  <th>Course</th>
+                  <th>Submitted At</th>
+                  <th>Grade</th>
+                  <th>Max Marks</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Dynamic Programming & Graph Algorithmic Suite</strong></td>
+                  <td>{{ student.department }}301</td>
+                  <td>3 days ago</td>
+                  <td><strong>48</strong></td>
+                  <td>50</td>
+                  <td><span class="badge badge-low">Graded &bull; 96%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Distributed B-Tree Indexing in SQLite</strong></td>
+                  <td>{{ student.department }}302</td>
+                  <td>Last week</td>
+                  <td><strong>45</strong></td>
+                  <td>50</td>
+                  <td><span class="badge badge-low">Graded &bull; 90%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Multi-Threaded Kernel Scheduler Simulation</strong></td>
+                  <td>{{ student.department }}303</td>
+                  <td>2 weeks ago</td>
+                  <td><strong>47</strong></td>
+                  <td>50</td>
+                  <td><span class="badge badge-low">Graded &bull; 94%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>KPMG Capstone Hackathon Project Blueprint</strong></td>
+                  <td>T&P201</td>
+                  <td>Yesterday</td>
+                  <td><strong>Pending</strong></td>
+                  <td>50</td>
+                  <td><span class="badge badge-accent">Under Review</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 5: MY SUCCESS SCORE & WHAT-IF SIMULATOR -->
+      <!-- ========================================================================= -->
+      <section id="section-my-success-score" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">My Success Score & What-If Simulator</h2>
+            <p class="section-subheading">Explainable Multi-Pillar Scoring formula and interactive scenario forecasting</p>
+          </div>
+          <button class="btn-action-primary" onclick="switchSection('section-personalized-recommendations')">
+            View Recommendations &rarr;
+          </button>
+        </div>
+
+        <div class="grid-2-col" style="margin-bottom:24px;">
+          
+          <!-- Explainable Score Explanation -->
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Explainable Scoring Architecture</h3>
+                <p class="glass-card-subtitle">Transparent rule-based multi-factor mathematical weights</p>
+              </div>
+            </div>
+
+            <div style="font-size:0.85rem; color:#E9D5FF; line-height:1.6; margin-bottom:16px;">
+              CampusIQ computes your Success Score using a multi-factor mathematical model designed specifically for early risk intervention:
+            </div>
+
+            <div style="background:rgba(20, 10, 42, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:12px; padding:16px; margin-bottom:16px;">
+              <div style="font-family:monospace; font-size:0.85rem; color:#F472B6; margin-bottom:8px;">
+                Success Score = (0.30 &times; Academic) + (0.20 &times; Attendance) + (0.15 &times; LMS) + (0.20 &times; Placement) + (0.15 &times; Wellbeing)
+              </div>
+              <div style="font-size:0.75rem; color:#C4B5FD;">
+                Each pillar maps raw data (CGPA, biometric logs, LMS hours, aptitude scores) to a normalized 0-100 scale with severe penalties for backlogs and sub-75% attendance.
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:rgba(139, 92, 246, 0.15); border-radius:10px;">
+              <div>
+                <span style="font-size:0.75rem; color:#C4B5FD; display:block;">Your Current Composite Score</span>
+                <span style="font-size:1.8rem; font-weight:800; color:#FFFFFF;">{{ student.success_score }} / 100</span>
+              </div>
+              <span class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}" style="font-size:0.9rem; padding:6px 14px;">
+                {{ student.risk_level }} Risk
+              </span>
+            </div>
+          </div>
+
+          <!-- Interactive What-If Simulator Panel -->
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Interactive What-If Simulator</h3>
+                <p class="glass-card-subtitle">Simulate how improving your habits elevates your projected score</p>
+              </div>
+              <span class="badge badge-accent">Live Forecast</span>
+            </div>
+
+            <div class="simulator-slider-group" style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
+              
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <label for="personalRangeAttendance"><strong>Boost Attendance</strong></label>
+                  <span id="personalValAttendance" style="color:#EC4899; font-weight:700;">+0%</span>
+                </div>
+                <input type="range" id="personalRangeAttendance" min="0" max="25" step="1" value="0" style="width:100%; accent-color:#EC4899;">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <label for="personalRangeBacklogs"><strong>Clear Active Backlogs</strong></label>
+                  <span id="personalValBacklogs" style="color:#8B5CF6; font-weight:700;">0 Cleared</span>
+                </div>
+                <input type="range" id="personalRangeBacklogs" min="0" max="{{ student.backlogs if student.backlogs > 0 else 2 }}" step="1" value="0" style="width:100%; accent-color:#8B5CF6;">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <label for="personalRangeLms"><strong>Increase Weekly Study Hours</strong></label>
+                  <span id="personalValLms" style="color:#06B6D4; font-weight:700;">+0 hrs/wk</span>
+                </div>
+                <input type="range" id="personalRangeLms" min="0" max="15" step="1" value="0" style="width:100%; accent-color:#06B6D4;">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <label for="personalRangeAssignment"><strong>Boost Assignment Completion</strong></label>
+                  <span id="personalValAssignment" style="color:#10B981; font-weight:700;">+0%</span>
+                </div>
+                <input type="range" id="personalRangeAssignment" min="0" max="20" step="1" value="0" style="width:100%; accent-color:#10B981;">
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:6px;">
+                <button id="btnRunPersonalSim" class="btn-action-primary" style="flex:1;">
+                  Calculate Projected Impact
+                </button>
+              </div>
+
+              <!-- Simulator Outcome Display -->
+              <div id="personalSimResults" style="padding:14px; background:rgba(236, 72, 153, 0.12); border:1px solid rgba(236, 72, 153, 0.3); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <span style="font-size:0.75rem; color:#DDD6FE; display:block;">Projected Success Score</span>
+                  <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span id="personalProjectedScore" style="font-size:1.6rem; font-weight:800; color:#FFFFFF;">{{ student.success_score }}</span>
+                    <span id="personalDeltaText" style="font-size:0.8rem; color:#34D399; font-weight:700;">(+0.0 pts)</span>
+                  </div>
+                </div>
+                <span id="personalProjectedBadge" class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}">
+                  {{ student.risk_level }} Risk
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 6: PLACEMENT READINESS -->
+      <!-- ========================================================================= -->
+      <section id="section-placement-readiness" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Placement Readiness & Career Telemetry</h2>
+            <p class="section-subheading">KPMG & Tier-1 campus placement eligibility diagnostic</p>
+          </div>
+        </div>
+
+        <div class="grid-3-col" style="margin-bottom:24px;">
+          <div class="glass-card">
+            <span class="kpi-label">Placement Aptitude Score</span>
+            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">{{ student.placement_aptitude_score }}<span class="kpi-sub">/100</span></div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Quantitative, Logical & Verbal Reasoning</p>
+          </div>
+
+          <div class="glass-card">
+            <span class="kpi-label">Technical Skills Index</span>
+            <div class="kpi-value text-gradient-pink" style="margin:8px 0;">{{ student.technical_skills_score }}<span class="kpi-sub">/100</span></div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Data Structures, System Design & Coding</p>
+          </div>
+
+          <div class="glass-card">
+            <span class="kpi-label">Tier-1 Corporate Eligibility</span>
+            <div class="kpi-value" style="margin:8px 0;">
+              {% if student.cgpa >= 7.0 and student.backlogs == 0 and student.placement_aptitude_score >= 70 %}
+                <span style="color:#34D399;">Eligible</span>
+              {% else %}
+                <span style="color:#F59E0B;">In Progress</span>
+              {% endif %}
+            </div>
+            <p style="font-size:0.75rem; color:#DDD6FE;">Meets KPMG campus recruitment thresholds</p>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div>
+              <h3 class="glass-card-title">Corporate Eligibility Checklist</h3>
+              <p class="glass-card-subtitle">Criteria verification for premier campus recruitment drives</p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
+              <div>
+                <strong>Minimum CGPA Cutoff (&ge; 7.0)</strong>
+                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ "%.2f"|format(student.cgpa) }}</p>
+              </div>
+              {% if student.cgpa >= 7.0 %}
+                <span class="badge badge-low">Verified &bull; Cleared</span>
+              {% else %}
+                <span class="badge badge-high">Below 7.0 Cutoff</span>
+              {% endif %}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
+              <div>
+                <strong>Active Arrears / Backlogs (Zero Tolerance)</strong>
+                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ student.backlogs }} active backlogs</p>
+              </div>
+              {% if student.backlogs == 0 %}
+                <span class="badge badge-low">Verified &bull; Zero Backlogs</span>
+              {% else %}
+                <span class="badge badge-high">{{ student.backlogs }} Backlog(s) to Clear</span>
+              {% endif %}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
+              <div>
+                <strong>Aptitude Benchmark (&ge; 70/100)</strong>
+                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ student.placement_aptitude_score }}/100</p>
+              </div>
+              {% if student.placement_aptitude_score >= 70 %}
+                <span class="badge badge-low">Verified &bull; Cleared</span>
+              {% else %}
+                <span class="badge badge-medium">Needs Diagnostic Prep</span>
+              {% endif %}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
+              <div>
+                <strong>Technical Assessment Benchmark (&ge; 75/100)</strong>
+                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ student.technical_skills_score }}/100</p>
+              </div>
+              {% if student.technical_skills_score >= 75 %}
+                <span class="badge badge-low">Verified &bull; High Readiness</span>
+              {% else %}
+                <span class="badge badge-medium">Practice Coding Labs</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 7: SKILLS -->
+      <!-- ========================================================================= -->
+      <section id="section-skills" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Verified Technical Skills & Competencies</h2>
+            <p class="section-subheading">Validated technical domain proficiencies, lab badges, and certifications</p>
+          </div>
+        </div>
+
+        <div class="grid-2-col" style="margin-bottom:24px;">
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Skill Mastery Breakdown</h3>
+                <p class="glass-card-subtitle">Evaluated through continuous lab assessments and quizzes</p>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Python & Data Science Stack</span>
+                  <span style="color:#A78BFA; font-weight:700;">92%</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: 92%; background: linear-gradient(90deg, #8B5CF6, #EC4899);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Data Structures & Algorithmic Design</span>
+                  <span style="color:#A78BFA; font-weight:700;">88%</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: 88%; background: linear-gradient(90deg, #8B5CF6, #EC4899);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>SQL & Relational Databases</span>
+                  <span style="color:#A78BFA; font-weight:700;">85%</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: 85%; background: linear-gradient(90deg, #8B5CF6, #EC4899);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Full-Stack Web Development & APIs</span>
+                  <span style="color:#A78BFA; font-weight:700;">80%</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: 80%; background: linear-gradient(90deg, #8B5CF6, #EC4899);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Cloud Fundamentals & Docker</span>
+                  <span style="color:#A78BFA; font-weight:700;">74%</span>
+                </div>
+                <div class="table-progress-bar" style="height:8px;">
+                  <div class="table-progress-fill" style="width: 74%; background: linear-gradient(90deg, #8B5CF6, #EC4899);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Verified Badges & Accreditations</h3>
+                <p class="glass-card-subtitle">Digital badges issued by university evaluation cell</p>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;">
+              <span class="badge badge-accent" style="padding:8px 14px; font-size:0.8rem;">Algorithms Specialist</span>
+              <span class="badge badge-low" style="padding:8px 14px; font-size:0.8rem;">Python Master</span>
+              <span class="badge badge-accent" style="padding:8px 14px; font-size:0.8rem;">SQL Advanced</span>
+              <span class="badge badge-low" style="padding:8px 14px; font-size:0.8rem;">KPMG Hackathon Participant</span>
+              <span class="badge badge-accent" style="padding:8px 14px; font-size:0.8rem;">Data Analytics Associate</span>
+              <span class="badge badge-low" style="padding:8px 14px; font-size:0.8rem;">Clean Code Standard</span>
+            </div>
+
+            <div style="margin-top:24px; padding:16px; background:rgba(30, 15, 60, 0.7); border-radius:10px;">
+              <strong style="color:#FFFFFF; font-size:0.875rem;">Next Milestone Recommendation</strong>
+              <p style="font-size:0.75rem; color:#DDD6FE; margin:6px 0 0;">
+                Complete the Cloud Computing & Microservices module to boost your technical index by +6 points before campus placement rounds begin.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 8: PERSONALIZED RECOMMENDATIONS -->
+      <!-- ========================================================================= -->
+      <section id="section-personalized-recommendations" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Personalized Recommendations & AI Action Plan</h2>
+            <p class="section-subheading">Data-driven guidance tailored to your academic standing and career targets</p>
+          </div>
+        </div>
+
+        <!-- Standout Strengths & Risk Factors -->
+        <div class="grid-2-col" style="margin-bottom:24px;">
+          
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Standout Strengths</h3>
+                <p class="glass-card-subtitle">Positive drivers boosting your success score</p>
+              </div>
+              <span class="badge badge-low">Key Pillars</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+              {% if metrics.positive_factors %}
+                {% for pf in metrics.positive_factors %}
+                <div class="factor-card success">
+                  <div class="factor-card-top">
+                    <span class="factor-title">{{ pf.title }}</span>
+                    <span class="factor-impact">{{ pf.impact }}</span>
+                  </div>
+                  <p class="factor-desc">{{ pf.description }}</p>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="factor-card success">
+                  <div class="factor-card-top">
+                    <span class="factor-title">Solid Academic Foundation</span>
+                    <span class="factor-impact">Positive</span>
+                  </div>
+                  <p class="factor-desc">Maintaining steady progress across ongoing curriculum modules.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Growth Areas & Risk Bottlenecks</h3>
+                <p class="glass-card-subtitle">Factor attribution explaining score penalties</p>
+              </div>
+              <span class="badge badge-high">Actionable</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+              {% if metrics.risk_factors %}
+                {% for rf in metrics.risk_factors %}
+                <div class="factor-card {{ rf.severity }}">
+                  <div class="factor-card-top">
+                    <span class="factor-title">{{ rf.title }}</span>
+                    <span class="factor-impact">{{ rf.impact }}</span>
+                  </div>
+                  <p class="factor-desc">{{ rf.description }}</p>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="factor-card success">
+                  <div class="factor-card-top">
+                    <span class="factor-title">No Critical Risk Alerts</span>
+                    <span class="factor-impact">Safe</span>
+                  </div>
+                  <p class="factor-desc">You are currently meeting or exceeding all university academic criteria.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Recommended Interventions / Learning Roadmap -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div>
+              <h3 class="glass-card-title">Tailored Academic Roadmap</h3>
+              <p class="glass-card-subtitle">Recommended interventions and suggested learning activities</p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+            {% if metrics.recommended_interventions %}
+              {% for intv in metrics.recommended_interventions %}
+              <div style="background:rgba(30, 15, 60, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-weight:700; font-size:0.9rem; color:#FFFFFF;">{{ intv.action }}</div>
+                  <div style="font-size:0.78rem; color:#DDD6FE; margin-top:3px;">{{ intv.rationale }}</div>
+                  <div style="font-size:0.7rem; color:#A78BFA; margin-top:4px;">
+                    Domain: <strong>{{ intv.category }}</strong> &bull; Target Horizon: <strong>{{ intv.timeline }}</strong>
+                  </div>
+                </div>
+                <span class="badge {% if intv.urgency == 'Immediate' %}badge-high{% elif intv.urgency == 'High' %}badge-medium{% else %}badge-low{% endif %}">
+                  {{ intv.urgency }}
+                </span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div style="padding:16px; background:rgba(30, 15, 60, 0.7); border-radius:10px; color:#DDD6FE; font-size:0.85rem;">
+                Keep maintaining your stellar pace! Focus on advanced algorithmic coding and industry certifications.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 9: NOTIFICATIONS -->
+      <!-- ========================================================================= -->
+      <section id="section-notifications" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Academic Notifications & Faculty Memos</h2>
+            <p class="section-subheading">Important advisories, examination reminders, and counseling updates</p>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div>
+              <h3 class="glass-card-title">Live Notification Feed</h3>
+              <p class="glass-card-subtitle">Recent communication from administration and faculty mentor</p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+            {% if notifications %}
+              {% for n in notifications %}
+              <div style="background:rgba(30, 15, 60, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <strong style="color:#FFFFFF; font-size:0.875rem;">{{ n.title }}</strong>
+                  <span style="font-size:0.7rem; color:#A78BFA;">{{ n.created_at or 'Today' }}</span>
+                </div>
+                <p style="font-size:0.8rem; color:#DDD6FE; margin:0;">{{ n.message }}</p>
+              </div>
+              {% endfor %}
+            {% endif %}
+
+            <div style="background:rgba(30, 15, 60, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <strong style="color:#FFFFFF; font-size:0.875rem;">KPMG Campus Hackathon Milestone Checkpoint</strong>
+                <span style="font-size:0.7rem; color:#A78BFA;">1 day ago</span>
+              </div>
+              <p style="font-size:0.8rem; color:#DDD6FE; margin:0;">
+                All enrolled students are encouraged to review their explainable success score and run scenarios using the What-If Simulator.
+              </p>
+            </div>
+
+            <div style="background:rgba(30, 15, 60, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <strong style="color:#FFFFFF; font-size:0.875rem;">Biometric Attendance Synchronization</strong>
+                <span style="font-size:0.7rem; color:#A78BFA;">2 days ago</span>
+              </div>
+              <p style="font-size:0.8rem; color:#DDD6FE; margin:0;">
+                Continuous biometric lecture logs have been updated. Ensure your attendance stays strictly above 75.0%.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 10: MY PROFILE -->
+      <!-- ========================================================================= -->
+      <section id="section-my-profile" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">My Student Profile & Mentorship Information</h2>
+            <p class="section-subheading">Personal institutional record, assigned faculty advisor, and contact details</p>
+          </div>
+        </div>
+
+        <div class="grid-2-col">
+          
+          <!-- Student Card -->
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Student Academic Information</h3>
+                <p class="glass-card-subtitle">Official university enrollment records</p>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:16px; margin:16px 0 20px;">
+              <div style="width:64px; height:64px; border-radius:50%; background:var(--grad-pink-purple); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:1.4rem; font-weight:800; box-shadow:var(--glow-purple);">
+                {{ student.name[:2].upper() }}
+              </div>
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800; color:#FFFFFF;">{{ student.name }}</h3>
+                <p style="font-size:0.8rem; color:#DDD6FE; margin:2px 0 0;">{{ student.student_id }} &bull; {{ student.email }}</p>
+                <span class="badge badge-accent" style="margin-top:6px;">{{ student.department_name }}</span>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:0.8125rem;">
+              <div>
+                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Department</span>
+                <strong style="color:#FFFFFF;">{{ student.department }}</strong>
+              </div>
+              <div>
+                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Semester & Section</span>
+                <strong style="color:#FFFFFF;">Sem {{ student.semester }} (Section {{ student.section }})</strong>
+              </div>
+              <div>
+                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Contact Phone</span>
+                <strong style="color:#FFFFFF;">{{ student.phone or '+91 9800000000' }}</strong>
+              </div>
+              <div>
+                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Gender</span>
+                <strong style="color:#FFFFFF;">{{ student.gender or 'Not Specified' }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advisor Card -->
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Assigned Faculty Advisor</h3>
+                <p class="glass-card-subtitle">Your designated mentor for academic guidance and counseling</p>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:16px; margin:16px 0 20px;">
+              <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #43187D, #8B5CF6); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:1.2rem; font-weight:800;">
+                {{ student.mentor_name[:2].upper() }}
+              </div>
+              <div>
+                <h4 style="font-size:1.05rem; font-weight:800; color:#FFFFFF;">{{ student.mentor_name }}</h4>
+                <p style="font-size:0.78rem; color:#DDD6FE; margin:2px 0 0;">Faculty Advisor &bull; {{ student.department }} Department</p>
+                <span class="badge badge-low" style="margin-top:6px;">Office Hours: Mon-Fri 3-5 PM</span>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:0.8125rem; margin-bottom:16px;">
+              <div>
+                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Mentorship Caseload</span>
+                <span style="color:#FFFFFF;">Academic counseling, attendance monitoring, and placement support</span>
+              </div>
+            </div>
+
+            <button class="btn-action-primary" style="width:100%;" onclick="alert('Advising appointment requested with {{ student.mentor_name }}. An email confirmation has been dispatched.')">
+              Request Mentorship Counseling Session
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Pass student object to JS for Radar & Simulator (must be before app.js)
+    window.STUDENT_DATA = {{ student|tojson }};
+    window.STUDENT_METRICS = {{ metrics|tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=2026.1"></script>
+</body>
+</html>

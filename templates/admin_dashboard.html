@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusIQ – Dean & Institutional Administrator Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2026.1">
+</head>
+<body>
+
+  <div class="dashboard-app-wrap">
+    
+    <!-- PERMANENT LEFT SIDEBAR NAVIGATION (Electric Purple, Pink & Lilac) -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+        </div>
+        <div class="sidebar-brand-title">Campus<span>IQ</span></div>
+      </div>
+
+      <nav class="sidebar-nav-scroll" role="navigation">
+        <div class="sidebar-nav-category">Main Governance</div>
+        <a class="sidebar-nav-link active" data-section="section-overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Overview</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-students">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Students</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-faculty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Faculty</span>
+        </a>
+
+        <div class="sidebar-nav-category">Early Warning & AI</div>
+        <a class="sidebar-nav-link" data-section="section-risk-monitoring">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Risk Monitoring</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-ai-insights">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>AI Insights</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-interventions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>Interventions</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-placement">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          <span>Placement Analytics</span>
+        </a>
+
+        <div class="sidebar-nav-category">System & Actions</div>
+        <a class="sidebar-nav-link" data-section="section-reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Reports</span>
+        </a>
+
+        <a class="sidebar-nav-link" data-section="section-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="sidebar-nav-link logout-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Logout</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer-user">
+        <div class="user-avatar-sidebar">VR</div>
+        <div style="display:flex; flex-direction:column; line-height:1.2;">
+          <span style="font-weight:700; font-size:0.8rem; color:#FFFFFF;">{{ user.name }}</span>
+          <span style="font-size:0.7rem; color:#C4B5FD;">Administrator &bull; {{ user.user_id }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT APP -->
+    <main class="app-main-content">
+      
+      <!-- Enterprise Top App Bar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="btn-mobile-toggle" id="btnToggleSidebar" aria-label="Toggle Navigation">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="topbar-breadcrumb-wrap">
+            <span class="topbar-badge-kpmg">KPMG in India</span>
+            <span class="topbar-breadcrumb-slash">/</span>
+            <span class="topbar-breadcrumb-parent">Administration</span>
+            <span class="topbar-breadcrumb-slash">/</span>
+            <span class="topbar-breadcrumb-current" id="topbarCurrentSection">Institutional Radar</span>
+          </div>
+        </div>
+
+        <div class="topbar-center">
+          <div class="topbar-global-search">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="topbarSearchInput" placeholder="Quick find student, faculty, course code... (Press / to focus)">
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button id="btnOpenSimulator" class="btn-topbar-action" title="Open What-If Academic Remediation Simulator">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>What-If Simulator</span>
+          </button>
+
+          <button id="btnToggleNotifications" class="topbar-icon-btn" title="Institutional Alerts & Watchlist">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="topbar-notif-dot"></span>
+          </button>
+
+          <div class="topbar-profile-container" style="position:relative;">
+            <div class="topbar-profile-chip" id="adminProfileChipBtn" style="cursor:pointer;" title="Click for account options">
+              <div class="user-avatar-sm">VR</div>
+              <div class="topbar-user-text">
+                <span class="user-name-text">{{ user.name }}</span>
+                <span class="user-role-text">Dean of Academics &bull; Admin</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); margin-left:4px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            
+            <div id="adminProfileDropdown" class="profile-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 8px); width:210px; background:#FFFFFF; border:1px solid var(--border-light); border-radius:12px; box-shadow:var(--shadow-lg); z-index:200; overflow:hidden;">
+              <div style="padding:12px 14px; background:#FAF9FE; border-bottom:1px solid var(--border-light);">
+                <strong style="display:block; font-size:0.8125rem; color:var(--text-primary);">{{ user.name }}</strong>
+                <span style="font-size:0.7rem; color:var(--text-muted);">{{ user.user_id }} &bull; Administrator</span>
+              </div>
+              <div style="padding:6px;">
+                <a href="javascript:void(0)" onclick="switchSection('section-settings')" style="display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:0.78rem; font-weight:600; color:var(--text-primary); border-radius:8px; text-decoration:none;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                  <span>System Settings</span>
+                </a>
+                <a href="{{ url_for('logout') }}" style="display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:0.78rem; font-weight:700; color:#DC2626; border-radius:8px; text-decoration:none;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                  <span>Sign Out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Notifications Dropdown Popover -->
+      <div id="notificationsDropdown" class="notifications-dropdown" style="display:none; position:absolute; right:28px; top:70px;">
+        <div class="notifications-header">
+          <h4>Institutional Alerts & Watchlist</h4>
+          <span style="font-size:0.7rem; color:var(--purple-electric); font-weight:700;">Live Feed</span>
+        </div>
+        <div class="notifications-list">
+          <div class="notification-item">
+            <strong style="color:#DC2626; font-size:0.75rem;">Debarment Risk Alert: Kabir Mehta</strong>
+            <span style="color:var(--text-secondary); font-size:0.72rem;">Attendance at 68.0% (below 75% threshold) with 3 backlogs.</span>
+          </div>
+          <div class="notification-item">
+            <strong style="color:#DC2626; font-size:0.75rem;">Attendance Deficit: Divya Rao</strong>
+            <span style="color:var(--text-secondary); font-size:0.72rem;">Attendance at 61.5% in IT Sem 6. Statutory warning dispatched.</span>
+          </div>
+          <div class="notification-item">
+            <strong style="color:#059669; font-size:0.75rem;">NIRF Accreditation Audit Ready</strong>
+            <span style="color:var(--text-secondary); font-size:0.72rem;">All 5 engineering departments audited with full 5-pillar telemetry.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 1: OVERVIEW (Default Active)                                      -->
+      <!-- ========================================================================= -->
+      <section id="section-overview" class="dashboard-section active-section">
+        <!-- Hero Banner -->
+        <div class="hero-glass-banner">
+          <div>
+            <span class="hero-role-pill">Dean & Administrator Governance</span>
+            <h1 class="hero-main-title">Institutional Student Success & Accreditation Radar</h1>
+            <p class="hero-sub-desc">
+              Real-time monitoring across 10 engineering students and 5 departments. Powered by explainable 5-pillar rule attribution with early risk intervention triggers.
+            </p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-action-primary" onclick="switchSection('section-students')">Manage Students</button>
+            <button class="btn-action-secondary" onclick="exportCohortCSV()">Export CSV Report</button>
+          </div>
+        </div>
+
+        <!-- KPI Scorecards Grid -->
+        <div class="kpi-cards-grid">
+          <!-- Total Students -->
+          <div class="glass-kpi-card pink-glow">
+            <div class="kpi-header-row">
+              <span class="kpi-title-label">Total Enrolled</span>
+              <div class="kpi-icon-glow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
+            </div>
+            <div class="kpi-big-value" id="kpiTotalStudents">10</div>
+            <div class="kpi-meta-badge-row">
+              <span class="badge-pill-status success">100% Active</span>
+              <span style="color:#C4B5FD; font-size:0.75rem;">Across 5 branches</span>
+            </div>
+          </div>
+
+          <!-- Success Score -->
+          <div class="glass-kpi-card purple-glow">
+            <div class="kpi-header-row">
+              <span class="kpi-title-label">Success Score</span>
+              <div class="kpi-icon-glow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div>
+            </div>
+            <div class="kpi-big-value" id="kpiAvgSuccess">74.1<span class="kpi-scale-sub">/100</span></div>
+            <div class="kpi-meta-badge-row">
+              <span class="badge-pill-status cyan" id="kpiAvgCgpaTag">Avg CGPA: 7.81</span>
+              <span style="color:#C4B5FD; font-size:0.75rem;">5-pillar weighted</span>
+            </div>
+          </div>
+
+          <!-- High Risk Alerts -->
+          <div class="glass-kpi-card red-glow">
+            <div class="kpi-header-row">
+              <span class="kpi-title-label">High-Risk Attention</span>
+              <div class="kpi-icon-glow" style="color:#F43F5E;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
+            </div>
+            <div class="kpi-big-value" style="color:#F43F5E;" id="kpiHighRisk">4</div>
+            <div class="kpi-meta-badge-row">
+              <span class="badge-pill-status danger" id="kpiHighRiskPct">40.0% of cohort</span>
+              <span style="color:#FCA5A5; font-size:0.75rem;">Requires immediate action</span>
+            </div>
+          </div>
+
+          <!-- Attendance Compliance -->
+          <div class="glass-kpi-card cyan-glow">
+            <div class="kpi-header-row">
+              <span class="kpi-title-label">Attendance Compliance</span>
+              <div class="kpi-icon-glow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line></svg></div>
+            </div>
+            <div class="kpi-big-value" id="kpiAttendanceRate">60.0%</div>
+            <div class="kpi-meta-badge-row">
+              <span class="badge-pill-status warning" id="kpiAttendanceAvg">Avg: 74.9%</span>
+              <span style="color:#C4B5FD; font-size:0.75rem;">UGC &ge; 75% rule</span>
+            </div>
+          </div>
+
+          <!-- Placement Readiness -->
+          <div class="glass-kpi-card emerald-glow">
+            <div class="kpi-header-row">
+              <span class="kpi-title-label">Placement Readiness</span>
+              <div class="kpi-icon-glow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg></div>
+            </div>
+            <div class="kpi-big-value" style="color:#10B981;" id="kpiPlacementRate">60.0%</div>
+            <div class="kpi-meta-badge-row">
+              <span class="badge-pill-status success">6 Students</span>
+              <span style="color:#6EE7B7; font-size:0.75rem;">Tier-1 eligible</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-dual-grid">
+          <div class="glass-card-container">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Risk Profile Breakdown</h3>
+                <span class="glass-card-subtitle">Early academic warning distribution</span>
+              </div>
+              <span class="badge badge-low">All Cohorts</span>
+            </div>
+            <div class="chart-canvas-wrapper doughnut-wrapper">
+              <canvas id="riskDoughnutChart"></canvas>
+            </div>
+            <div class="doughnut-legend" id="riskLegendSummary" style="display:flex; justify-content:center; gap:16px; margin-top:12px;"></div>
+          </div>
+
+          <div class="glass-card-container">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Department Benchmark</h3>
+                <span class="glass-card-subtitle">Success Score vs CGPA by branch</span>
+              </div>
+              <span class="badge badge-low">NIRF Metrics</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="departmentBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEDICATED PRIORITY INTERVENTION PANEL -->
+        <div class="glass-card-container priority-intervention-panel">
+          <div class="glass-card-header">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="badge badge-high" style="font-size:0.75rem;">Action Needed</span>
+                <h3 class="glass-card-title">Priority Student Interventions & Case Alerts</h3>
+              </div>
+              <span class="glass-card-subtitle">Urgent cases requiring administrator escalation or faculty advisory intervention</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-action-secondary" style="font-size:0.75rem; padding:6px 12px;" onclick="switchSection('section-risk-monitoring')">View Risk Radar</button>
+              <button class="btn-action-primary" style="font-size:0.75rem; padding:6px 12px;" onclick="switchSection('section-interventions')">All Interventions &rarr;</button>
+            </div>
+          </div>
+
+          <div class="priority-cases-grid">
+            <div class="priority-case-card urgent">
+              <div class="priority-case-header">
+                <div class="priority-student-identity">
+                  <div class="student-initials-avatar" style="width:32px; height:32px; font-size:0.75rem;">KM</div>
+                  <div>
+                    <strong style="color:var(--text-white); font-size:0.875rem;">Kabir Mehta</strong>
+                    <div style="font-size:0.72rem; color:var(--text-muted);">CIQ-2026-008 &bull; IT Sem 6</div>
+                  </div>
+                </div>
+                <span class="badge badge-high">Critical Risk (37.5)</span>
+              </div>
+              <div class="priority-case-details">
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Trigger:</span> <strong>68.0% Attendance (Debarment) & 3 Backlogs</strong></div>
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Assigned Mentor:</span> <span>Dr. Sunita Rao (CSE)</span></div>
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Recommended Action:</span> <span style="color:var(--purple-electric); font-weight:700;">Remedial Senior Peer Tutoring</span></div>
+              </div>
+              <div class="priority-case-footer">
+                <span class="priority-status-pill pending">Status: Pending Review</span>
+                <button class="btn-table-inspect" onclick="inspectStudent('CIQ-2026-008')">Analyze Case &rarr;</button>
+              </div>
+            </div>
+
+            <div class="priority-case-card urgent">
+              <div class="priority-case-header">
+                <div class="priority-student-identity">
+                  <div class="student-initials-avatar" style="width:32px; height:32px; font-size:0.75rem;">DR</div>
+                  <div>
+                    <strong style="color:var(--text-white); font-size:0.875rem;">Divya Rao</strong>
+                    <div style="font-size:0.72rem; color:var(--text-muted);">CIQ-2026-007 &bull; IT Sem 6</div>
+                  </div>
+                </div>
+                <span class="badge badge-high">High Risk (41.5)</span>
+              </div>
+              <div class="priority-case-details">
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Trigger:</span> <strong>61.5% Attendance (Deficit 13.5%) & 2 Backlogs</strong></div>
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Assigned Mentor:</span> <span>Dr. Meenakshi Sundaram (IT)</span></div>
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Recommended Action:</span> <span style="color:var(--purple-electric); font-weight:700;">Statutory Attendance Advisory Meeting</span></div>
+              </div>
+              <div class="priority-case-footer">
+                <span class="priority-status-pill in-progress">Status: In Progress</span>
+                <button class="btn-table-inspect" onclick="inspectStudent('CIQ-2026-007')">Analyze Case &rarr;</button>
+              </div>
+            </div>
+
+            <div class="priority-case-card moderate">
+              <div class="priority-case-header">
+                <div class="priority-student-identity">
+                  <div class="student-initials-avatar" style="width:32px; height:32px; font-size:0.75rem;">RS</div>
+                  <div>
+                    <strong style="color:var(--text-white); font-size:0.875rem;">Rohan Sharma</strong>
+                    <div style="font-size:0.72rem; color:var(--text-muted);">CIQ-2026-003 &bull; CSE Sem 6</div>
+                  </div>
+                </div>
+                <span class="badge badge-medium">Medium Risk (72.8)</span>
+              </div>
+              <div class="priority-case-details">
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Trigger:</span> <strong>CGPA 8.40 but Coding Aptitude &lt; 65</strong></div>
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Assigned Mentor:</span> <span>Dr. Sunita Rao (CSE)</span></div>
+                <div class="priority-driver-item"><span style="color:var(--text-muted);">Recommended Action:</span> <span style="color:var(--purple-electric); font-weight:700;">KPMG Mock Technical Coding Bootcamp</span></div>
+              </div>
+              <div class="priority-case-footer">
+                <span class="priority-status-pill completed">Status: Completed</span>
+                <button class="btn-table-inspect" onclick="inspectStudent('CIQ-2026-003')">Analyze Case &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 2: STUDENT ANALYTICS                                              -->
+      <!-- ========================================================================= -->
+      <section id="section-analytics" class="dashboard-section">
+        <div class="hero-glass-banner">
+          <div>
+            <h2 class="hero-main-title">Multi-Dimensional Student Analytics</h2>
+            <p class="hero-sub-desc">Detailed statistical correlation between biometric attendance, CGPA, LMS engagement, and career placement readiness.</p>
+          </div>
+        </div>
+
+        <div class="charts-dual-grid">
+          <div class="glass-card-container">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Attendance vs CGPA Scatter Radar</h3>
+                <span class="glass-card-subtitle">Correlation of biometric compliance to academic marks</span>
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="attendanceScatterChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card-container">
+            <div class="glass-card-header">
+              <div>
+                <h3 class="glass-card-title">Institutional Risk Bottlenecks</h3>
+                <span class="glass-card-subtitle">Frequency of distress triggers across faculties</span>
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="systemicRiskBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 3: STUDENTS DIRECTORY & MANAGEMENT (CRUD)                        -->
+      <!-- ========================================================================= -->
+      <section id="section-students" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">University Student Directory & Management</h2>
+              <span class="glass-card-subtitle">Filter, search, inspect, add or edit student academic records.</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-action-primary" id="btnOpenAddStudent">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add New Student
+              </button>
+              <button class="btn-action-secondary" onclick="exportCohortCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="filter-toolbar-wrap">
+            <div class="cyber-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="studentSearchInput" placeholder="Search by student name, ID (e.g. student001), or faculty mentor...">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <div class="risk-filter-pills-cyber">
+                <button class="pill-filter-item active" data-risk="ALL">All (120)</button>
+                <button class="pill-filter-item" data-risk="High">High Risk</button>
+                <button class="pill-filter-item" data-risk="Medium">Medium</button>
+                <button class="pill-filter-item" data-risk="Low">Low</button>
+              </div>
+
+              <select id="rosterDeptFilter" class="cyber-select" title="Department">
+                <option value="ALL">All Departments</option>
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="AI&DS">AI&DS</option>
+                <option value="ECE">ECE</option>
+                <option value="ME">ME</option>
+                <option value="EEE">EEE</option>
+              </select>
+
+              <select id="rosterSemFilter" class="cyber-select" title="Semester">
+                <option value="ALL">All Semesters</option>
+                <option value="4">Semester 4</option>
+                <option value="6">Semester 6</option>
+                <option value="8">Semester 8</option>
+              </select>
+
+              <select id="rosterSortBy" class="cyber-select" title="Sort By">
+                <option value="risk_level-asc">Risk: High First</option>
+                <option value="success_score-asc">Success Score: Lowest First</option>
+                <option value="success_score-desc">Success Score: Highest First</option>
+                <option value="cgpa-asc">CGPA: Lowest First</option>
+                <option value="cgpa-desc">CGPA: Highest First</option>
+                <option value="attendance_pct-asc">Attendance: Lowest First</option>
+                <option value="name-asc">Student Name (A-Z)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Students Table -->
+          <div class="glass-table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Branch & Sem</th>
+                  <th>Faculty Advisor</th>
+                  <th>CGPA</th>
+                  <th>Attendance</th>
+                  <th>Backlogs</th>
+                  <th>Success Score</th>
+                  <th>Risk Category</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 4: FACULTY MANAGEMENT                                             -->
+      <!-- ========================================================================= -->
+      <section id="section-faculty" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">Faculty Mentors & Department Chairs</h2>
+              <span class="glass-card-subtitle">Manage faculty advisors, department assignments, and mentorship caseloads.</span>
+            </div>
+            <button class="btn-action-primary" id="btnOpenAddFaculty">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add Faculty Member
+            </button>
+          </div>
+
+          <div class="glass-table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Faculty Member</th>
+                  <th>ID</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Specialization</th>
+                  <th>Assigned Caseload</th>
+                  <th>Contact</th>
+                </tr>
+              </thead>
+              <tbody id="facultyTableBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 5: DEPARTMENTS                                                    -->
+      <!-- ========================================================================= -->
+      <section id="section-departments" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">Department Accreditation & Performance Benchmarks</h2>
+              <span class="glass-card-subtitle">Academic velocity, attendance compliance and placement rates across 6 faculties.</span>
+            </div>
+            <span class="badge badge-low">NAAC & NIRF Audited</span>
+          </div>
+
+          <div class="glass-table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Enrolled</th>
+                  <th>High Risk</th>
+                  <th>Medium Risk</th>
+                  <th>Safe Cohort</th>
+                  <th>Avg CGPA</th>
+                  <th>Avg Attendance</th>
+                  <th>Success Score</th>
+                  <th>Placement Ready</th>
+                  <th>Accreditation Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminDeptTableBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 6: COURSES & CURRICULUM                                           -->
+      <!-- ========================================================================= -->
+      <section id="section-courses" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">Engineering Curriculum & Courses</h2>
+              <span class="glass-card-subtitle">Course catalog, department semester mapping, credits, and historical pass rates.</span>
+            </div>
+          </div>
+
+          <div class="glass-table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Course Code</th>
+                  <th>Course Name</th>
+                  <th>Department</th>
+                  <th>Semester</th>
+                  <th>Credits</th>
+                  <th>Faculty Instructor</th>
+                  <th>Historical Pass Rate</th>
+                </tr>
+              </thead>
+              <tbody id="coursesTableBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 7: RISK MONITORING                                                -->
+      <!-- ========================================================================= -->
+      <section id="section-risk-monitoring" class="dashboard-section">
+        <div class="hero-glass-banner">
+          <div>
+            <span class="hero-role-pill" style="background:linear-gradient(135deg, #F43F5E, #DC2626);">Early Risk Radar</span>
+            <h2 class="hero-main-title">Statutory Attendance & Academic Velocity Watchlist</h2>
+            <p class="hero-sub-desc">Proactive identification of students facing potential semester debarment or graduation credit delay.</p>
+          </div>
+        </div>
+
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <h3 class="glass-card-title">At-Risk Students Requiring Mandatory Action</h3>
+            <span class="badge badge-high">4 Critical Alerts</span>
+          </div>
+          <div class="glass-table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Branch</th>
+                  <th>Attendance</th>
+                  <th>Backlogs</th>
+                  <th>Success Score</th>
+                  <th>Primary Risk Driver</th>
+                  <th style="text-align:right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="riskWatchlistBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 8: AI INSIGHTS & SEGMENTATION                                     -->
+      <!-- ========================================================================= -->
+      <section id="section-ai-insights" class="dashboard-section">
+        <div class="hero-glass-banner">
+          <div>
+            <span class="hero-role-pill">Explainable AI Intelligence</span>
+            <h2 class="hero-main-title">Automated Student Cohort Segmentation</h2>
+            <p class="hero-sub-desc">Calculated multi-factor grouping based on academic marks, skills, attendance, and placement aptitude.</p>
+          </div>
+        </div>
+
+        <div class="segment-cards-grid" id="segmentCardsGrid">
+          <!-- Segment 1 -->
+          <div class="segment-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="badge badge-high">Debarment Alert</span>
+              <strong style="color:#F43F5E;" id="segCountDebar">4 Students</strong>
+            </div>
+            <h4 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:6px;">Low Attendance & Debarment Risk</h4>
+            <p style="font-size:0.78rem; color:#DDD6FE;">Students with attendance &lt; 75%. Urgent statutory counseling required to prevent semester exam debarment.</p>
+            <div style="margin-top:12px; font-size:0.75rem; color:#C4B5FD;">Protocol: Statutory Attendance Advisory Meeting</div>
+          </div>
+
+          <!-- Segment 2 -->
+          <div class="segment-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="badge badge-medium">Skills Gap</span>
+              <strong style="color:#F59E0B;" id="segCountPlacement">1 Student</strong>
+            </div>
+            <h4 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:6px;">Academically Strong but Placement-Unready</h4>
+            <p style="font-size:0.78rem; color:#DDD6FE;">CGPA &ge; 7.5 but technical coding or aptitude &lt; 65. High potential if targeted coding bootcamps are provided.</p>
+            <div style="margin-top:12px; font-size:0.75rem; color:#C4B5FD;">Protocol: KPMG Technical & Aptitude Mock Bootcamp</div>
+          </div>
+
+          <!-- Segment 3 -->
+          <div class="segment-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="badge badge-high">Credit Delay</span>
+              <strong style="color:#F43F5E;" id="segCountBacklogs">2 Students</strong>
+            </div>
+            <h4 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:6px;">Academic Velocity & Backlog Risk</h4>
+            <p style="font-size:0.78rem; color:#DDD6FE;">Students with 1 or more uncleared backlogs. Need supplementary tutoring to prevent graduation timeline extension.</p>
+            <div style="margin-top:12px; font-size:0.75rem; color:#C4B5FD;">Protocol: Remedial Senior Peer Tutoring</div>
+          </div>
+
+          <!-- Segment 4 -->
+          <div class="segment-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="badge badge-low">Exemplary</span>
+              <strong style="color:#10B981;" id="segCountStars">2 Students</strong>
+            </div>
+            <h4 style="font-size:1rem; font-weight:700; color:#FFFFFF; margin-bottom:6px;">High Potential Star Performers</h4>
+            <p style="font-size:0.78rem; color:#DDD6FE;">Composite Success Score &ge; 80 with balanced excellence across marks, attendance, and competitive coding.</p>
+            <div style="margin-top:12px; font-size:0.75rem; color:#C4B5FD;">Protocol: Department Peer Mentor & Research Nomination</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 9: INTERVENTIONS TRACKING                                         -->
+      <!-- ========================================================================= -->
+      <section id="section-interventions" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">University-Wide Faculty Intervention Log</h2>
+              <span class="glass-card-subtitle">Active remediation protocols, counseling notes, and progress outcomes recorded in SQLite.</span>
+            </div>
+            <span class="badge badge-low">Live SQLite Feed</span>
+          </div>
+
+          <div class="glass-table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Student</th>
+                  <th>Advisor Name</th>
+                  <th>Protocol Action</th>
+                  <th>Priority</th>
+                  <th>Counseling Minutes</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="interventionsTableBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 10: PLACEMENT ANALYTICS                                           -->
+      <!-- ========================================================================= -->
+      <section id="section-placement" class="dashboard-section">
+        <div class="hero-glass-banner">
+          <div>
+            <h2 class="hero-main-title">Campus Placement Readiness Intelligence</h2>
+            <p class="hero-sub-desc">Evaluating competitive coding aptitude, technical DSA proficiency, and Tier-1 recruitment eligibility.</p>
+          </div>
+          <button class="btn-action-primary" onclick="exportCohortCSV()">Download Placement Report</button>
+        </div>
+
+        <div class="kpi-cards-grid">
+          <div class="glass-kpi-card pink-glow">
+            <span class="kpi-title-label">Overall Readiness Rate</span>
+            <div class="kpi-big-value" style="color:#EC4899;">60.0%</div>
+            <span style="font-size:0.75rem; color:#DDD6FE;">6 Students meeting Tier-1 criteria</span>
+          </div>
+          <div class="glass-kpi-card purple-glow">
+            <span class="kpi-title-label">Avg Aptitude Benchmark</span>
+            <div class="kpi-big-value">71.0<span class="kpi-scale-sub">/100</span></div>
+            <span style="font-size:0.75rem; color:#DDD6FE;">Quantitative, Logical & Verbal</span>
+          </div>
+          <div class="glass-kpi-card cyan-glow">
+            <span class="kpi-title-label">Avg Technical Score</span>
+            <div class="kpi-big-value">71.5<span class="kpi-scale-sub">/100</span></div>
+            <span style="font-size:0.75rem; color:#DDD6FE;">Algorithms, Coding & Architecture</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 11: REPORTS & EXPORT                                              -->
+      <!-- ========================================================================= -->
+      <section id="section-reports" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">Accreditation & Audit Report Export</h2>
+              <span class="glass-card-subtitle">Generate official CSV reports for NAAC, NIRF, and academic governance meetings.</span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px;">
+            <div style="background:rgba(35,18,70,0.6); border:1px solid var(--border-glass); border-radius:14px; padding:20px;">
+              <h4 style="color:#FFFFFF; font-size:1.1rem; margin-bottom:8px;">Full University Cohort Export</h4>
+              <p style="font-size:0.8125rem; color:#DDD6FE; margin-bottom:16px;">Complete export of all 10 student records including CGPA, attendance, LMS hours, aptitude, and success scores.</p>
+              <button class="btn-action-primary" onclick="exportCohortCSV()">Download Full CSV</button>
+            </div>
+
+            <div style="background:rgba(35,18,70,0.6); border:1px solid var(--border-glass); border-radius:14px; padding:20px;">
+              <h4 style="color:#FFFFFF; font-size:1.1rem; margin-bottom:8px;">High-Risk Debarment Watchlist</h4>
+              <p style="font-size:0.8125rem; color:#DDD6FE; margin-bottom:16px;">Filtered CSV of the 4 students identified in the High Risk category requiring dean-level intervention.</p>
+              <button class="btn-action-secondary" onclick="exportRiskCSV('High')">Download High Risk CSV</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 12: NOTIFICATIONS                                                 -->
+      <!-- ========================================================================= -->
+      <section id="section-notifications" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">System Alerts & Notifications Center</h2>
+              <span class="glass-card-subtitle">Real-time alerts generated from university telemetry.</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.4); border-radius:12px; padding:14px 18px;">
+              <strong style="color:#FECDD3;">Institutional Risk Alert</strong>
+              <p style="color:#F3E8FF; font-size:0.8125rem; margin-top:2px;">4 students identified in High Risk bracket for Semester 4, 6 & 8 review.</p>
+              <span style="font-size:0.7rem; color:#C4B5FD;">Today, 10:15 AM</span>
+            </div>
+
+            <div style="background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.35); border-radius:12px; padding:14px 18px;">
+              <strong style="color:#E9D5FF;">NAAC & NIRF Accreditation Audit Ready</strong>
+              <p style="color:#F3E8FF; font-size:0.8125rem; margin-top:2px;">Department benchmarking metrics updated across all 5 faculties.</p>
+              <span style="font-size:0.7rem; color:#C4B5FD;">Yesterday, 04:30 PM</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 13: SETTINGS                                                      -->
+      <!-- ========================================================================= -->
+      <section id="section-settings" class="dashboard-section">
+        <div class="glass-card-container">
+          <div class="glass-card-header">
+            <div>
+              <h2 class="glass-card-title">CampusIQ Engine Configuration & Weights</h2>
+              <span class="glass-card-subtitle">Transparent mathematical weights governing the 5-pillar Success Score formula.</span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:20px;">
+            <div style="background:rgba(30,15,60,0.6); padding:16px; border-radius:10px; border:1px solid var(--border-glass);">
+              <span style="font-size:0.75rem; color:#C4B5FD; font-weight:700;">1. ACADEMIC MASTERY</span>
+              <div style="font-size:1.6rem; font-weight:800; color:#EC4899;">30%</div>
+              <span style="font-size:0.72rem; color:#DDD6FE;">CGPA & internal marks (minus backlogs)</span>
+            </div>
+            <div style="background:rgba(30,15,60,0.6); padding:16px; border-radius:10px; border:1px solid var(--border-glass);">
+              <span style="font-size:0.75rem; color:#C4B5FD; font-weight:700;">2. ATTENDANCE COMPLIANCE</span>
+              <div style="font-size:1.6rem; font-weight:800; color:#8B5CF6;">20%</div>
+              <span style="font-size:0.72rem; color:#DDD6FE;">UGC &ge; 75% regulatory mandate</span>
+            </div>
+            <div style="background:rgba(30,15,60,0.6); padding:16px; border-radius:10px; border:1px solid var(--border-glass);">
+              <span style="font-size:0.75rem; color:#C4B5FD; font-weight:700;">3. DIGITAL LMS ENGAGEMENT</span>
+              <div style="font-size:1.6rem; font-weight:800; color:#A855F7;">15%</div>
+              <span style="font-size:0.72rem; color:#DDD6FE;">Weekly LMS study hours & assignments</span>
+            </div>
+            <div style="background:rgba(30,15,60,0.6); padding:16px; border-radius:10px; border:1px solid var(--border-glass);">
+              <span style="font-size:0.75rem; color:#C4B5FD; font-weight:700;">4. PLACEMENT READINESS</span>
+              <div style="font-size:1.6rem; font-weight:800; color:#06B6D4;">20%</div>
+              <span style="font-size:0.72rem; color:#DDD6FE;">Coding skills & mock aptitude scores</span>
+            </div>
+            <div style="background:rgba(30,15,60,0.6); padding:16px; border-radius:10px; border:1px solid var(--border-glass);">
+              <span style="font-size:0.75rem; color:#C4B5FD; font-weight:700;">5. HOLISTIC WELLBEING</span>
+              <div style="font-size:1.6rem; font-weight:800; color:#10B981;">15%</div>
+              <span style="font-size:0.72rem; color:#DDD6FE;">Extracurriculars & wellness index</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: STUDENT DEEP-DIVE & EXPLAINABLE AI INSPECTION                    -->
+  <!-- ========================================================================= -->
+  <div id="studentDetailModal" class="glass-modal-overlay" style="display:none;" aria-hidden="true" role="dialog">
+    <div class="glass-modal-card">
+      <div class="glass-modal-header">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div class="student-initials-avatar" id="modalStudentAvatar" style="width:48px; height:48px; font-size:1.1rem;">AR</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <h2 id="modalStudentName" style="color:#FFFFFF; font-size:1.35rem; font-weight:800;">Aarav Reddy</h2>
+              <span id="modalRiskBadge" class="badge badge-high">High Risk</span>
+            </div>
+            <div style="font-size:0.75rem; color:#C4B5FD; margin-top:2px;">
+              <span id="modalStudentID" style="font-weight:700; color:#EC4899;">student001</span> &bull;
+              <span id="modalStudentDept">CSE &bull; Sem 8</span> &bull;
+              <span id="modalStudentEmail">aarav@campusiq.edu</span>
+            </div>
+          </div>
+        </div>
+        <button id="btnCloseModal" class="btn-close-modal-icon">&times;</button>
+      </div>
+
+      <div class="glass-modal-body">
+        <!-- 5 Pillars Breakdown & Gauge -->
+        <div style="display:grid; grid-template-columns:260px 1fr; gap:20px; background:rgba(35,18,70,0.5); border:1px solid var(--border-glass); border-radius:16px; padding:18px;">
+          <div style="text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; border-right:1px solid var(--border-glass); padding-right:18px;">
+            <span style="font-size:0.72rem; font-weight:700; color:#C4B5FD; text-transform:uppercase;">Composite Success Score</span>
+            <div style="font-size:3.2rem; font-weight:800; color:#FFFFFF; line-height:1; margin:8px 0;" id="modalSuccessScore">64.2</div>
+            <span style="font-size:0.72rem; color:#A78BFA;">5-Pillar Weighted Score (0-100)</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; justify-content:space-around;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                <span style="color:#DDD6FE;">1. Academic Mastery (30%)</span>
+                <strong style="color:#FFFFFF;" id="pillarAcademicVal">70/100</strong>
+              </div>
+              <div class="pillar-progress-track"><div class="pillar-progress-fill" id="pillarAcademicBar" style="width:70%;"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                <span style="color:#DDD6FE;">2. Attendance & Discipline (20%)</span>
+                <strong style="color:#FFFFFF;" id="pillarAttendanceVal">62/100</strong>
+              </div>
+              <div class="pillar-progress-track"><div class="pillar-progress-fill" id="pillarAttendanceBar" style="width:62%;"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                <span style="color:#DDD6FE;">3. Digital LMS Engagement (15%)</span>
+                <strong style="color:#FFFFFF;" id="pillarLmsVal">55/100</strong>
+              </div>
+              <div class="pillar-progress-track"><div class="pillar-progress-fill" id="pillarLmsBar" style="width:55%;"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                <span style="color:#DDD6FE;">4. Placement Readiness (20%)</span>
+                <strong style="color:#FFFFFF;" id="pillarPlacementVal">80/100</strong>
+              </div>
+              <div class="pillar-progress-track"><div class="pillar-progress-fill" id="pillarPlacementBar" style="width:80%;"></div></div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                <span style="color:#DDD6FE;">5. Holistic Wellbeing (15%)</span>
+                <strong style="color:#FFFFFF;" id="pillarWellbeingVal">65/100</strong>
+              </div>
+              <div class="pillar-progress-track"><div class="pillar-progress-fill" id="pillarWellbeingBar" style="width:65%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw Metrics Strip -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(90px, 1fr)); gap:8px;">
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">CGPA</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalCgpa">7.2</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">Marks</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalMarks">74.5%</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">Attendance</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalAttendance">68.2%</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">Backlogs</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalBacklogs">1</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">LMS Hours</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalLmsHours">6.5</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">Assignments</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalAssignmentRate">72%</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">Aptitude</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalAptitude">68/100</div>
+          </div>
+          <div style="background:rgba(30,15,60,0.6); padding:10px; border-radius:8px; border:1px solid var(--border-glass); text-align:center;">
+            <span style="font-size:0.68rem; color:#C4B5FD; text-transform:uppercase;">Technical</span>
+            <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF;" id="modalTech">75/100</div>
+          </div>
+        </div>
+
+        <!-- Explainable Factors Cards -->
+        <div>
+          <h4 style="font-size:0.9rem; font-weight:700; color:#F43F5E; margin-bottom:8px;">Explainable Risk Factors & Feature Attribution</h4>
+          <div class="factors-cards-grid" id="modalRiskFactorsContainer"></div>
+        </div>
+
+        <!-- Standout Strengths -->
+        <div>
+          <h4 style="font-size:0.9rem; font-weight:700; color:#10B981; margin-bottom:8px;">Standout Competencies & Strengths</h4>
+          <div class="factors-cards-grid" id="modalStrengthsContainer"></div>
+        </div>
+
+        <!-- Automated Targeted Interventions -->
+        <div>
+          <h4 style="font-size:0.9rem; font-weight:700; color:#FFFFFF; margin-bottom:8px;">Recommended Targeted Interventions</h4>
+          <div id="modalInterventionsContainer"></div>
+        </div>
+
+        <!-- Log Faculty Action Hub -->
+        <div style="background:rgba(35,18,70,0.7); border:1px solid var(--border-glass); border-radius:14px; padding:18px;">
+          <h4 style="color:#EC4899; font-size:0.95rem; font-weight:700; margin-bottom:6px;">Record Mentor Counseling Minutes</h4>
+          <form id="interventionForm" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+              <div class="input-group-custom" style="margin-bottom:0;">
+                <label>Protocol Action</label>
+                <select id="formActionType" class="cyber-select" required>
+                  <option value="Statutory Attendance Advisory Meeting">Statutory Attendance Advisory Meeting</option>
+                  <option value="Remedial Peer Tutoring Assignment">Remedial Peer Tutoring Assignment</option>
+                  <option value="KPMG Technical & Aptitude Mock Bootcamp">KPMG Technical & Aptitude Mock Bootcamp</option>
+                  <option value="LMS Learning Roadblock Diagnostic">LMS Learning Roadblock Diagnostic</option>
+                  <option value="Student Wellness & Stress Counseling">Student Wellness & Stress Counseling</option>
+                </select>
+              </div>
+
+              <div class="input-group-custom" style="margin-bottom:0;">
+                <label>Priority</label>
+                <select id="formPriority" class="cyber-select" required>
+                  <option value="Immediate">Immediate (24-48 Hours)</option>
+                  <option value="High" selected>High (Within 1 Week)</option>
+                  <option value="Medium">Medium (Regular Check-in)</option>
+                </select>
+              </div>
+
+              <div class="input-group-custom" style="margin-bottom:0;">
+                <label>Advisor Name</label>
+                <input type="text" id="formMentorName" value="{{ user.name }}" required>
+              </div>
+            </div>
+
+            <div class="input-group-custom" style="margin-bottom:0;">
+              <label>Counselor Diagnostic Notes & Action Steps</label>
+              <textarea id="formNotes" rows="2" style="background:rgba(25,12,50,0.8); border:1px solid var(--border-glass-strong); border-radius:8px; padding:10px; color:#FFFFFF; font-family:var(--font-sans); outline:none;" placeholder="Record minutes of discussion, student commitments..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-action-primary" style="align-self:flex-start;">Save to SQLite</button>
+          </form>
+
+          <div style="margin-top:14px; border-top:1px solid var(--border-glass); padding-top:10px;">
+            <h5 style="font-size:0.75rem; color:#C4B5FD; text-transform:uppercase; margin-bottom:6px;">Logged Timeline for this Student</h5>
+            <div id="modalInterventionHistory"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 2: ADD NEW STUDENT MODAL                                            -->
+  <!-- ========================================================================= -->
+  <div id="addStudentModal" class="glass-modal-overlay" style="display:none;" aria-hidden="true" role="dialog">
+    <div class="glass-modal-card" style="max-width:700px;">
+      <div class="glass-modal-header">
+        <h3 style="color:#FFFFFF; font-size:1.2rem; font-weight:800;">Add New Student Record</h3>
+        <button id="btnCloseAddStudent" class="btn-close-modal-icon">&times;</button>
+      </div>
+      <div class="glass-modal-body">
+        <form id="addStudentForm" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="input-group-custom">
+              <label>Student ID</label>
+              <input type="text" id="newStudentId" placeholder="e.g. student121" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Full Name</label>
+              <input type="text" id="newStudentName" placeholder="e.g. Rahul Sharma" required>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="input-group-custom">
+              <label>Email</label>
+              <input type="email" id="newStudentEmail" placeholder="rahul@campusiq.edu" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Department</label>
+              <select id="newStudentDept" class="cyber-select" required>
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="AI&DS">AI&DS</option>
+                <option value="ECE">ECE</option>
+                <option value="ME">ME</option>
+                <option value="EEE">EEE</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
+            <div class="input-group-custom">
+              <label>Semester</label>
+              <input type="number" id="newStudentSem" value="6" min="1" max="8" required>
+            </div>
+            <div class="input-group-custom">
+              <label>CGPA</label>
+              <input type="number" id="newStudentCgpa" step="0.01" min="0" max="10" value="7.50" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Attendance %</label>
+              <input type="number" id="newStudentAtt" step="0.1" min="0" max="100" value="78.0" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Backlogs</label>
+              <input type="number" id="newStudentBack" min="0" max="10" value="0" required>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="input-group-custom">
+              <label>Placement Aptitude (0-100)</label>
+              <input type="number" id="newStudentApt" min="0" max="100" value="70" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Technical Skills (0-100)</label>
+              <input type="number" id="newStudentTech" min="0" max="100" value="75" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-action-primary" style="margin-top:8px;">Add Student Record</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 3: ADD FACULTY MEMBER MODAL                                         -->
+  <!-- ========================================================================= -->
+  <div id="addFacultyModal" class="glass-modal-overlay" style="display:none;" aria-hidden="true" role="dialog">
+    <div class="glass-modal-card" style="max-width:650px;">
+      <div class="glass-modal-header">
+        <h3 style="color:#FFFFFF; font-size:1.2rem; font-weight:800;">Add Faculty Mentor</h3>
+        <button id="btnCloseAddFaculty" class="btn-close-modal-icon">&times;</button>
+      </div>
+      <div class="glass-modal-body">
+        <form id="addFacultyForm" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="input-group-custom">
+              <label>Faculty User ID</label>
+              <input type="text" id="newFacId" placeholder="e.g. faculty007" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Full Name</label>
+              <input type="text" id="newFacName" placeholder="e.g. Dr. Anand Verma" required>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="input-group-custom">
+              <label>Email</label>
+              <input type="email" id="newFacEmail" placeholder="anand@campusiq.edu" required>
+            </div>
+            <div class="input-group-custom">
+              <label>Department</label>
+              <select id="newFacDept" class="cyber-select" required>
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="AI&DS">AI&DS</option>
+                <option value="ECE">ECE</option>
+                <option value="ME">ME</option>
+                <option value="EEE">EEE</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group-custom">
+            <label>Designation</label>
+            <input type="text" id="newFacDesig" placeholder="Associate Professor" required>
+          </div>
+
+          <div class="input-group-custom">
+            <label>Specialization</label>
+            <input type="text" id="newFacSpec" placeholder="Machine Learning & Cloud Architecture" required>
+          </div>
+
+          <button type="submit" class="btn-action-primary" style="margin-top:8px;">Create Faculty Member</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 4: WHAT-IF SCENARIO SIMULATOR                                       -->
+  <!-- ========================================================================= -->
+  <div id="simulatorModal" class="glass-modal-overlay" style="display:none;" aria-hidden="true" role="dialog">
+    <div class="glass-modal-card" style="max-width:800px;">
+      <div class="glass-modal-header">
+        <div>
+          <h3 style="color:#FFFFFF; font-size:1.25rem; font-weight:800;">CampusIQ What-If Academic Simulator</h3>
+          <p style="font-size:0.78rem; color:#DDD6FE;">Simulate the exact numerical impact of faculty intervention on student risk categories.</p>
+        </div>
+        <button id="btnCloseSimulator" class="btn-close-modal-icon">&times;</button>
+      </div>
+
+      <div class="glass-modal-body">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <label for="simStudentSelect" style="font-weight:700; font-size:0.85rem; color:#C4B5FD;">Select Student:</label>
+          <select id="simStudentSelect" class="cyber-select" style="flex:1;"></select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="input-group-custom" style="margin-bottom:0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+                <label>Attendance Boost:</label>
+                <strong id="valSimAttendance" style="color:#EC4899;">+10%</strong>
+              </div>
+              <input type="range" id="rangeSimAttendance" min="0" max="30" value="10" step="1" style="accent-color:#EC4899;">
+            </div>
+
+            <div class="input-group-custom" style="margin-bottom:0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+                <label>Backlogs Cleared:</label>
+                <strong id="valSimBacklogs" style="color:#EC4899;">1 Backlog</strong>
+              </div>
+              <input type="range" id="rangeSimBacklogs" min="0" max="3" value="1" step="1" style="accent-color:#EC4899;">
+            </div>
+
+            <div class="input-group-custom" style="margin-bottom:0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+                <label>Weekly LMS Hours:</label>
+                <strong id="valSimLms" style="color:#EC4899;">+5 hrs/wk</strong>
+              </div>
+              <input type="range" id="rangeSimLms" min="0" max="15" value="5" step="1" style="accent-color:#EC4899;">
+            </div>
+
+            <div class="input-group-custom" style="margin-bottom:0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+                <label>Assignment Rate Boost:</label>
+                <strong id="valSimAssignment" style="color:#EC4899;">+15%</strong>
+              </div>
+              <input type="range" id="rangeSimAssignment" min="0" max="30" value="15" step="1" style="accent-color:#EC4899;">
+            </div>
+
+            <button id="btnRunSimulation" class="btn-action-primary" style="justify-content:center; margin-top:8px;">Recalculate Score</button>
+          </div>
+
+          <div style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="flex:1; background:rgba(35,18,70,0.6); border:1px solid var(--border-glass); border-radius:12px; padding:14px; text-align:center;">
+                <span style="font-size:0.7rem; color:#A78BFA; font-weight:700;">CURRENT</span>
+                <div style="font-size:1.8rem; font-weight:800; color:#FFFFFF;" id="simCurrentScore">--</div>
+                <div id="simCurrentBadge" class="badge badge-high">High Risk</div>
+              </div>
+
+              <span style="color:#EC4899; font-size:1.2rem; font-weight:800;">&rarr;</span>
+
+              <div style="flex:1; background:rgba(35,18,70,0.6); border:1px solid var(--border-glass); border-radius:12px; padding:14px; text-align:center;">
+                <span style="font-size:0.7rem; color:#A78BFA; font-weight:700;">SIMULATED</span>
+                <div style="font-size:1.8rem; font-weight:800; color:#10B981;" id="simProjectedScore">--</div>
+                <div id="simProjectedBadge" class="badge badge-low">Low Risk</div>
+              </div>
+            </div>
+
+            <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:14px; margin-top:12px;">
+              <strong style="color:#6EE7B7; font-size:0.875rem;" id="simDeltaHighlight">Success Score Delta: +14.5 pts</strong>
+              <p style="color:#D1FAE5; font-size:0.78rem; margin-top:4px;" id="simRecommendationText">
+                Simulated remediation effectively clears statutory thresholds!
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=2026.1"></script>
+</body>
+</html>
