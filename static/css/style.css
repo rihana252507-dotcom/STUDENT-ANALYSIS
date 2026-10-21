@@ -1252,6 +1252,18 @@ a:hover {
   display: block;
 }
 
+.faculty-name,
+#facultyTableBody tr td strong {
+  color: #000000;
+  font-weight: 700;
+}
+
+.faculty-advisor-name,
+#studentsTableBody tr td .faculty-advisor-name {
+  color: #000000;
+  font-weight: 500;
+}
+
 .student-id-code {
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -1962,4 +1974,98 @@ a:hover {
   .demo-pills-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── AI Insights segment cards ─────────────────────────────────────── */
+.segment-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.segment-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── Risk Watchlist intervene button ───────────────────────────────── */
+.btn-inspect {
+  background: var(--purple-soft);
+  border: 1px solid #DDD6FE;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--purple-deep);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-inspect:hover {
+  background: var(--purple-electric);
+  color: #FFFFFF;
+  border-color: var(--purple-electric);
+}
+
+
+/* ==============================================================================
+   SCOPED STYLES: CAMPUSIQ WHAT-IF SIMULATOR VISIBILITY & READABILITY FIX
+   Scope: #simulatorModal (Admin & Faculty) & #section-my-success-score (Student)
+   ============================================================================== */
+
+#simulatorModal .glass-modal-header h3 {
+  color: #111827 !important;
+  font-weight: 800;
+}
+
+#simulatorModal .glass-modal-header p {
+  color: #4B5563 !important;
+}
+
+#simulatorModal label,
+#simulatorModal .input-group-custom label {
+  color: #1F2937 !important;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+#simulatorModal select.cyber-select {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #D1D5DB !important;
+}
+
+#simulatorModal select.cyber-select option {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  padding: 6px 10px;
+}
+
+#simulatorModal #simDeltaHighlight {
+  color: #065F46 !important;
+}
+
+#simulatorModal #simRecommendationText {
+  color: #047857 !important;
+  font-weight: 500;
+}
+
+#section-my-success-score label,
+.simulator-slider-group label {
+  color: #1F2937 !important;
+  font-weight: 700;
+}
+
+#personalSimResults #personalProjectedScore {
+  color: #111827 !important;
+  font-weight: 800;
+}
+
+#personalSimResults #personalDeltaText {
+  color: #059669 !important;
+  font-weight: 800;
 }

@@ -12,12 +12,42 @@ from database.db import get_db
 def authenticate_user(user_id, password):
     """
     Validates user credentials against SQLite users table.
+    Supports lookup by user_id, email, or linked student_id / faculty_id.
     Returns user dict on success, None on failure.
     """
+    clean_id = (user_id or "").strip()
+    if not clean_id or not password:
+        return None
+
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id.strip(),))
+
+    # 1. Primary lookup in users table (case-insensitive)
+    cursor.execute("""
+        SELECT * FROM users 
+        WHERE user_id = ? COLLATE NOCASE 
+           OR email = ? COLLATE NOCASE
+    """, (clean_id, clean_id))
     user = cursor.fetchone()
+
+    # 2. If not found directly, check if clean_id is a student_id / roll number
+    if not user:
+        cursor.execute("""
+            SELECT u.* FROM users u
+            JOIN students s ON (s.user_id = u.user_id OR s.student_id = u.user_id)
+            WHERE s.student_id = ? COLLATE NOCASE OR s.user_id = ? COLLATE NOCASE OR s.email = ? COLLATE NOCASE
+        """, (clean_id, clean_id, clean_id))
+        user = cursor.fetchone()
+
+    # 3. If not found directly, check if clean_id is a faculty_id / code
+    if not user:
+        cursor.execute("""
+            SELECT u.* FROM users u
+            JOIN faculty f ON (f.user_id = u.user_id OR f.faculty_id = u.user_id)
+            WHERE f.faculty_id = ? COLLATE NOCASE OR f.user_id = ? COLLATE NOCASE OR f.email = ? COLLATE NOCASE
+        """, (clean_id, clean_id, clean_id))
+        user = cursor.fetchone()
+
     conn.close()
 
     if not user:
@@ -42,6 +72,25 @@ def login_user(user):
     session["name"] = user["name"]
     session["email"] = user["email"]
     session["department"] = user.get("department", "")
+
+    # Establish canonical student_id or faculty_id in session for reliable record queries
+    conn = get_db()
+    cursor = conn.cursor()
+    if user["role"] == "student":
+        cursor.execute("""
+            SELECT student_id FROM students 
+            WHERE student_id = ? COLLATE NOCASE OR user_id = ? COLLATE NOCASE OR email = ? COLLATE NOCASE
+        """, (user["user_id"], user["user_id"], user.get("email", "")))
+        s_row = cursor.fetchone()
+        session["student_id"] = s_row["student_id"] if s_row else user["user_id"]
+    elif user["role"] == "faculty":
+        cursor.execute("""
+            SELECT faculty_id FROM faculty 
+            WHERE faculty_id = ? COLLATE NOCASE OR user_id = ? COLLATE NOCASE OR email = ? COLLATE NOCASE
+        """, (user["user_id"], user["user_id"], user.get("email", "")))
+        f_row = cursor.fetchone()
+        session["faculty_id"] = f_row["faculty_id"] if f_row else user["user_id"]
+    conn.close()
 
 def logout_user():
     """Clears all session variables."""

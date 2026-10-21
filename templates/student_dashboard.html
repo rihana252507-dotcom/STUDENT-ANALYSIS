@@ -39,6 +39,11 @@
           <span>My Academics</span>
         </a>
 
+        <a class="sidebar-nav-link" data-section="section-fee-details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Fee Details</span>
+        </a>
+
         <a class="sidebar-nav-link" data-section="section-attendance">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           <span>Attendance</span>
@@ -80,7 +85,13 @@
       </nav>
 
       <div class="sidebar-footer-user">
-        <div class="user-avatar-sidebar">{{ student.name[:2].upper() }}</div>
+        <div class="user-avatar-sidebar" style="{% if student.gender and student.gender|lower == 'male' %}background:linear-gradient(135deg,#2563EB,#0EA5E9);{% elif student.gender and student.gender|lower == 'female' %}background:linear-gradient(135deg,#EC4899,#F43F5E);{% endif %}">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.58-6.5 8-6.5s8 2.5 8 6.5"/>
+            {% if student.gender and student.gender|lower == 'male' %}<line x1="16" y1="4" x2="19" y2="2"/><polyline points="16 2 19 2 19 5"/>{% elif student.gender and student.gender|lower == 'female' %}<line x1="12" y1="16" x2="12" y2="21"/><line x1="9.5" y1="19" x2="14.5" y2="19"/>{% endif %}
+          </svg>
+        </div>
         <div style="display:flex; flex-direction:column; line-height:1.2;">
           <span style="font-weight:700; font-size:0.8rem; color:#FFFFFF;">{{ student.name }}</span>
           <span style="font-size:0.7rem; color:#C4B5FD;">{{ student.department }} &bull; {{ student.student_id }}</span>
@@ -126,7 +137,13 @@
 
           <div class="topbar-profile-container" style="position:relative;">
             <div class="topbar-profile-chip" id="studentProfileChipBtn" style="cursor:pointer;" title="Click for account options">
-              <div class="user-avatar-sm">{{ student.name[:2].upper() }}</div>
+              <div class="user-avatar-sm" style="{% if student.gender and student.gender|lower == 'male' %}background:linear-gradient(135deg,#2563EB,#0EA5E9);{% elif student.gender and student.gender|lower == 'female' %}background:linear-gradient(135deg,#EC4899,#F43F5E);{% endif %}">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M4 20c0-4 3.58-6.5 8-6.5s8 2.5 8 6.5"/>
+                  {% if student.gender and student.gender|lower == 'male' %}<line x1="16" y1="4" x2="19" y2="2"/><polyline points="16 2 19 2 19 5"/>{% elif student.gender and student.gender|lower == 'female' %}<line x1="12" y1="16" x2="12" y2="21"/><line x1="9.5" y1="19" x2="14.5" y2="19"/>{% endif %}
+                </svg>
+              </div>
               <div class="topbar-user-text">
                 <span class="user-name-text">{{ student.name }}</span>
                 <span class="user-role-text">Student &bull; Sem {{ student.semester }}</span>
@@ -180,204 +197,389 @@
       </div>
 
       <!-- ========================================================================= -->
-      <!-- SECTION 1: MY DASHBOARD -->
+      <!-- SECTION 1: MY DASHBOARD (SIMPLIFIED PROFILE VIEW) -->
       <!-- ========================================================================= -->
       <section id="section-my-dashboard" class="dashboard-section active-section">
         
-        <!-- Personalized Welcome Banner -->
-        <div class="hero-context-banner">
-          <div>
-            <span class="hero-tag">Personal Academic Hub &bull; {{ student.department }} Sem {{ student.semester }}</span>
-            <h1 class="hero-title">Welcome back, <span class="gradient-text">{{ student.name }}</span>!</h1>
-            <p class="hero-desc">
-              Your overall Student Success Score is <strong>{{ student.success_score }}/100</strong>. 
-              Academic risk status: 
-              {% if student.risk_level == 'Low' %}
-                <span class="badge badge-low">Low Risk &bull; Excellent Standing</span>
-              {% elif student.risk_level == 'Medium' %}
-                <span class="badge badge-medium">Medium Risk &bull; Watchlist</span>
-              {% else %}
-                <span class="badge badge-high">High Risk &bull; Action Required</span>
-              {% endif %}
-              &bull; Assigned Faculty Mentor: <strong>{{ student.mentor_name }}</strong>.
+        <!-- Welcome Message -->
+        <div style="margin-bottom:28px;">
+          <h1 style="font-size:2rem; font-weight:800; color:#17112B; margin:0 0 8px 0; letter-spacing:-0.02em;">
+            Welcome back, <span style="background:linear-gradient(135deg, #7C3AED 0%, #EC4899 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">{{ student.name }}</span>!
+          </h1>
+          <p style="font-size:0.95rem; color:#6B7280; margin:0;">
+            Here is your student profile and academic information.
+          </p>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- Three Graphical Indicators (Marks, Attendance, Academic Risk) -->
+        <!-- ============================================================= -->
+        <div style="max-width:850px; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:24px;">
+          
+          <!-- Indicator 1: Academic Marks Graphic -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; padding:24px 20px; box-shadow:0 4px 20px rgba(124,58,237,0.06); text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:220px;">
+            <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#6B7280; margin-bottom:10px; display:block;">
+              Academic Marks
+            </span>
+            
+            {% if student.academic_marks_pct is not none %}
+            <div style="position:relative; width:120px; height:120px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+              <svg width="120" height="120" viewBox="0 0 100 100" style="transform:rotate(-90deg);">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1EFF9" stroke-width="9" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="url(#marksGaugeGrad)" stroke-width="9" stroke-linecap="round"
+                  stroke-dasharray="263.89"
+                  stroke-dashoffset="{{ (263.89 - (263.89 * (student.academic_marks_pct / 100)))|round(2) }}" />
+                <defs>
+                  <linearGradient id="marksGaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#7C3AED" />
+                    <stop offset="100%" stop-color="#EC4899" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div style="position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span style="font-size:1.5rem; font-weight:800; color:#17112B; line-height:1;">
+                  {{ student.academic_marks_pct }}%
+                </span>
+                <span style="font-size:0.65rem; font-weight:700; color:#7C3AED; text-transform:uppercase; margin-top:2px;">
+                  Score
+                </span>
+              </div>
+            </div>
+            {% else %}
+            <div style="padding:32px 10px; color:#6B7280; font-size:0.875rem; font-weight:600;">
+              Marks data unavailable
+            </div>
+            {% endif %}
+
+            <p style="font-size:0.825rem; color:#6B7280; margin:12px 0 0 0; font-weight:500;">
+              Overall recorded performance
             </p>
           </div>
-          <div class="hero-actions-group">
-            <button class="btn-hero-action" onclick="switchSection('section-my-success-score')">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-              <span>Score Breakdown</span>
-            </button>
-            <button class="btn-hero-action" onclick="switchSection('section-personalized-recommendations')">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-              <span>AI Action Plan</span>
-            </button>
+
+          <!-- Indicator 2: Attendance Graphic -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; padding:24px 20px; box-shadow:0 4px 20px rgba(124,58,237,0.06); text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:220px;">
+            <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#6B7280; margin-bottom:10px; display:block;">
+              Attendance
+            </span>
+
+            {% if student.attendance_pct is not none %}
+            <div style="position:relative; width:120px; height:120px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+              <svg width="120" height="120" viewBox="0 0 100 100" style="transform:rotate(-90deg);">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1EFF9" stroke-width="9" />
+                <circle cx="50" cy="50" r="42" fill="none"
+                  stroke="{% if student.attendance_pct >= 75 %}#10B981{% else %}#DC2626{% endif %}"
+                  stroke-width="9" stroke-linecap="round"
+                  stroke-dasharray="263.89"
+                  stroke-dashoffset="{{ (263.89 - (263.89 * (student.attendance_pct / 100)))|round(2) }}" />
+              </svg>
+              <div style="position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span style="font-size:1.5rem; font-weight:800; color:{% if student.attendance_pct >= 75 %}#17112B{% else %}#DC2626{% endif %}; line-height:1;">
+                  {{ student.attendance_pct }}%
+                </span>
+                {% if student.attendance_pct < 75 %}
+                <span style="font-size:0.6rem; font-weight:700; color:#DC2626; text-transform:uppercase; margin-top:2px;">
+                  Shortage
+                </span>
+                {% else %}
+                <span style="font-size:0.65rem; font-weight:700; color:#10B981; text-transform:uppercase; margin-top:2px;">
+                  Compliant
+                </span>
+                {% endif %}
+              </div>
+            </div>
+            {% if student.attendance_pct < 75 %}
+            <div style="margin-top:6px;">
+              <span class="badge" style="background:rgba(220,38,38,0.1); color:#DC2626; border:1px solid rgba(220,38,38,0.3); font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:9999px;">
+                ⚠️ Shortage Warning (&lt; 75%)
+              </span>
+            </div>
+            {% endif %}
+            {% else %}
+            <div style="padding:32px 10px; color:#6B7280; font-size:0.875rem; font-weight:600;">
+              Attendance data unavailable
+            </div>
+            {% endif %}
+
+            <p style="font-size:0.825rem; color:#6B7280; margin:12px 0 0 0; font-weight:500;">
+              Recorded attendance
+            </p>
           </div>
+
+          <!-- Indicator 3: Academic Risk Graphic -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; padding:24px 20px; box-shadow:0 4px 20px rgba(124,58,237,0.06); text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:220px;">
+            <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#6B7280; margin-bottom:10px; display:block;">
+              Academic Risk
+            </span>
+
+            {% if student.risk_level %}
+            <div style="position:relative; width:120px; height:120px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+              <svg width="120" height="120" viewBox="0 0 100 100" style="transform:rotate(-90deg);">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1EFF9" stroke-width="9" />
+                <circle cx="50" cy="50" r="42" fill="none"
+                  stroke="{% if student.risk_level == 'Low' %}#10B981{% elif student.risk_level == 'Medium' %}#F59E0B{% else %}#DC2626{% endif %}"
+                  stroke-width="9" stroke-linecap="round"
+                  stroke-dasharray="263.89"
+                  stroke-dashoffset="{% if student.risk_level == 'Low' %}175.92{% elif student.risk_level == 'Medium' %}87.96{% else %}0{% endif %}" />
+              </svg>
+              <div style="position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 6px;">
+                <span style="font-size:1.25rem; line-height:1; margin-bottom:3px;">
+                  {% if student.risk_level == 'Low' %}🛡️{% elif student.risk_level == 'Medium' %}⚠️{% else %}🚨{% endif %}
+                </span>
+                <span style="font-size:0.875rem; font-weight:800; color:{% if student.risk_level == 'Low' %}#059669{% elif student.risk_level == 'Medium' %}#D97706{% else %}#DC2626{% endif %}; line-height:1.2;">
+                  {{ student.risk_level }} Risk
+                </span>
+              </div>
+            </div>
+            {% if student.success_score is not none %}
+            <div style="margin-top:6px;">
+              <span style="font-size:0.72rem; font-weight:700; color:#7C3AED; background:rgba(124,58,237,0.08); padding:3px 10px; border-radius:9999px; border:1px solid rgba(124,58,237,0.2);">
+                Success Score: {{ student.success_score }}/100
+              </span>
+            </div>
+            {% endif %}
+            {% else %}
+            <div style="padding:32px 10px; color:#6B7280; font-size:0.875rem; font-weight:600;">
+              Risk assessment unavailable
+            </div>
+            {% endif %}
+
+            <p style="font-size:0.825rem; color:#6B7280; margin:12px 0 0 0; font-weight:500;">
+              Current academic risk assessment
+            </p>
+          </div>
+
         </div>
 
-        <!-- KPI Scorecards Grid -->
-        <div class="kpi-grid">
+        <!-- ============================================================= -->
+        <!-- Academic Risk Alert & Graphical Indicator (Requirement 2 & 4) -->
+        <!-- ============================================================= -->
+        <div class="glass-card" style="max-width:850px; margin-top:24px; padding:28px; background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; box-shadow:0 4px 20px rgba(124,58,237,0.06);">
           
-          <!-- KPI 1: Success Score -->
-          <div class="glass-card kpi-card-glow border-purple">
-            <div class="kpi-header">
-              <span class="kpi-label">Student Success Score</span>
-              <div class="kpi-icon-box bg-purple">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          {% if student.risk_level %}
+          <!-- Alert Header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #F1EFF9;">
+            <div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.4rem;">
+                  {% if student.risk_level == 'Low' %}🛡️{% elif student.risk_level == 'Medium' %}⚠️{% else %}🚨{% endif %}
+                </span>
+                <h3 style="font-size:1.25rem; font-weight:800; color:#17112B; margin:0;">
+                  Academic Risk Alert
+                </h3>
               </div>
-            </div>
-            <div class="kpi-value text-gradient-purple">
-              {{ student.success_score }}<span class="kpi-sub">/100</span>
-            </div>
-            <div class="kpi-footer-note">
-              <span>Risk Status: </span>
-              <span class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}">{{ student.risk_level }} Risk</span>
-            </div>
-          </div>
-
-          <!-- KPI 2: CGPA -->
-          <div class="glass-card kpi-card-glow border-pink">
-            <div class="kpi-header">
-              <span class="kpi-label">Cumulative GPA</span>
-              <div class="kpi-icon-box bg-pink">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-              </div>
-            </div>
-            <div class="kpi-value text-gradient-pink">
-              {{ "%.2f"|format(student.cgpa) }}<span class="kpi-sub">/10.0</span>
-            </div>
-            <div class="kpi-footer-note">
-              <span>Exam Marks: <strong>{{ student.academic_marks_pct }}%</strong></span>
-            </div>
-          </div>
-
-          <!-- KPI 3: Biometric Attendance -->
-          <div class="glass-card kpi-card-glow border-cyan">
-            <div class="kpi-header">
-              <span class="kpi-label">Biometric Attendance</span>
-              <div class="kpi-icon-box bg-cyan">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              </div>
-            </div>
-            <div class="kpi-value">
-              {{ student.attendance_pct }}<span class="kpi-sub">%</span>
-            </div>
-            <div class="kpi-footer-note">
-              {% if student.attendance_pct >= 75 %}
-                <span style="color:#34D399; font-weight:700;">Compliant (&ge;75% Statutory)</span>
-              {% else %}
-                <span style="color:#F43F5E; font-weight:700;">Below Threshold (Deficit {{ "%.1f"|format(75 - student.attendance_pct) }}%)</span>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- KPI 4: Backlogs & Placement -->
-          <div class="glass-card kpi-card-glow border-amber">
-            <div class="kpi-header">
-              <span class="kpi-label">Backlogs & Placement</span>
-              <div class="kpi-icon-box bg-amber">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-              </div>
-            </div>
-            <div class="kpi-value">
-              {% if student.backlogs == 0 %}
-                <span style="color:#34D399;">0</span><span class="kpi-sub"> Backlogs</span>
-              {% else %}
-                <span style="color:#F43F5E;">{{ student.backlogs }}</span><span class="kpi-sub"> Active</span>
-              {% endif %}
-            </div>
-            <div class="kpi-footer-note">
-              <span>Aptitude: <strong>{{ student.placement_aptitude_score }}/100</strong> &bull; Tech: <strong>{{ student.technical_skills_score }}</strong></span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- 5-Pillar Radar & Breakdown -->
-        <div class="grid-2-col" style="margin-top: 24px;">
-          
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div>
-                <h3 class="glass-card-title">5-Pillar Explainable Performance</h3>
-                <p class="glass-card-subtitle">Comprehensive multi-dimensional evaluation radar</p>
-              </div>
-              <span class="badge badge-accent">Weighted Radar</span>
-            </div>
-            <div style="height: 300px; position: relative;">
-              <canvas id="studentPillarRadarChart"></canvas>
-            </div>
-          </div>
-
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div>
-                <h3 class="glass-card-title">Pillar Contribution Weights</h3>
-                <p class="glass-card-subtitle">Score breakdown across all 5 evaluation components</p>
-              </div>
-              <button class="btn-sm-action" onclick="switchSection('section-my-success-score')">Explore Details</button>
+              <p style="font-size:0.85rem; color:#6B7280; margin:4px 0 0 0;">
+                Continuous institutional risk diagnostic based on academic performance, attendance, and coursework
+              </p>
             </div>
             
-            <div class="pillar-bars-wrap" style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <span><strong>Academic Performance</strong> (30% weight)</span>
-                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.academic }}/100</span>
-                </div>
-                <div class="table-progress-bar" style="height:8px;">
-                  <div class="table-progress-fill" style="width: {{ metrics.pillars.academic }}%; background: linear-gradient(90deg, #8B5CF6, #A855F7);"></div>
-                </div>
-              </div>
-
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <span><strong>Attendance & Regularity</strong> (20% weight)</span>
-                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.attendance }}/100</span>
-                </div>
-                <div class="table-progress-bar" style="height:8px;">
-                  <div class="table-progress-fill" style="width: {{ metrics.pillars.attendance }}%; background: linear-gradient(90deg, #EC4899, #F43F5E);"></div>
-                </div>
-              </div>
-
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <span><strong>LMS Digital Learning & Assignments</strong> (15% weight)</span>
-                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.lms }}/100</span>
-                </div>
-                <div class="table-progress-bar" style="height:8px;">
-                  <div class="table-progress-fill" style="width: {{ metrics.pillars.lms }}%; background: linear-gradient(90deg, #06B6D4, #3B82F6);"></div>
-                </div>
-              </div>
-
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <span><strong>Placement Aptitude & Technical Skills</strong> (20% weight)</span>
-                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.placement }}/100</span>
-                </div>
-                <div class="table-progress-bar" style="height:8px;">
-                  <div class="table-progress-fill" style="width: {{ metrics.pillars.placement }}%; background: linear-gradient(90deg, #10B981, #059669);"></div>
-                </div>
-              </div>
-
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <span><strong>Wellbeing & Engagement</strong> (15% weight)</span>
-                  <span style="color:#DDD6FE; font-weight:700;">{{ metrics.pillars.wellbeing }}/100</span>
-                </div>
-                <div class="table-progress-bar" style="height:8px;">
-                  <div class="table-progress-fill" style="width: {{ metrics.pillars.wellbeing }}%; background: linear-gradient(90deg, #F59E0B, #FBBF24);"></div>
-                </div>
-              </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}" style="font-size:0.875rem; padding:6px 14px; font-weight:700;">
+                {{ student.risk_level }} Risk
+              </span>
+              {% if student.success_score is not none %}
+              <span style="font-size:0.8rem; font-weight:700; color:#7C3AED; background:rgba(124,58,237,0.08); padding:6px 12px; border-radius:9999px; border:1px solid rgba(124,58,237,0.2);">
+                Success Score: {{ student.success_score }}/100
+              </span>
+              {% endif %}
             </div>
-
-            <div style="margin-top:20px; padding:12px 14px; background:rgba(139, 92, 246, 0.12); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <span style="font-size:0.75rem; color:#DDD6FE; display:block;">Calculated Student Archetype</span>
-                <span style="font-weight:700; color:#FFFFFF; font-size:0.875rem;">{{ metrics.segment }}</span>
-              </div>
-              <button class="btn-sm-action" onclick="switchSection('section-personalized-recommendations')">View Guidance &rarr;</button>
-            </div>
-
           </div>
+
+          <!-- Status Explanation Banner -->
+          <div style="padding:14px 18px; border-radius:12px; margin-bottom:24px; display:flex; align-items:center; gap:12px;
+            {% if student.risk_level == 'Low' %}
+              background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); color:#065F46;
+            {% elif student.risk_level == 'Medium' %}
+              background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.35); color:#92400E;
+            {% else %}
+              background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.35); color:#991B1B;
+            {% endif %}">
+            <div style="font-size:1.25rem;">
+              {% if student.risk_level == 'Low' %}✓{% elif student.risk_level == 'Medium' %}ℹ️{% else %}⚠️{% endif %}
+            </div>
+            <div style="font-size:0.875rem; line-height:1.45;">
+              {% if student.risk_level == 'Low' %}
+                <strong>Good Academic Standing:</strong> You are currently progressing smoothly with compliant attendance and steady academic evaluation. Keep up the consistent effort.
+              {% elif student.risk_level == 'Medium' %}
+                <strong>Watchlist Advisory:</strong> Your academic record requires attention. One or more factors such as attendance or course evaluations have placed your standing on the university monitoring watchlist.
+              {% else %}
+                <strong>Critical Risk Alert:</strong> Urgent intervention required. Performance factors such as attendance shortage or active backlogs place you at immediate risk of academic probation or exam debarment.
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Graphical Risk Indicator (Horizontal Segmented Gauge) -->
+          <div style="margin-bottom:26px; padding:18px 20px; background:#FAF9FE; border:1px solid rgba(124,58,237,0.12); border-radius:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#4B5563;">
+                Academic Risk Level Gauge
+              </span>
+              <span style="font-size:0.75rem; color:#6B7280;">
+                Current Category: <strong style="color:{% if student.risk_level == 'Low' %}#059669{% elif student.risk_level == 'Medium' %}#D97706{% else %}#DC2626{% endif %};">{{ student.risk_level }} Risk</strong>
+              </span>
+            </div>
+
+            <!-- Segmented Bar Track -->
+            <div style="position:relative; height:24px; border-radius:12px; overflow:hidden; display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px; background:#E5E7EB; box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);">
+              <!-- Segment 1: Low Risk -->
+              <div style="background:{% if student.risk_level == 'Low' %}linear-gradient(90deg, #10B981, #059669){% else %}rgba(16,185,129,0.35){% endif %}; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;">
+                Low Risk
+              </div>
+              <!-- Segment 2: Medium Risk -->
+              <div style="background:{% if student.risk_level == 'Medium' %}linear-gradient(90deg, #F59E0B, #D97706){% else %}rgba(245,158,11,0.35){% endif %}; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;">
+                Medium Risk
+              </div>
+              <!-- Segment 3: High Risk -->
+              <div style="background:{% if student.risk_level == 'High' %}linear-gradient(90deg, #F43F5E, #DC2626){% else %}rgba(220,38,38,0.35){% endif %}; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;">
+                High Risk
+              </div>
+            </div>
+
+            <!-- Pointer Marker Indicator -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; margin-top:6px; text-align:center;">
+              <div>
+                {% if student.risk_level == 'Low' %}
+                  <div style="display:inline-flex; flex-direction:column; align-items:center;">
+                    <span style="font-size:0.85rem; color:#059669; line-height:1;">▲</span>
+                    <span style="font-size:0.7rem; font-weight:800; color:#059669;">YOUR LEVEL</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div>
+                {% if student.risk_level == 'Medium' %}
+                  <div style="display:inline-flex; flex-direction:column; align-items:center;">
+                    <span style="font-size:0.85rem; color:#D97706; line-height:1;">▲</span>
+                    <span style="font-size:0.7rem; font-weight:800; color:#D97706;">YOUR LEVEL</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div>
+                {% if student.risk_level == 'High' %}
+                  <div style="display:inline-flex; flex-direction:column; align-items:center;">
+                    <span style="font-size:0.85rem; color:#DC2626; line-height:1;">▲</span>
+                    <span style="font-size:0.7rem; font-weight:800; color:#DC2626;">YOUR LEVEL</span>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Gauge Scale Legend -->
+            <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#6B7280; margin-top:8px; padding-top:8px; border-top:1px dashed #E5E7EB;">
+              <span>• <strong>Low</strong>: Score &ge; 74, Attendance &ge; 78%, 0 Backlogs</span>
+              <span>• <strong>Medium</strong>: Score 60-74, Attendance 70-78%, 1 Backlog</span>
+              <span>• <strong>High</strong>: Score &lt; 60, Attendance &lt; 70%, 2+ Backlogs</span>
+            </div>
+          </div>
+
+          <!-- Contributing Risk Factors (Requirement 5) -->
+          <div style="margin-bottom:24px;">
+            <h4 style="font-size:0.95rem; font-weight:800; color:#17112B; margin:0 0 10px 0;">
+              Contributing Academic Factors
+            </h4>
+
+            {% if metrics.risk_factors and metrics.risk_factors|length > 0 %}
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                {% for rf in metrics.risk_factors %}
+                <div style="padding:12px 14px; background:#FAF9FE; border-left:4px solid {% if rf.severity == 'danger' %}#DC2626{% else %}#F59E0B{% endif %}; border-radius:6px; border-top:1px solid #E5E7EB; border-right:1px solid #E5E7EB; border-bottom:1px solid #E5E7EB;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                    <strong style="font-size:0.85rem; color:#17112B;">{{ rf.title }}</strong>
+                    <span style="font-size:0.75rem; font-weight:700; color:{% if rf.severity == 'danger' %}#DC2626{% else %}#D97706{% endif %};">
+                      Impact: {{ rf.impact }}
+                    </span>
+                  </div>
+                  <p style="font-size:0.8rem; color:#4B5563; margin:0; line-height:1.4;">
+                    {{ rf.description }}
+                  </p>
+                </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div style="padding:14px 16px; background:#ECFDF5; border:1px solid #6EE7B7; border-radius:8px; color:#065F46; font-size:0.85rem;">
+                <strong>✓ Institutional Standards Met:</strong> No critical academic risk factors identified. Your attendance ({{ student.attendance_pct }}%), cumulative GPA ({{ "%.2f"|format(student.cgpa) }}), and course completions satisfy institutional criteria.
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Personalized Action Suggestions (Requirement 6 - Max 3 Suggestions) -->
+          <div>
+            <h4 style="font-size:0.95rem; font-weight:800; color:#17112B; margin:0 0 10px 0;">
+              Recommended Action Suggestions
+            </h4>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+              {% if student.risk_level == 'High' %}
+                <div style="padding:12px 14px; background:rgba(220,38,38,0.05); border:1px solid rgba(220,38,38,0.25); border-radius:8px;">
+                  <strong style="color:#DC2626; font-size:0.825rem; display:block; margin-bottom:4px;">1. Meet Faculty Mentor</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Contact your advisor <strong>{{ student.mentor_name }}</strong> immediately to formalize an academic recovery plan.
+                  </p>
+                </div>
+                {% if student.attendance_pct is not none and student.attendance_pct < 75 %}
+                <div style="padding:12px 14px; background:rgba(220,38,38,0.05); border:1px solid rgba(220,38,38,0.25); border-radius:8px;">
+                  <strong style="color:#DC2626; font-size:0.825rem; display:block; margin-bottom:4px;">2. Recover Attendance</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Attend all upcoming classes without absence to clear the statutory 75% threshold and prevent exam debarment.
+                  </p>
+                </div>
+                {% endif %}
+                {% if student.backlogs > 0 %}
+                <div style="padding:12px 14px; background:rgba(220,38,38,0.05); border:1px solid rgba(220,38,38,0.25); border-radius:8px;">
+                  <strong style="color:#DC2626; font-size:0.825rem; display:block; margin-bottom:4px;">3. Backlog Revision</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Dedicate focused revision to your {{ student.backlogs }} active backlog subject(s) for the next supplementary exam cycle.
+                  </p>
+                </div>
+                {% endif %}
+              {% elif student.risk_level == 'Medium' %}
+                {% if student.attendance_pct is not none and student.attendance_pct < 80 %}
+                <div style="padding:12px 14px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.25); border-radius:8px;">
+                  <strong style="color:#D97706; font-size:0.825rem; display:block; margin-bottom:4px;">1. Build Attendance Buffer</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Maintain regular lecture attendance to keep your buffer safely above the 75% mandatory cutoff.
+                  </p>
+                </div>
+                {% endif %}
+                {% if student.backlogs > 0 %}
+                <div style="padding:12px 14px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.25); border-radius:8px;">
+                  <strong style="color:#D97706; font-size:0.825rem; display:block; margin-bottom:4px;">2. Clear Pending Arrear</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Review past question papers and attend department problem-solving labs to clear your backlog.
+                  </p>
+                </div>
+                {% endif %}
+                <div style="padding:12px 14px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.25); border-radius:8px;">
+                  <strong style="color:#D97706; font-size:0.825rem; display:block; margin-bottom:4px;">3. Increase LMS Engagement</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Complete weekly online assignments promptly to elevate your digital learning score.
+                  </p>
+                </div>
+              {% else %}
+                <div style="padding:12px 14px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:8px;">
+                  <strong style="color:#059669; font-size:0.825rem; display:block; margin-bottom:4px;">1. Maintain Consistency</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Continue your daily study routine to keep your CGPA and internal continuous assessment marks in the top tier.
+                  </p>
+                </div>
+                <div style="padding:12px 14px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:8px;">
+                  <strong style="color:#059669; font-size:0.825rem; display:block; margin-bottom:4px;">2. Career & Placement Prep</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Leverage your strong academic standing to solve competitive coding problems and quantitative aptitude mocks.
+                  </p>
+                </div>
+                <div style="padding:12px 14px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:8px;">
+                  <strong style="color:#059669; font-size:0.825rem; display:block; margin-bottom:4px;">3. Faculty Mentorship</strong>
+                  <p style="font-size:0.78rem; color:#4B5563; margin:0; line-height:1.35;">
+                    Consult your mentor <strong>{{ student.mentor_name }}</strong> regarding advanced electives and industry certifications.
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          {% else %}
+          <!-- Empty State (Requirement 3) -->
+          <div style="text-align:center; padding:24px; color:#6B7280;">
+            <p style="margin:0; font-size:0.95rem;">Academic risk assessment is not available yet.</p>
+          </div>
+          {% endif %}
 
         </div>
 
@@ -386,124 +588,515 @@
       <!-- ========================================================================= -->
       <!-- SECTION 2: MY ACADEMICS -->
       <!-- ========================================================================= -->
+      <!-- ========================================================================= -->
+      <!-- SECTION 2: MY ACADEMICS (COMPLETE MULTI-YEAR ACADEMIC RECORDS VIEW) -->
+      <!-- ========================================================================= -->
       <section id="section-my-academics" class="dashboard-section">
         <div class="section-title-wrap">
           <div>
-            <h2 class="section-heading">My Academics & Marks Portfolio</h2>
-            <p class="section-subheading">Continuous internal assessments, semester grade points, and course performance</p>
+            <h2 class="section-heading">Complete Academic History & Portfolio</h2>
+            <p class="section-subheading">Comprehensive multi-year academic trajectory, semester grade points, mid-examination records, and backlog tracking</p>
+          </div>
+          <button class="btn-action-primary" onclick="window.print()" style="display:inline-flex; align-items:center; gap:8px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print Academic Transcript
+          </button>
+        </div>
+
+        <!-- 1. Student Profile & Branch Information Banner (Requirement 2) -->
+        <div class="glass-card" style="margin-bottom:24px; background:linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,243,255,0.95) 100%); border:1px solid rgba(124,58,237,0.2);">
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid rgba(124,58,237,0.1);">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:48px; height:48px; border-radius:12px; {% if student.gender and student.gender|lower == 'male' %}background:linear-gradient(135deg,#2563EB,#0EA5E9); box-shadow:0 4px 12px rgba(37,99,235,0.35);{% elif student.gender and student.gender|lower == 'female' %}background:linear-gradient(135deg,#EC4899,#F43F5E); box-shadow:0 4px 12px rgba(236,72,153,0.35);{% else %}background:linear-gradient(135deg,#7C3AED,#EC4899); box-shadow:0 4px 12px rgba(124,58,237,0.3);{% endif %} display:flex; align-items:center; justify-content:center; color:#FFFFFF;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M4 20c0-4 3.58-6.5 8-6.5s8 2.5 8 6.5"/>
+                  {% if student.gender and student.gender|lower == 'male' %}<line x1="16" y1="4" x2="19" y2="2"/><polyline points="16 2 19 2 19 5"/>{% elif student.gender and student.gender|lower == 'female' %}<line x1="12" y1="16" x2="12" y2="21"/><line x1="9.5" y1="19" x2="14.5" y2="19"/>{% endif %}
+                </svg>
+              </div>
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800; color:#17112B; margin:0;">
+                  {{ student.name or 'Not available' }}
+                </h3>
+                <p style="font-size:0.8rem; color:#6B7280; margin:2px 0 0;">
+                  Official Student Academic Record &bull; CampusIQ Verified
+                </p>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="badge badge-accent" style="font-size:0.8rem; padding:6px 12px;">
+                {{ student.department or 'Not available' }} Department
+              </span>
+              <span class="badge badge-{{ student.risk_badge or (student.risk_level.lower() if student.risk_level else 'neutral') }}" style="font-size:0.8rem; padding:6px 12px;">
+                {{ student.risk_level or 'Not available' }} Risk
+              </span>
+            </div>
+          </div>
+
+          <!-- Profile Fields Grid -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; font-size:0.825rem;">
+            <div style="background:rgba(255,255,255,0.8); border:1px solid rgba(124,58,237,0.1); border-radius:8px; padding:10px 14px;">
+              <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em;">Student ID / Roll No</span>
+              <strong style="color:#17112B; font-size:0.95rem; font-family:monospace;">{{ student.student_id or 'Not available' }}</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.8); border:1px solid rgba(124,58,237,0.1); border-radius:8px; padding:10px 14px;">
+              <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em;">Branch / Discipline</span>
+              <strong style="color:#17112B; font-size:0.95rem;">{{ student.department or 'Not available' }}</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.8); border:1px solid rgba(124,58,237,0.1); border-radius:8px; padding:10px 14px;">
+              <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em;">Current Academic Year</span>
+              <strong style="color:#17112B; font-size:0.95rem;">{{ current_academic_year or 'Not available' }}</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.8); border:1px solid rgba(124,58,237,0.1); border-radius:8px; padding:10px 14px;">
+              <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em;">Current Semester</span>
+              <strong style="color:#17112B; font-size:0.95rem;">{{ ('Semester ' ~ student.semester) if student.semester else 'Not available' }} (Sec {{ student.section or 'A' }})</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.8); border:1px solid rgba(124,58,237,0.1); border-radius:8px; padding:10px 14px;">
+              <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em;">Overall CGPA</span>
+              <strong style="color:#7C3AED; font-size:0.95rem;">{{ ("%.2f / 10.0"|format(student.cgpa)) if student.cgpa is not none else 'Not available' }}</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.8); border:1px solid rgba(124,58,237,0.1); border-radius:8px; padding:10px 14px;">
+              <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em;">Faculty Advisor</span>
+              <strong style="color:#17112B; font-size:0.95rem;">{{ student.mentor_name or 'Not available' }}</strong>
+            </div>
           </div>
         </div>
 
-        <div class="grid-3-col" style="margin-bottom:24px;">
+        <!-- 2. Overall Performance & Summary Metrics Scorecards (Requirement 5) -->
+        <div class="grid-4-col" style="margin-bottom:20px;">
+          <!-- CGPA Card -->
           <div class="glass-card">
-            <span class="kpi-label">Cumulative GPA</span>
-            <div class="kpi-value text-gradient-pink" style="margin:8px 0;">{{ "%.2f"|format(student.cgpa) }}</div>
-            <p style="font-size:0.75rem; color:#DDD6FE;">On 10.0 institutional scale &bull; Consistent high standing</p>
+            <span class="kpi-label">Cumulative GPA (CGPA)</span>
+            <div class="kpi-value text-gradient-pink" style="margin:8px 0;">
+              {{ "%.2f"|format(student.cgpa) if student.cgpa is not none else 'N/A' }}
+            </div>
+            <p style="font-size:0.75rem; color:#6B7280; margin:0;">
+              Institutional 10.0 scale &bull; 
+              {% if student.cgpa and student.cgpa >= 8.5 %}
+                Top Tier Standing
+              {% elif student.cgpa and student.cgpa >= 7.0 %}
+                Good Standing
+              {% else %}
+                Academic Focus Needed
+              {% endif %}
+            </p>
           </div>
 
+          <!-- Courses Passed Card -->
           <div class="glass-card">
-            <span class="kpi-label">Continuous Internal Assessment</span>
-            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">{{ student.academic_marks_pct }}%</div>
-            <p style="font-size:0.75rem; color:#DDD6FE;">Average score across mid-semester exams and quizzes</p>
+            <span class="kpi-label">Courses Passed / Completed</span>
+            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">
+              {{ total_passed }} <span style="font-size:1rem; font-weight:600; color:#6B7280;">/ {{ total_courses }}</span>
+            </div>
+            <p style="font-size:0.75rem; color:#6B7280; margin:0;">
+              {{ ((total_passed / total_courses * 100)|round(1)) if total_courses > 0 else 100 }}% academic course completion rate
+            </p>
           </div>
 
+          <!-- Active Backlogs Card -->
           <div class="glass-card">
-            <span class="kpi-label">Arrears / Backlogs</span>
+            <span class="kpi-label">Active Backlogs</span>
             <div class="kpi-value" style="margin:8px 0;">
               {% if student.backlogs == 0 %}
-                <span style="color:#34D399;">0</span>
+                <span style="color:#10B981;">0</span>
               {% else %}
-                <span style="color:#F43F5E;">{{ student.backlogs }}</span>
+                <span style="color:#DC2626;">{{ student.backlogs }}</span>
               {% endif %}
             </div>
-            <p style="font-size:0.75rem; color:#DDD6FE;">
+            <p style="font-size:0.75rem; margin:0; line-height:1.3;">
               {% if student.backlogs == 0 %}
-                Clear academic standing with no active arrears
+                <span style="color:#10B981; font-weight:700;">No active backlogs</span> &bull; All clear
               {% else %}
-                Supplementary exam coaching recommended
+                <span style="color:#DC2626; font-weight:700;">Subjects:</span> 
+                <span style="color:#4B5563;">{{ backlog_subjects|join(', ') if backlog_subjects else 'Supplementary re-exam required' }}</span>
+              {% endif %}
+            </p>
+          </div>
+
+          <!-- Overall Attendance Card -->
+          <div class="glass-card">
+            <span class="kpi-label">Overall Attendance</span>
+            <div class="kpi-value" style="margin:8px 0;">
+              {% if student.attendance_pct is not none %}
+                {% if student.attendance_pct >= 75.0 %}
+                  <span style="color:#10B981;">{{ student.attendance_pct }}%</span>
+                {% else %}
+                  <span style="color:#DC2626;">{{ student.attendance_pct }}%</span>
+                {% endif %}
+              {% else %}
+                <span style="color:#6B7280; font-size:1.1rem;">Not available</span>
+              {% endif %}
+            </div>
+            <p style="font-size:0.75rem; margin:0;">
+              {% if student.attendance_pct is not none %}
+                {% if student.attendance_pct >= 75.0 %}
+                  <span style="color:#10B981; font-weight:700;">✓ Compliant</span> &bull; Above 75% cutoff
+                {% else %}
+                  <span style="color:#DC2626; font-weight:700;">⚠️ Shortage Alert</span> &bull; &lt; 75% cutoff
+                {% endif %}
+              {% else %}
+                <span style="color:#6B7280;">Attendance data unavailable</span>
               {% endif %}
             </p>
           </div>
         </div>
 
-        <!-- Academic Performance Table -->
+        <!-- Attendance Shortage Warning Banner (Requirement 5) -->
+        {% if student.attendance_pct is not none and student.attendance_pct < 75.0 %}
+        <div style="margin-bottom:24px; padding:14px 18px; background:rgba(220, 38, 38, 0.08); border:1px solid rgba(220, 38, 38, 0.35); border-radius:12px; display:flex; align-items:flex-start; gap:12px;">
+          <div style="font-size:1.4rem; line-height:1;">⚠️</div>
+          <div>
+            <strong style="color:#DC2626; font-size:0.9rem; display:block;">Statutory Attendance Shortage Warning (&lt; 75%)</strong>
+            <p style="margin:3px 0 0; font-size:0.8rem; color:#4B5563; line-height:1.45;">
+              Your cumulative biometric attendance is <strong>{{ student.attendance_pct }}%</strong>, which falls below the mandatory <strong>75.0%</strong> statutory university threshold. You are at imminent risk of exam debarment. Please meet your faculty advisor <strong>{{ student.mentor_name or 'Faculty Advisor' }}</strong> immediately to establish a recovery schedule.
+            </p>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- 3. Mid-Examination Marks Search & Filter Panel (Requirement 4) -->
+        <div class="glass-card" style="margin-bottom:24px;">
+          <div class="glass-card-header">
+            <div>
+              <h3 class="glass-card-title">Filter Mid-Examination & Semester Marks</h3>
+              <p class="glass-card-subtitle">Search or filter internal mid-term examinations across academic years, semesters, or courses</p>
+            </div>
+            <span id="acadRecordCount" class="badge badge-accent" style="font-size:0.75rem;">
+              Showing {{ total_courses }} courses
+            </span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:8px;">
+            <div>
+              <label for="acadYearFilter" style="display:block; font-size:0.75rem; font-weight:700; color:#4B5563; margin-bottom:4px; text-transform:uppercase;">Academic Year</label>
+              <select id="acadYearFilter" class="filter-select" style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #E5E7EB; background:#FFFFFF; color:#17112B; font-size:0.85rem;">
+                <option value="ALL">All Academic Years</option>
+                <option value="1">Year 1 (Semesters 1-1 & 1-2)</option>
+                <option value="2">Year 2 (Semesters 2-1 & 2-2)</option>
+                <option value="3">Year 3 (Semesters 3-1 & 3-2)</option>
+                <option value="4">Year 4 (Semesters 4-1 & 4-2)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="acadSemFilter" style="display:block; font-size:0.75rem; font-weight:700; color:#4B5563; margin-bottom:4px; text-transform:uppercase;">Semester</label>
+              <select id="acadSemFilter" class="filter-select" style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #E5E7EB; background:#FFFFFF; color:#17112B; font-size:0.85rem;">
+                <option value="ALL">All Semesters</option>
+                {% for sem_label, sem_info in semesters_data.items() %}
+                  <option value="{{ sem_label }}">Semester {{ sem_label }} (Year {{ sem_info.year }})</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label for="acadSubjectSearch" style="display:block; font-size:0.75rem; font-weight:700; color:#4B5563; margin-bottom:4px; text-transform:uppercase;">Search Course / Code</label>
+              <input type="text" id="acadSubjectSearch" placeholder="Search by course name or code (e.g. CS201, Math)..." style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #E5E7EB; background:#FFFFFF; color:#17112B; font-size:0.85rem;">
+            </div>
+
+            <div style="display:flex; align-items:flex-end;">
+              <button id="btnResetAcademicFilter" class="btn-action-secondary" style="width:100%; padding:9px 14px; font-size:0.85rem; justify-content:center;">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- "No marks available for this semester or subject" Fallback Message (Requirement 4) -->
+        <div id="acadNoRecordsAlert" style="display:none; text-align:center; padding:36px 20px; background:rgba(124, 58, 237, 0.05); border:1px dashed rgba(124, 58, 237, 0.3); border-radius:14px; margin-bottom:24px;">
+          <div style="font-size:2.2rem; margin-bottom:8px;">🔍</div>
+          <h4 style="font-size:1.1rem; font-weight:800; color:#17112B; margin-bottom:6px;">No marks available for this semester or subject</h4>
+          <p style="font-size:0.85rem; color:#6B7280; max-width:480px; margin:0 auto 14px;">
+            There are no examination or internal marks matching your selected filter criteria. Please adjust your academic year, semester, or search query.
+          </p>
+          <button class="btn-action-primary" onclick="resetAcademicFilters()" style="font-size:0.8rem; padding:6px 16px;">
+            Clear Search Filters
+          </button>
+        </div>
+
+        <!-- 4. Complete Academic History (Multi-Year / Multi-Semester) (Requirement 3) -->
+        <div id="acadSemestersContainer">
+          {% for sem_label, sem_info in semesters_data.items() %}
+          <div class="glass-card acad-semester-panel" data-year="{{ sem_info.year }}" data-semester="{{ sem_label }}" style="margin-bottom:24px; padding:0; overflow:hidden;">
+            <!-- Semester Card Header with SGPA & Backlog Status -->
+            <div class="acad-sem-header" onclick="toggleSemesterAccordion('{{ sem_label }}')" style="padding:18px 24px; background:linear-gradient(135deg, rgba(245,243,255,0.9) 0%, rgba(255,255,255,0.9) 100%); border-bottom:1px solid rgba(124,58,237,0.12); display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:34px; height:34px; border-radius:8px; background:rgba(124,58,237,0.15); display:flex; align-items:center; justify-content:center; color:#7C3AED; font-weight:800; font-size:0.85rem;">
+                  {{ sem_label }}
+                </div>
+                <div>
+                  <h3 style="font-size:1rem; font-weight:800; color:#17112B; margin:0;">
+                    Year {{ sem_info.year }} &bull; Semester {{ sem_label }}
+                  </h3>
+                  <span style="font-size:0.75rem; color:#6B7280;">
+                    Academic Session {{ sem_info.academic_year }} &bull; {{ sem_info.courses|length }} Registered Courses
+                  </span>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:12px;">
+                <!-- Semester SGPA -->
+                <div style="text-align:right;">
+                  <span style="font-size:0.7rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block;">Semester SGPA</span>
+                  <strong style="font-size:1.05rem; color:#7C3AED; font-weight:800;">
+                    {{ "%.2f"|format(sem_info.sgpa) if sem_info.sgpa is not none else 'N/A' }}
+                  </strong>
+                </div>
+
+                <!-- Semester Backlog Badge -->
+                {% if sem_info.has_backlog %}
+                  <span class="badge badge-high" style="font-size:0.75rem;">
+                    {{ sem_info.backlog_count }} Backlog(s)
+                  </span>
+                {% else %}
+                  <span class="badge badge-low" style="font-size:0.75rem;">
+                    All Clear
+                  </span>
+                {% endif %}
+
+                <!-- Accordion Toggle Chevron -->
+                <svg id="chevron-{{ sem_label }}" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color:#6B7280; transition:transform 0.2s ease;">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Semester Courses Table (Collapsible Body) -->
+            <div id="sem-body-{{ sem_label }}" class="acad-sem-body" style="padding:16px 20px;">
+              <div class="table-responsive">
+                <table class="data-table" style="width:100%; font-size:0.825rem;">
+                  <thead>
+                    <tr>
+                      <th style="min-width:95px;">Code</th>
+                      <th style="min-width:180px;">Course Name</th>
+                      <th>Credits</th>
+                      <th>Mid 1<br><span style="font-size:0.65rem; font-weight:normal; color:#6B7280;">(Max 20)</span></th>
+                      <th>Mid 2<br><span style="font-size:0.65rem; font-weight:normal; color:#6B7280;">(Max 20)</span></th>
+                      <th>Internal<br><span style="font-size:0.65rem; font-weight:normal; color:#6B7280;">(Max 40)</span></th>
+                      <th>External<br><span style="font-size:0.65rem; font-weight:normal; color:#6B7280;">(Max 60)</span></th>
+                      <th>Total<br><span style="font-size:0.65rem; font-weight:normal; color:#6B7280;">(Max 100)</span></th>
+                      <th>Grade</th>
+                      <th>Status</th>
+                      <th>Attendance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for course in sem_info.courses %}
+                    <tr class="acad-course-row" 
+                        data-year="{{ course.year }}" 
+                        data-semester="{{ course.semester }}" 
+                        data-code="{{ course.course_code|lower }}" 
+                        data-name="{{ course.course_name|lower }}">
+                      <td>
+                        <strong style="color:#17112B; font-family:monospace;">{{ course.course_code }}</strong>
+                      </td>
+                      <td>
+                        <div style="font-weight:600; color:#17112B;">{{ course.course_name }}</div>
+                      </td>
+                      <td style="text-align:center;">
+                        {{ course.credits }}
+                      </td>
+                      <td style="text-align:center;">
+                        <strong>{{ course.mid1_marks }}</strong><span style="color:#6B7280; font-size:0.75rem;">/{{ course.mid1_max }}</span>
+                      </td>
+                      <td style="text-align:center;">
+                        <strong>{{ course.mid2_marks }}</strong><span style="color:#6B7280; font-size:0.75rem;">/{{ course.mid2_max }}</span>
+                      </td>
+                      <td style="text-align:center;">
+                        <span style="font-weight:700; color:#7C3AED;">{{ course.internal_marks }}</span><span style="color:#6B7280; font-size:0.75rem;">/{{ course.internal_max }}</span>
+                      </td>
+                      <td style="text-align:center;">
+                        <strong>{{ course.external_marks }}</strong><span style="color:#6B7280; font-size:0.75rem;">/{{ course.external_max }}</span>
+                      </td>
+                      <td style="text-align:center;">
+                        <strong style="color:#17112B; font-size:0.9rem;">{{ course.total_marks }}</strong><span style="color:#6B7280; font-size:0.75rem;">/{{ course.total_max }}</span>
+                      </td>
+                      <td style="text-align:center;">
+                        <span style="display:inline-block; padding:2px 8px; border-radius:4px; font-weight:800; font-size:0.8rem; background:rgba(124,58,237,0.1); color:#7C3AED;">
+                          {{ course.grade }}
+                        </span>
+                      </td>
+                      <td style="text-align:center;">
+                        {% if course.status == 'Passed' %}
+                          <span class="badge badge-low" style="font-size:0.72rem; padding:4px 8px;">Passed</span>
+                        {% else %}
+                          <span class="badge badge-high" style="font-size:0.72rem; padding:4px 8px;">Backlog</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                          <div style="font-weight:600; font-size:0.8rem; color:{% if course.attendance_pct >= 75 %}#10B981{% else %}#DC2626{% endif %};">
+                            {{ course.attendance_pct }}%
+                          </div>
+                          <div style="font-size:0.7rem; color:#6B7280;">
+                            ({{ course.classes_attended }}/{{ course.classes_conducted }})
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SECTION: SEMESTER FEE DETAILS (REQUIREMENT 1) -->
+      <!-- ========================================================================= -->
+      <section id="section-fee-details" class="dashboard-section">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-heading">Semester Fee Details</h2>
+            <p class="section-subheading">Semester-wise tuition fees, payment breakdown, outstanding dues, and payment schedules</p>
+          </div>
+        </div>
+
+        {% if fee_records and fee_records|length > 0 %}
+        <!-- Fee Summary Cards (Requirement 4) -->
+        <div class="grid-4-col" style="margin-bottom:24px;">
+          <!-- Total Fees -->
+          <div class="glass-card">
+            <span class="kpi-label">Total Fees</span>
+            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">
+              ₹{{ "{:,.2f}".format(fee_summary.total_fees) }}
+            </div>
+            <p style="font-size:0.75rem; color:#6B7280; margin:0;">
+              Total curriculum tuition across recorded semesters
+            </p>
+          </div>
+
+          <!-- Total Amount Paid -->
+          <div class="glass-card">
+            <span class="kpi-label">Total Amount Paid</span>
+            <div class="kpi-value text-gradient-teal" style="margin:8px 0; color:#059669;">
+              ₹{{ "{:,.2f}".format(fee_summary.total_paid) }}
+            </div>
+            <p style="font-size:0.75rem; color:#6B7280; margin:0;">
+              Cumulative verified payments received
+            </p>
+          </div>
+
+          <!-- Total Outstanding Due -->
+          <div class="glass-card">
+            <span class="kpi-label">Total Outstanding Due</span>
+            <div class="kpi-value" style="margin:8px 0;">
+              {% if fee_summary.total_due > 0 %}
+                <span style="color:#DC2626;">₹{{ "{:,.2f}".format(fee_summary.total_due) }}</span>
+              {% else %}
+                <span style="color:#059669;">₹0.00</span>
+              {% endif %}
+            </div>
+            <p style="font-size:0.75rem; margin:0;">
+              {% if fee_summary.total_due > 0 %}
+                <span style="color:#DC2626; font-weight:700;">Payment Pending</span>
+              {% else %}
+                <span style="color:#059669; font-weight:700;">✓ Fully Cleared</span>
+              {% endif %}
+            </p>
+          </div>
+
+          <!-- Next Fee Due Date -->
+          <div class="glass-card">
+            <span class="kpi-label">Next Fee Due Date</span>
+            <div class="kpi-value text-gradient-pink" style="margin:8px 0; font-size:1.35rem;">
+              {{ fee_summary.next_due_date or 'Not available' }}
+            </div>
+            <p style="font-size:0.75rem; color:#6B7280; margin:0;">
+              {% if fee_summary.next_due_date and fee_summary.next_due_date not in ['Not available', 'None pending'] %}
+                Upcoming deadline for outstanding fee
+              {% else %}
+                No pending fee deadline
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <!-- Semester-Wise Fee Table (Requirements 2 & 3) -->
         <div class="glass-card">
           <div class="glass-card-header">
             <div>
-              <h3 class="glass-card-title">Enrolled Courses & Semester Grades</h3>
-              <p class="glass-card-subtitle">Current semester academic roster and continuous evaluation</p>
+              <h3 class="glass-card-title">Semester-Wise Fee Breakdown</h3>
+              <p class="glass-card-subtitle">Official semester fee records, verified payments, and remaining balances</p>
             </div>
           </div>
 
           <div class="table-responsive">
-            <table class="data-table">
+            <table class="data-table" style="width:100%;">
               <thead>
                 <tr>
-                  <th>Course Code</th>
-                  <th>Course Name</th>
-                  <th>Credits</th>
-                  <th>Faculty Instructor</th>
-                  <th>Internal (40)</th>
-                  <th>Continuous Eval (60)</th>
-                  <th>Predicted Grade</th>
-                  <th>Status</th>
+                  <th>Academic Year</th>
+                  <th>Semester</th>
+                  <th>Total Semester Fee</th>
+                  <th>Amount Paid</th>
+                  <th>Remaining Due</th>
+                  <th>Fee Due Date / Last Date</th>
+                  <th>Payment Status</th>
                 </tr>
               </thead>
               <tbody>
+                {% for r in fee_records %}
                 <tr>
-                  <td><strong>{{ student.department }}301</strong></td>
-                  <td>Advanced Data Structures & Algorithms</td>
-                  <td>4</td>
-                  <td>{{ student.mentor_name }}</td>
-                  <td>36/40</td>
-                  <td>54/60</td>
-                  <td><strong>A+</strong></td>
-                  <td><span class="badge badge-low">Passed</span></td>
+                  <td><strong>{{ r.academic_year }}</strong></td>
+                  <td>
+                    <span style="display:inline-block; padding:2px 8px; border-radius:4px; font-weight:700; font-size:0.8rem; background:rgba(124,58,237,0.1); color:#7C3AED;">
+                      Semester {{ r.semester_label }}
+                    </span>
+                  </td>
+                  <td>₹{{ "{:,.2f}".format(r.total_fee) }}</td>
+                  <td style="color:#059669; font-weight:600;">₹{{ "{:,.2f}".format(r.amount_paid) }}</td>
+                  <td>
+                    {% if r.remaining_due > 0 %}
+                      <strong style="color:#DC2626;">₹{{ "{:,.2f}".format(r.remaining_due) }}</strong>
+                    {% else %}
+                      <span style="color:#059669; font-weight:600;">₹0.00</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if r.due_date %}
+                      <span style="font-family:monospace; font-size:0.85rem;">{{ r.due_date }}</span>
+                    {% else %}
+                      <span style="color:#9CA3AF; font-style:italic;">Not available</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if r.status == 'Paid' %}
+                      <span class="badge badge-low">Paid</span>
+                    {% elif r.status == 'Partially Paid' %}
+                      <span class="badge badge-medium">Partially Paid</span>
+                    {% elif r.status == 'Due' %}
+                      <span class="badge badge-medium">Due</span>
+                    {% elif r.status == 'Overdue' %}
+                      <span class="badge badge-high">Overdue</span>
+                    {% else %}
+                      <span class="badge badge-medium">{{ r.status }}</span>
+                    {% endif %}
+                  </td>
                 </tr>
-                <tr>
-                  <td><strong>{{ student.department }}302</strong></td>
-                  <td>Database Systems & Distributed Storage</td>
-                  <td>4</td>
-                  <td>Prof. Rajesh Kumar</td>
-                  <td>34/40</td>
-                  <td>51/60</td>
-                  <td><strong>A</strong></td>
-                  <td><span class="badge badge-low">Passed</span></td>
-                </tr>
-                <tr>
-                  <td><strong>{{ student.department }}303</strong></td>
-                  <td>Operating Systems & Cloud Architecture</td>
-                  <td>3</td>
-                  <td>Dr. Meenakshi Sundaram</td>
-                  <td>32/40</td>
-                  <td>48/60</td>
-                  <td><strong>A</strong></td>
-                  <td><span class="badge badge-low">Passed</span></td>
-                </tr>
-                <tr>
-                  <td><strong>{{ student.department }}304</strong></td>
-                  <td>Machine Learning & Predictive Intelligence</td>
-                  <td>4</td>
-                  <td>Prof. Neha Gupta</td>
-                  <td>37/40</td>
-                  <td>56/60</td>
-                  <td><strong>O (Outstanding)</strong></td>
-                  <td><span class="badge badge-low">Passed</span></td>
-                </tr>
-                <tr>
-                  <td><strong>T&P201</strong></td>
-                  <td>KPMG Campus Placement Mock Aptitude & Coding</td>
-                  <td>2</td>
-                  <td>Dr. Sunita Rao</td>
-                  <td>38/40</td>
-                  <td>58/60</td>
-                  <td><strong>O (Outstanding)</strong></td>
-                  <td><span class="badge badge-low">Passed</span></td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
         </div>
+
+        {% else %}
+        <!-- Friendly Empty State (Requirement 4) -->
+        <div class="glass-card" style="text-align:center; padding:56px 24px; max-width:650px; margin:32px auto;">
+          <div style="width:64px; height:64px; border-radius:50%; background:rgba(124,58,237,0.1); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.8rem; color:#7C3AED;">
+            💳
+          </div>
+          <h3 style="font-size:1.2rem; font-weight:800; color:#17112B; margin-bottom:8px;">No Fee Records Found</h3>
+          <p style="font-size:0.925rem; color:#6B7280; line-height:1.6; margin:0 auto 20px;">
+            No fee details are available for your account yet. Please contact your college administration.
+          </p>
+          <div style="font-size:0.78rem; color:#9CA3AF; padding:10px 14px; background:#FAF9FE; border-radius:8px; display:inline-block;">
+            Finance & Accounts Cell &bull; Administrative Block, Room 104
+          </div>
+        </div>
+        {% endif %}
+
       </section>
 
       <!-- ========================================================================= -->
@@ -524,28 +1117,32 @@
                 <h3 class="glass-card-title">Overall Attendance Compliance</h3>
                 <p class="glass-card-subtitle">Mandatory University Statutory Threshold is 75.0%</p>
               </div>
-              {% if student.attendance_pct >= 75 %}
+              {% if student.attendance_pct is not none and student.attendance_pct >= 75 %}
                 <span class="badge badge-low">Statutory Compliant</span>
-              {% else %}
+              {% elif student.attendance_pct is not none %}
                 <span class="badge badge-high">Shortage Warning</span>
+              {% else %}
+                <span class="badge badge-neutral">Data Unavailable</span>
               {% endif %}
             </div>
 
             <div style="text-align:center; padding:24px 0;">
               <div style="font-size:3.5rem; font-weight:800; font-family:var(--font-heading);" class="text-gradient-purple">
-                {{ student.attendance_pct }}%
+                {{ student.attendance_pct ~ '%' if student.attendance_pct is not none else 'N/A' }}
               </div>
               <p style="font-size:0.85rem; color:#DDD6FE; max-width:400px; margin:8px auto;">
-                {% if student.attendance_pct >= 75 %}
+                {% if student.attendance_pct is not none and student.attendance_pct >= 75 %}
                   You are eligible for all end-semester regular examinations without condonation fees.
-                {% else %}
+                {% elif student.attendance_pct is not none %}
                   Critical warning: You are currently {{ "%.1f"|format(75 - student.attendance_pct) }}% below the statutory 75% limit. Meet your faculty advisor immediately.
+                {% else %}
+                  Attendance records are not currently available for this academic cycle.
                 {% endif %}
               </p>
             </div>
 
             <div class="table-progress-bar" style="height:12px; border-radius:6px;">
-              <div class="table-progress-fill" style="width: {{ student.attendance_pct }}%; background: {% if student.attendance_pct >= 75 %}linear-gradient(90deg, #10B981, #059669){% else %}linear-gradient(90deg, #F43F5E, #EC4899){% endif %};"></div>
+              <div class="table-progress-fill" style="width: {{ student.attendance_pct or 0 }}%; background: {% if student.attendance_pct is not none and student.attendance_pct >= 75 %}linear-gradient(90deg, #10B981, #059669){% else %}linear-gradient(90deg, #F43F5E, #EC4899){% endif %};"></div>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#A78BFA; margin-top:8px;">
               <span>0%</span>
@@ -723,26 +1320,26 @@
               </div>
             </div>
 
-            <div style="font-size:0.85rem; color:#E9D5FF; line-height:1.6; margin-bottom:16px;">
+            <div style="font-size:0.875rem; color:#374151; line-height:1.6; margin-bottom:16px; font-weight:500;">
               CampusIQ computes your Success Score using a multi-factor mathematical model designed specifically for early risk intervention:
             </div>
 
-            <div style="background:rgba(20, 10, 42, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:12px; padding:16px; margin-bottom:16px;">
-              <div style="font-family:monospace; font-size:0.85rem; color:#F472B6; margin-bottom:8px;">
+            <div style="background:#1E1538; border:1px solid #7C3AED; border-radius:12px; padding:16px; margin-bottom:16px;">
+              <div style="font-family:monospace; font-size:0.875rem; color:#F472B6; font-weight:700; margin-bottom:8px;">
                 Success Score = (0.30 &times; Academic) + (0.20 &times; Attendance) + (0.15 &times; LMS) + (0.20 &times; Placement) + (0.15 &times; Wellbeing)
               </div>
-              <div style="font-size:0.75rem; color:#C4B5FD;">
+              <div style="font-size:0.8125rem; color:#E0E7FF; line-height:1.5;">
                 Each pillar maps raw data (CGPA, biometric logs, LMS hours, aptitude scores) to a normalized 0-100 scale with severe penalties for backlogs and sub-75% attendance.
               </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:rgba(139, 92, 246, 0.15); border-radius:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:#F5F3FF; border:1px solid #DDD6FE; border-radius:10px;">
               <div>
-                <span style="font-size:0.75rem; color:#C4B5FD; display:block;">Your Current Composite Score</span>
-                <span style="font-size:1.8rem; font-weight:800; color:#FFFFFF;">{{ student.success_score }} / 100</span>
+                <span style="font-size:0.75rem; color:#5B21B6; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; display:block;">Your Current Composite Score</span>
+                <span style="font-size:1.8rem; font-weight:800; color:#111827;">{{ student.success_score }} / 100</span>
               </div>
-              <span class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}" style="font-size:0.9rem; padding:6px 14px;">
-                {{ student.risk_level }} Risk
+              <span class="badge badge-{{ student.risk_badge or (student.risk_level.lower() if student.risk_level else 'neutral') }}" style="font-size:0.9rem; padding:6px 14px;">
+                {{ student.risk_level or 'Not available' }} Risk
               </span>
             </div>
           </div>
@@ -760,35 +1357,35 @@
             <div class="simulator-slider-group" style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
               
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <label for="personalRangeAttendance"><strong>Boost Attendance</strong></label>
-                  <span id="personalValAttendance" style="color:#EC4899; font-weight:700;">+0%</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                  <label for="personalRangeAttendance" style="color:#1F2937; font-weight:700;"><strong>Boost Attendance</strong></label>
+                  <span id="personalValAttendance" style="color:#DB2777; font-weight:800;">+0%</span>
                 </div>
-                <input type="range" id="personalRangeAttendance" min="0" max="25" step="1" value="0" style="width:100%; accent-color:#EC4899;">
+                <input type="range" id="personalRangeAttendance" min="0" max="25" step="1" value="0" style="width:100%; accent-color:#DB2777;">
               </div>
 
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <label for="personalRangeBacklogs"><strong>Clear Active Backlogs</strong></label>
-                  <span id="personalValBacklogs" style="color:#8B5CF6; font-weight:700;">0 Cleared</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                  <label for="personalRangeBacklogs" style="color:#1F2937; font-weight:700;"><strong>Clear Active Backlogs</strong></label>
+                  <span id="personalValBacklogs" style="color:#7C3AED; font-weight:800;">0 Cleared</span>
                 </div>
-                <input type="range" id="personalRangeBacklogs" min="0" max="{{ student.backlogs if student.backlogs > 0 else 2 }}" step="1" value="0" style="width:100%; accent-color:#8B5CF6;">
+                <input type="range" id="personalRangeBacklogs" min="0" max="{{ student.backlogs if student.backlogs > 0 else 2 }}" step="1" value="0" style="width:100%; accent-color:#7C3AED;">
               </div>
 
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <label for="personalRangeLms"><strong>Increase Weekly Study Hours</strong></label>
-                  <span id="personalValLms" style="color:#06B6D4; font-weight:700;">+0 hrs/wk</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                  <label for="personalRangeLms" style="color:#1F2937; font-weight:700;"><strong>Increase Weekly Study Hours</strong></label>
+                  <span id="personalValLms" style="color:#0284C7; font-weight:800;">+0 hrs/wk</span>
                 </div>
-                <input type="range" id="personalRangeLms" min="0" max="15" step="1" value="0" style="width:100%; accent-color:#06B6D4;">
+                <input type="range" id="personalRangeLms" min="0" max="15" step="1" value="0" style="width:100%; accent-color:#0284C7;">
               </div>
 
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-                  <label for="personalRangeAssignment"><strong>Boost Assignment Completion</strong></label>
-                  <span id="personalValAssignment" style="color:#10B981; font-weight:700;">+0%</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                  <label for="personalRangeAssignment" style="color:#1F2937; font-weight:700;"><strong>Boost Assignment Completion</strong></label>
+                  <span id="personalValAssignment" style="color:#059669; font-weight:800;">+0%</span>
                 </div>
-                <input type="range" id="personalRangeAssignment" min="0" max="20" step="1" value="0" style="width:100%; accent-color:#10B981;">
+                <input type="range" id="personalRangeAssignment" min="0" max="20" step="1" value="0" style="width:100%; accent-color:#059669;">
               </div>
 
               <div style="display:flex; gap:12px; margin-top:6px;">
@@ -798,16 +1395,16 @@
               </div>
 
               <!-- Simulator Outcome Display -->
-              <div id="personalSimResults" style="padding:14px; background:rgba(236, 72, 153, 0.12); border:1px solid rgba(236, 72, 153, 0.3); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+              <div id="personalSimResults" style="padding:14px 16px; background:#FDF2F8; border:1px solid #FBCFE8; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                  <span style="font-size:0.75rem; color:#DDD6FE; display:block;">Projected Success Score</span>
+                  <span style="font-size:0.75rem; color:#831843; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; display:block;">Projected Success Score</span>
                   <div style="display:flex; align-items:baseline; gap:8px;">
-                    <span id="personalProjectedScore" style="font-size:1.6rem; font-weight:800; color:#FFFFFF;">{{ student.success_score }}</span>
-                    <span id="personalDeltaText" style="font-size:0.8rem; color:#34D399; font-weight:700;">(+0.0 pts)</span>
+                    <span id="personalProjectedScore" style="font-size:1.6rem; font-weight:800; color:#111827;">{{ student.success_score }}</span>
+                    <span id="personalDeltaText" style="font-size:0.875rem; color:#059669; font-weight:800;">(+0.0 pts)</span>
                   </div>
                 </div>
-                <span id="personalProjectedBadge" class="badge badge-{{ student.risk_badge or student.risk_level.lower() }}">
-                  {{ student.risk_level }} Risk
+                <span id="personalProjectedBadge" class="badge badge-{{ student.risk_badge or (student.risk_level.lower() if student.risk_level else 'neutral') }}">
+                  {{ student.risk_level or 'Not available' }} Risk
                 </span>
               </div>
 
@@ -817,102 +1414,911 @@
         </div>
       </section>
 
+<!-- ========================================================================= -->
+      <!-- SECTION 6: JOB PREPARATION & SKILLS ROADMAP (Replaces Placement Readiness) -->
       <!-- ========================================================================= -->
-      <!-- SECTION 6: PLACEMENT READINESS -->
+      <!-- SECTION 6: JOB PREPARATION & SKILLS ROADMAP (Replaces Placement Readiness) -->
       <!-- ========================================================================= -->
       <section id="section-placement-readiness" class="dashboard-section">
-        <div class="section-title-wrap">
-          <div>
-            <h2 class="section-heading">Placement Readiness & Career Telemetry</h2>
-            <p class="section-subheading">KPMG & Tier-1 campus placement eligibility diagnostic</p>
-          </div>
-        </div>
-
-        <div class="grid-3-col" style="margin-bottom:24px;">
-          <div class="glass-card">
-            <span class="kpi-label">Placement Aptitude Score</span>
-            <div class="kpi-value text-gradient-purple" style="margin:8px 0;">{{ student.placement_aptitude_score }}<span class="kpi-sub">/100</span></div>
-            <p style="font-size:0.75rem; color:#DDD6FE;">Quantitative, Logical & Verbal Reasoning</p>
-          </div>
-
-          <div class="glass-card">
-            <span class="kpi-label">Technical Skills Index</span>
-            <div class="kpi-value text-gradient-pink" style="margin:8px 0;">{{ student.technical_skills_score }}<span class="kpi-sub">/100</span></div>
-            <p style="font-size:0.75rem; color:#DDD6FE;">Data Structures, System Design & Coding</p>
-          </div>
-
-          <div class="glass-card">
-            <span class="kpi-label">Tier-1 Corporate Eligibility</span>
-            <div class="kpi-value" style="margin:8px 0;">
-              {% if student.cgpa >= 7.0 and student.backlogs == 0 and student.placement_aptitude_score >= 70 %}
-                <span style="color:#34D399;">Eligible</span>
-              {% else %}
-                <span style="color:#F59E0B;">In Progress</span>
-              {% endif %}
-            </div>
-            <p style="font-size:0.75rem; color:#DDD6FE;">Meets KPMG campus recruitment thresholds</p>
-          </div>
-        </div>
-
-        <div class="glass-card">
-          <div class="glass-card-header">
+        <!-- HEADER -->
+        <div class="section-title-wrap" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
             <div>
-              <h3 class="glass-card-title">Corporate Eligibility Checklist</h3>
-              <p class="glass-card-subtitle">Criteria verification for premier campus recruitment drives</p>
+              <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); border-radius: 20px; font-size: 0.82rem; font-weight: 700; color: #7C3AED; margin-bottom: 8px;">
+                <i class="fas fa-route"></i> Career Pathway &amp; Placement Readiness
+              </div>
+              <h2 class="section-heading" style="font-size: 1.85rem; font-weight: 800; color: #1E1B4B; margin: 0 0 6px 0;">Personalized Job Preparation &amp; Skills Roadmap</h2>
+              <p class="section-subheading" style="color: #64748B; font-size: 0.95rem; margin: 0;">Step-by-step role discovery, verified syllabus milestones, interview prep bank, and measurable readiness tracking.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" id="btn-save-plan" class="btn" style="background: linear-gradient(135deg, #7C3AED, #6D28D9); color: #fff; font-weight: 700; border-radius: 10px; padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px; border: none; box-shadow: 0 4px 14px rgba(124,58,237,0.3); cursor: pointer; transition: all 0.2s ease;">
+                <i class="fas fa-save"></i> Save My Progress
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 9 PREVIEW / HERO READINESS PROGRESS BANNER -->
+        <div class="glass-card" style="background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%); color: #fff; border-radius: 18px; padding: 26px 30px; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(76,29,149,0.25); position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -30px; bottom: -30px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(167,139,250,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%;"></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; align-items: center; position: relative; z-index: 1;">
+            <div>
+              <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #C4B5FD; font-weight: 700;">Target Role Selected</span>
+              <h3 id="hero-target-role" style="color: #fff; font-size: 1.6rem; font-weight: 800; margin: 4px 0 8px 0;">Software Developer</h3>
+              <p id="hero-timeline-desc" style="color: #E2E8F0; font-size: 0.9rem; margin: 0; opacity: 0.9;">
+                <i class="fas fa-calendar-alt" style="color: #A78BFA; margin-right: 6px;"></i><span id="hero-timeline-text">90 Days Preparation Plan &bull; 2-3 hrs/day</span>
+              </p>
+            </div>
+
+            <!-- Readiness Gauge -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <span style="font-size: 0.85rem; font-weight: 700; color: #E0E7FF;">Job Readiness Score</span>
+                <span id="hero-readiness-pct" style="font-size: 1.8rem; font-weight: 900; color: #34D399;">0%</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.15); border-radius: 12px; height: 12px; overflow: hidden; position: relative;">
+                <div id="hero-readiness-bar" style="background: linear-gradient(90deg, #10B981, #34D399); width: 0%; height: 100%; border-radius: 12px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+              </div>
+              <p id="hero-readiness-explain" style="font-size: 0.78rem; color: #CBD5E1; margin-top: 6px; line-height: 1.4;">Calculated as: 50% Core Skills Confident + 50% Roadmap Milestone Checklists Completed.</p>
+            </div>
+
+            <!-- Metric Badges -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Confident Skills</div>
+                <div id="hero-count-confident" style="font-size: 1.4rem; font-weight: 800; color: #34D399;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Skills In-Progress</div>
+                <div id="hero-count-learning" style="font-size: 1.4rem; font-weight: 800; color: #FBBF24;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Skills To Learn</div>
+                <div id="hero-count-needed" style="font-size: 1.4rem; font-weight: 800; color: #F87171;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Tasks Done</div>
+                <div id="hero-count-tasks" style="font-size: 1.4rem; font-weight: 800; color: #60A5FA;">0 / 0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: CHOOSE YOUR CAREER GOAL -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(124,58,237,0.12); color: #7C3AED; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">1. Choose Your Career Goal</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Tailor your roadmap to your target specialization, current semester level, and available study hours.</p>
             </div>
           </div>
 
-          <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
+          <form id="form-career-goal" onsubmit="event.preventDefault(); applyCareerPlan();">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 20px;">
+              <!-- Target Job Role -->
               <div>
-                <strong>Minimum CGPA Cutoff (&ge; 7.0)</strong>
-                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ "%.2f"|format(student.cgpa) }}</p>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Target Job Role <span style="color:#DC2626;">*</span>
+                </label>
+                <select id="input-target-role" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="Software Developer">Software Developer (Core &amp; DSA)</option>
+                  <option value="Full-Stack Developer">Full-Stack Developer (MERN / Python)</option>
+                  <option value="Data Analyst">Data Analyst (SQL, BI, Python)</option>
+                  <option value="AI / ML Engineer">AI / ML Engineer (Deep Learning &amp; LLMs)</option>
+                  <option value="Frontend Developer">Frontend Developer (Modern Web &amp; UI)</option>
+                  <option value="Cybersecurity Analyst">Cybersecurity Analyst (SOC, Threat &amp; SecOps)</option>
+                  <option value="Electronics / Embedded Systems Engineer">Electronics / Embedded Systems Engineer (IoT, C/C++)</option>
+                  <option value="Custom">Custom Role Specification...</option>
+                </select>
+                <input type="text" id="input-custom-role" placeholder="Enter custom target role..." style="display:none; margin-top:8px; width:100%; padding:9px 13px; border-radius:8px; border:1.5px solid #CBD5E1; font-size:0.88rem;" />
               </div>
-              {% if student.cgpa >= 7.0 %}
-                <span class="badge badge-low">Verified &bull; Cleared</span>
-              {% else %}
-                <span class="badge badge-high">Below 7.0 Cutoff</span>
-              {% endif %}
+
+              <!-- Academic Branch (Pre-filled) -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Degree &amp; Department (Pre-filled)
+                </label>
+                <input type="text" id="input-student-branch" class="form-control" value="{{ student.department }} ({{ student.roll_number }})" readonly style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #E2E8F0; font-size:0.92rem; color:#64748B; background:#F1F5F9; font-weight:600;" />
+              </div>
+
+              <!-- Current Semester (Pre-filled) -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Current Semester
+                </label>
+                <input type="text" id="input-student-sem" class="form-control" value="Semester {{ student.semester }} (Year {{ acad_year }})" readonly style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #E2E8F0; font-size:0.92rem; color:#64748B; background:#F1F5F9; font-weight:600;" />
+              </div>
+
+              <!-- Current Skill Level -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Current Technical Level
+                </label>
+                <select id="input-skill-level" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="Beginner">Beginner (Starting fundamentals)</option>
+                  <option value="Intermediate" selected>Intermediate (Familiar with syntax &amp; college labs)</option>
+                  <option value="Advanced">Advanced (Built projects, ready for mock rounds)</option>
+                </select>
+              </div>
+
+              <!-- Target Timeline -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Target Placement Timeline
+                </label>
+                <select id="input-timeline" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="30">30 Days (Intensive Sprint)</option>
+                  <option value="60">60 Days (Structured Preparation)</option>
+                  <option value="90" selected>90 Days (Complete Mastery)</option>
+                </select>
+              </div>
+
+              <!-- Daily Hours -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Available Daily Study Time
+                </label>
+                <select id="input-daily-hours" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="1-2">1 - 2 Hours / day (Consistent pace)</option>
+                  <option value="2-3" selected>2 - 3 Hours / day (Recommended)</option>
+                  <option value="4+">4+ Hours / day (Full immersion)</option>
+                </select>
+              </div>
+
+              <!-- Preferred Language -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Primary Programming Language
+                </label>
+                <select id="input-pref-lang" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="Python" selected>Python</option>
+                  <option value="Java">Java</option>
+                  <option value="C++">C++</option>
+                  <option value="JavaScript">JavaScript / TypeScript</option>
+                  <option value="C">C</option>
+                </select>
+              </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
-              <div>
-                <strong>Active Arrears / Backlogs (Zero Tolerance)</strong>
-                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ student.backlogs }} active backlogs</p>
+            <div style="display: flex; gap: 12px; justify-content: flex-start; align-items: center; border-top: 1px dashed #E2E8F0; padding-top: 16px;">
+              <button type="submit" class="btn" style="background: #7C3AED; color: #fff; font-weight: 700; border-radius: 10px; padding: 11px 24px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-magic"></i> Create / Update My Job Preparation Plan
+              </button>
+              <span id="plan-save-status" style="font-size: 0.88rem; font-weight: 600; color: #059669; display: none;">
+                <i class="fas fa-check-circle"></i> Roadmap regenerated successfully!
+              </span>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2-COLUMN GRID: SECTION 2 (REQUIRED SKILLS) & SECTION 4 (SKILL GAP ANALYSIS) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-bottom: 28px;">
+          <!-- SECTION 2: REQUIRED SKILLS FOR SELECTED JOB -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:26px 28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(59,130,246,0.12); color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                <i class="fas fa-layer-group"></i>
               </div>
-              {% if student.backlogs == 0 %}
-                <span class="badge badge-low">Verified &bull; Zero Backlogs</span>
-              {% else %}
-                <span class="badge badge-high">{{ student.backlogs }} Backlog(s) to Clear</span>
-              {% endif %}
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #1E1B4B;">2. Required Skills for Selected Job</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: #64748B;">Core technical pillars vs. role-enhancing optional skills</p>
+              </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
-              <div>
-                <strong>Aptitude Benchmark (&ge; 70/100)</strong>
-                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ student.placement_aptitude_score }}/100</p>
+            <!-- Core Skills Block -->
+            <div style="margin-bottom: 18px;">
+              <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: #7C3AED; letter-spacing: 0.06em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-star" style="font-size: 0.75rem;"></i> Core Skills (Essential)
               </div>
-              {% if student.placement_aptitude_score >= 70 %}
-                <span class="badge badge-low">Verified &bull; Cleared</span>
-              {% else %}
-                <span class="badge badge-medium">Needs Diagnostic Prep</span>
-              {% endif %}
+              <div id="role-core-skills-badges" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Populated dynamically -->
+              </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(30, 15, 60, 0.6); border-radius:8px;">
-              <div>
-                <strong>Technical Assessment Benchmark (&ge; 75/100)</strong>
-                <p style="font-size:0.75rem; color:#DDD6FE; margin:2px 0 0;">Current: {{ student.technical_skills_score }}/100</p>
+            <!-- Optional Skills Block -->
+            <div>
+              <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: #64748B; letter-spacing: 0.06em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-plus-circle" style="font-size: 0.75rem;"></i> Role-Enhancing / Optional Skills
               </div>
-              {% if student.technical_skills_score >= 75 %}
-                <span class="badge badge-low">Verified &bull; High Readiness</span>
-              {% else %}
-                <span class="badge badge-medium">Practice Coding Labs</span>
-              {% endif %}
+              <div id="role-optional-skills-badges" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Populated dynamically -->
+              </div>
             </div>
+          </div>
+
+          <!-- SECTION 4: SKILL GAP ANALYSIS -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:26px 28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245,158,11,0.12); color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #1E1B4B;">4. Skill Gap Analysis</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: #64748B;">Clear distinction between validated, active, and missing requirements</p>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Skills I Know -->
+              <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 12px 14px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #15803D; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                  <span><i class="fas fa-check-circle" style="margin-right: 5px;"></i> Skills I Know / Practiced</span>
+                  <span id="gap-count-known" class="badge" style="background:#16A34A; color:#fff; font-size:0.75rem;">0</span>
+                </div>
+                <div id="gap-list-known" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; color: #166534;">
+                  <span style="color:#64748B; font-style:italic;">None evaluated yet</span>
+                </div>
+              </div>
+
+              <!-- Skills I Am Learning -->
+              <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 12px 14px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #B45309; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                  <span><i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Skills I Am Learning</span>
+                  <span id="gap-count-learning" class="badge" style="background:#D97706; color:#fff; font-size:0.75rem;">0</span>
+                </div>
+                <div id="gap-list-learning" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; color: #92400E;">
+                  <span style="color:#64748B; font-style:italic;">None currently in progress</span>
+                </div>
+              </div>
+
+              <!-- Skills I Need To Learn -->
+              <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 12px 14px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #B91C1C; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                  <span><i class="fas fa-exclamation-triangle" style="margin-right: 5px;"></i> Skills I Need To Learn (High Priority)</span>
+                  <span id="gap-count-needed" class="badge" style="background:#DC2626; color:#fff; font-size:0.75rem;">0</span>
+                </div>
+                <div id="gap-list-needed" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; color: #991B1B;">
+                  <span style="color:#64748B; font-style:italic;">All core requirements met!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: MY CURRENT SKILLS (EVALUATION MATRIX) -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16,185,129,0.12); color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">3. My Current Skills Self-Evaluation</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Accurately mark your status for each skill: <em>Not Started</em>, <em>Learning</em>, <em>Practiced</em>, or <em>Confident</em>.</p>
+              </div>
+            </div>
+            <!-- Add Custom Skill -->
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="input-add-custom-skill" placeholder="Add custom skill (e.g. Docker, OpenCV)..." style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid #CBD5E1; font-size: 0.85rem; width: 220px;" />
+              <button type="button" onclick="addCustomSkillToMatrix()" class="btn" style="background: #10B981; color: #fff; font-weight: 700; border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; border: none; cursor: pointer;">
+                <i class="fas fa-plus"></i> Add
+              </button>
+            </div>
+          </div>
+
+          <!-- Skills Evaluation Table / Matrix -->
+          <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;">
+              <thead>
+                <tr style="background: #F8FAFC; text-align: left; color: #475569; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; border-top-left-radius: 10px;">Skill Name</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0;">Importance</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center;">Not Started</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center;">Learning</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center;">Practiced</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center; border-top-right-radius: 10px;">Confident</th>
+                </tr>
+              </thead>
+              <tbody id="skill-matrix-tbody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION 5: PERSONALIZED LEARNING ROADMAP (TIMELINE & CHECKLISTS) -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(124,58,237,0.12); color: #7C3AED; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-road"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">5. Step-by-Step Learning Roadmap</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Structured syllabus broken into chronological stages with actionable checklist tasks.</p>
+            </div>
+          </div>
+
+          <div id="roadmap-stages-container" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Stages rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- SECTION 6: PROJECTS TO BUILD -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(236,72,153,0.12); color: #EC4899; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-laptop-code"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">6. Recommended Projects to Build</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Stand out in resume screening and recruiter interviews with proof-of-work projects.</p>
+            </div>
+          </div>
+
+          <div id="roadmap-projects-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- SECTION 7: PRACTICE FOR PLACEMENTS (APTITUDE, CODING, INTERVIEWS) -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(99,102,241,0.12); color: #6366F1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">7. Placement Practice Bank (Aptitude, Technical &amp; HR)</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Comprehensive preparation questions with detailed answers and STAR methodology tips.</p>
+            </div>
+          </div>
+
+          <!-- Practice Tabs -->
+          <div style="display: flex; gap: 10px; border-bottom: 2px solid #E2E8F0; margin-bottom: 20px; flex-wrap: wrap;">
+            <button type="button" class="prep-tab-btn active-prep-tab" onclick="switchPrepTab('Quantitative Aptitude')" id="tab-btn-quant" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid #7C3AED; color: #7C3AED;">
+              <i class="fas fa-calculator" style="margin-right: 6px;"></i> Quantitative Aptitude
+            </button>
+            <button type="button" class="prep-tab-btn" onclick="switchPrepTab('Logical Reasoning')" id="tab-btn-logical" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B;">
+              <i class="fas fa-brain" style="margin-right: 6px;"></i> Logical Reasoning
+            </button>
+            <button type="button" class="prep-tab-btn" onclick="switchPrepTab('Technical Interview Questions')" id="tab-btn-technical" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B;">
+              <i class="fas fa-code" style="margin-right: 6px;"></i> Technical Rounds
+            </button>
+            <button type="button" class="prep-tab-btn" onclick="switchPrepTab('HR & Behavioral Questions')" id="tab-btn-hr" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B;">
+              <i class="fas fa-comments" style="margin-right: 6px;"></i> HR &amp; Behavioral (STAR)
+            </button>
+          </div>
+
+          <div id="prep-tab-content" style="min-height: 220px;">
+            <!-- Tab content dynamically populated -->
+          </div>
+        </div>
+
+        <!-- SECTION 8: VERIFIED LEARNING RESOURCES -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(14,165,233,0.12); color: #0EA5E9; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-book-reader"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">8. Verified Learning Documentation &amp; Platforms</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Official documentation, open textbooks, interactive sandboxes, and problem banks.</p>
+            </div>
+          </div>
+
+          <div id="roadmap-resources-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+            <!-- Dynamically populated -->
           </div>
         </div>
       </section>
+
+      <!-- CAREER ROADMAP CONTROLLER JAVASCRIPT -->
+      <script>
+        (function() {
+          let currentRoadmapData = null;
+          let activePrepBank = {};
+          let currentSkillAssessments = {};
+          let currentCompletedTasks = {};
+
+          window.addEventListener('DOMContentLoaded', function() {
+            initRoadmap();
+
+            const targetSelect = document.getElementById('input-target-role');
+            if (targetSelect) {
+              targetSelect.addEventListener('change', function(e) {
+                const customInput = document.getElementById('input-custom-role');
+                if (e.target.value === 'Custom') {
+                  customInput.style.display = 'block';
+                } else {
+                  customInput.style.display = 'none';
+                }
+              });
+            }
+
+            const saveBtn = document.getElementById('btn-save-plan');
+            if (saveBtn) {
+              saveBtn.addEventListener('click', function() {
+                saveRoadmapToServer(true);
+              });
+            }
+          });
+
+          async function initRoadmap() {
+            try {
+              const res = await fetch('/api/student/roadmap');
+              if (!res.ok) throw new Error('Failed to load roadmap data');
+              const data = await res.json();
+              currentRoadmapData = data;
+              renderAllRoadmapSections(data);
+            } catch (err) {
+              console.error('Error fetching roadmap:', err);
+            }
+          }
+
+          function renderAllRoadmapSections(data) {
+            const plan = data.plan || {};
+            const roleData = data.role_data || {};
+            activePrepBank = data.interview_prep || {};
+
+            // 1. Form controls sync
+            const targetSelect = document.getElementById('input-target-role');
+            const customInput = document.getElementById('input-custom-role');
+            const matchedOption = Array.from(targetSelect.options).some(o => o.value === plan.target_role);
+            if (matchedOption) {
+              targetSelect.value = plan.target_role;
+              customInput.style.display = 'none';
+            } else if (plan.target_role) {
+              targetSelect.value = 'Custom';
+              customInput.value = plan.target_role;
+              customInput.style.display = 'block';
+            }
+
+            if (plan.skill_level) document.getElementById('input-skill-level').value = plan.skill_level;
+            if (plan.timeline_days) document.getElementById('input-timeline').value = plan.timeline_days;
+            if (plan.daily_hours) document.getElementById('input-daily-hours').value = plan.daily_hours;
+            if (plan.preferred_language) document.getElementById('input-pref-lang').value = plan.preferred_language;
+
+            // 2. Hero update
+            const displayRole = (targetSelect.value === 'Custom' && customInput.value.trim()) ? customInput.value.trim() : targetSelect.value;
+            document.getElementById('hero-target-role').textContent = displayRole;
+            document.getElementById('hero-timeline-text').textContent = (plan.timeline_days || '90') + ' Days Preparation Plan • ' + (plan.daily_hours || '2-3') + ' hrs/day';
+
+            currentSkillAssessments = plan.skill_assessments || {};
+            currentCompletedTasks = plan.completed_tasks || {};
+
+            // 3. Section 2: Required Skills
+            renderRequiredSkills(roleData);
+
+            // 4. Section 3: Skill Matrix
+            renderSkillMatrix(roleData, currentSkillAssessments);
+
+            // 5. Section 4 & Section 9: Compute & Render Gap Analysis & Readiness
+            recomputeAndRenderReadiness(roleData);
+
+            // 6. Section 5: Roadmap stages
+            renderStages(roleData.stages || [], currentCompletedTasks);
+
+            // 7. Section 6: Projects
+            renderProjects(roleData.projects || []);
+
+            // 8. Section 7: Practice tabs
+            switchPrepTab('Quantitative Aptitude');
+
+            // 9. Section 8: Resources gathered from stages
+            const resources = [];
+            (roleData.stages || []).forEach(stg => {
+              (stg.resources || []).forEach(resItem => {
+                if (!resources.some(r => r.url === resItem.url)) {
+                  resources.push({
+                    title: resItem.name,
+                    category: resItem.type || 'Official Documentation',
+                    url: resItem.url,
+                    description: 'Recommended for Stage ' + stg.stage_num + ': ' + stg.title
+                  });
+                }
+              });
+            });
+            renderResources(resources);
+          }
+
+          function renderRequiredSkills(roleData) {
+            const coreContainer = document.getElementById('role-core-skills-badges');
+            const optContainer = document.getElementById('role-optional-skills-badges');
+            coreContainer.innerHTML = '';
+            optContainer.innerHTML = '';
+
+            (roleData.core_skills || []).forEach(skill => {
+              const badge = document.createElement('span');
+              badge.className = 'badge';
+              badge.style.cssText = 'background: rgba(124,58,237,0.12); color: #7C3AED; border: 1px solid rgba(124,58,237,0.3); font-weight: 700; padding: 6px 12px; font-size: 0.82rem; border-radius: 8px;';
+              badge.innerHTML = '<i class="fas fa-check" style="margin-right: 4px;"></i>' + skill;
+              coreContainer.appendChild(badge);
+            });
+
+            (roleData.optional_skills || []).forEach(skill => {
+              const badge = document.createElement('span');
+              badge.className = 'badge';
+              badge.style.cssText = 'background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; font-weight: 600; padding: 6px 12px; font-size: 0.82rem; border-radius: 8px;';
+              badge.innerHTML = skill;
+              optContainer.appendChild(badge);
+            });
+          }
+
+          function renderSkillMatrix(roleData, assessments) {
+            const tbody = document.getElementById('skill-matrix-tbody');
+            tbody.innerHTML = '';
+
+            const allSkills = [];
+            (roleData.core_skills || []).forEach(s => allSkills.push({ name: s, isCore: true }));
+            (roleData.optional_skills || []).forEach(s => allSkills.push({ name: s, isCore: false }));
+
+            // Add any custom assessed skills not in role list
+            Object.keys(assessments).forEach(s => {
+              if (!allSkills.some(item => item.name.toLowerCase() === s.toLowerCase())) {
+                allSkills.push({ name: s, isCore: false, isCustom: true });
+              }
+            });
+
+            allSkills.forEach((item, idx) => {
+              const tr = document.createElement('tr');
+              tr.style.borderBottom = '1px solid #F1F5F9';
+              if (idx % 2 === 1) tr.style.background = '#FAFAFD';
+
+              const currentLevel = assessments[item.name] || 'Not Started';
+
+              tr.innerHTML = `
+                <td style="padding: 12px 16px; font-weight: 700; color: #1E293B;">
+                  ${item.name}
+                  ${item.isCustom ? '<span style="font-size:0.7rem; color:#6B7280; margin-left:6px;">(Custom)</span>' : ''}
+                </td>
+                <td style="padding: 12px 16px;">
+                  <span class="badge" style="${item.isCore ? 'background:#EDE9FE; color:#7C3AED; font-weight:700;' : 'background:#F1F5F9; color:#64748B;'} padding:4px 8px; border-radius:6px; font-size:0.75rem;">
+                    ${item.isCore ? 'Core Required' : 'Optional / Plus'}
+                  </span>
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Not Started" ${currentLevel === 'Not Started' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Learning" ${currentLevel === 'Learning' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Practiced" ${currentLevel === 'Practiced' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Confident" ${currentLevel === 'Confident' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+
+          window.onSkillLevelChange = function(skillName, value) {
+            currentSkillAssessments[skillName] = value;
+            if (currentRoadmapData && currentRoadmapData.role_data) {
+              recomputeAndRenderReadiness(currentRoadmapData.role_data);
+            }
+          };
+
+          window.addCustomSkillToMatrix = function() {
+            const input = document.getElementById('input-add-custom-skill');
+            const skillName = (input.value || '').trim();
+            if (!skillName) return;
+            currentSkillAssessments[skillName] = 'Learning';
+            input.value = '';
+            if (currentRoadmapData && currentRoadmapData.role_data) {
+              renderSkillMatrix(currentRoadmapData.role_data, currentSkillAssessments);
+              recomputeAndRenderReadiness(currentRoadmapData.role_data);
+            }
+          };
+
+          function recomputeAndRenderReadiness(roleData) {
+            const coreSkills = roleData.core_skills || [];
+            const known = [];
+            const learning = [];
+            const needed = [];
+
+            // Classify all evaluated skills
+            Object.keys(currentSkillAssessments).forEach(s => {
+              const val = currentSkillAssessments[s];
+              if (val === 'Confident' || val === 'Practiced') {
+                known.push(s);
+              } else if (val === 'Learning') {
+                learning.push(s);
+              }
+            });
+
+            // Core skills not marked Confident or Practiced are needed
+            coreSkills.forEach(s => {
+              const val = currentSkillAssessments[s];
+              if (val !== 'Confident' && val !== 'Practiced') {
+                if (!needed.includes(s)) needed.push(s);
+              }
+            });
+
+            // Update Section 4 DOM
+            document.getElementById('gap-count-known').textContent = known.length;
+            document.getElementById('gap-count-learning').textContent = learning.length;
+            document.getElementById('gap-count-needed').textContent = needed.length;
+
+            const listKnown = document.getElementById('gap-list-known');
+            listKnown.innerHTML = known.length ? known.map(s => `<span class="badge" style="background:#DCFCE7; color:#15803D; padding:4px 8px; border-radius:6px; font-weight:700;"><i class="fas fa-check" style="font-size:0.7rem; margin-right:4px;"></i>${s}</span>`).join('') : '<span style="color:#64748B; font-style:italic;">None evaluated yet</span>';
+
+            const listLearning = document.getElementById('gap-list-learning');
+            listLearning.innerHTML = learning.length ? learning.map(s => `<span class="badge" style="background:#FEF3C7; color:#92400E; padding:4px 8px; border-radius:6px; font-weight:700;"><i class="fas fa-clock" style="font-size:0.7rem; margin-right:4px;"></i>${s}</span>`).join('') : '<span style="color:#64748B; font-style:italic;">None in-progress</span>';
+
+            const listNeeded = document.getElementById('gap-list-needed');
+            listNeeded.innerHTML = needed.length ? needed.map(s => `<span class="badge" style="background:#FEE2E2; color:#B91C1C; padding:4px 8px; border-radius:6px; font-weight:700;"><i class="fas fa-bolt" style="font-size:0.7rem; margin-right:4px;"></i>${s}</span>`).join('') : '<span style="color:#16A34A; font-weight:700;"><i class="fas fa-star" style="margin-right:4px;"></i>All core skills practiced!</span>';
+
+            // Calculate overall readiness
+            let totalTasks = 0;
+            let doneTasks = 0;
+            (roleData.stages || []).forEach(stage => {
+              (stage.practical_tasks || []).forEach(t => {
+                totalTasks += 1;
+                if (currentCompletedTasks[t]) doneTasks += 1;
+              });
+            });
+
+            const totalCore = coreSkills.length || 1;
+            const confidentCoreCount = coreSkills.filter(s => currentSkillAssessments[s] === 'Confident' || currentSkillAssessments[s] === 'Practiced').length;
+            const skillScore = Math.min(100, Math.round((confidentCoreCount / totalCore) * 50));
+            const taskScore = totalTasks > 0 ? Math.min(100, Math.round((doneTasks / totalTasks) * 50)) : 25;
+            const readinessPct = Math.min(100, skillScore + taskScore);
+
+            // Update Hero & Section 9 metrics
+            document.getElementById('hero-readiness-pct').textContent = readinessPct + '%';
+            document.getElementById('hero-readiness-bar').style.width = readinessPct + '%';
+            document.getElementById('hero-count-confident').textContent = known.length;
+            document.getElementById('hero-count-learning').textContent = learning.length;
+            document.getElementById('hero-count-needed').textContent = needed.length;
+            document.getElementById('hero-count-tasks').textContent = doneTasks + ' / ' + totalTasks;
+          }
+
+          function renderStages(stages, completedTasks) {
+            const container = document.getElementById('roadmap-stages-container');
+            container.innerHTML = '';
+
+            stages.forEach((stage, idx) => {
+              const card = document.createElement('div');
+              card.style.cssText = 'border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03);';
+
+              let topicsHtml = (stage.topics || []).map(tp => `<span class="badge" style="background:#F1F5F9; color:#334155; font-weight:600; padding:4px 8px; border-radius:6px; font-size:0.78rem;">${tp}</span>`).join('');
+
+              let checklistsHtml = (stage.practical_tasks || []).map(task => {
+                const isChecked = !!completedTasks[task];
+                return `
+                  <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; color: #334155; cursor: pointer; padding: 6px 0;">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="onTaskToggle('${task.replace(/'/g, "\\'")}', this.checked)" style="margin-top: 3px; accent-color: #7C3AED; cursor: pointer;" />
+                    <span style="${isChecked ? 'text-decoration: line-through; color: #94A3B8;' : ''}">${task}</span>
+                  </label>
+                `;
+              }).join('');
+
+              card.innerHTML = `
+                <div style="background: linear-gradient(90deg, #F8FAFC, #EEF2FF); padding: 16px 20px; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #7C3AED; letter-spacing: 0.06em;">Stage ${stage.stage_num || (idx + 1)} &bull; ${stage.time_allocation}</span>
+                    <h4 style="margin: 2px 0 0 0; font-size: 1.1rem; font-weight: 800; color: #1E1B4B;">${stage.title}</h4>
+                  </div>
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #059669; background: #ECFDF5; padding: 4px 10px; border-radius: 20px; border: 1px solid #A7F3D0;">
+                    <i class="fas fa-flag-checkered" style="margin-right: 4px;"></i>${stage.completion_goal}
+                  </div>
+                </div>
+                <div style="padding: 18px 20px;">
+                  <div style="margin-bottom: 14px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 6px;">Key Topics &amp; Competencies:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">${topicsHtml}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 6px;">Actionable Checklist:</div>
+                    <div style="display: flex; flex-direction: column;">${checklistsHtml}</div>
+                  </div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+          }
+
+          window.onTaskToggle = function(taskName, isChecked) {
+            currentCompletedTasks[taskName] = isChecked;
+            if (currentRoadmapData && currentRoadmapData.role_data) {
+              recomputeAndRenderReadiness(currentRoadmapData.role_data);
+            }
+          };
+
+          function renderProjects(projects) {
+            const container = document.getElementById('roadmap-projects-container');
+            container.innerHTML = '';
+
+            projects.forEach(p => {
+              const card = document.createElement('div');
+              let badgeStyle = 'background:#E0E7FF; color:#4338CA;';
+              if ((p.level || '').includes('Intermediate')) badgeStyle = 'background:#FEF3C7; color:#92400E;';
+              if ((p.level || '').includes('Advanced')) badgeStyle = 'background:#FCE7F3; color:#9D174D;';
+
+              card.style.cssText = 'border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between;';
+              card.innerHTML = `
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="badge" style="${badgeStyle} font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">${p.level}</span>
+                  </div>
+                  <h4 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: #1E1B4B;">${p.title}</h4>
+                  <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; line-height: 1.45;"><strong>Problem Solved:</strong> ${p.problem}</p>
+                  
+                  <div style="margin-bottom: 10px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 4px;">Skills Utilized:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                      ${(p.skills_practiced || []).map(s => `<span class="badge" style="background:#F1F5F9; color:#334155; font-size:0.75rem; padding:2px 6px; border-radius:4px;">${s}</span>`).join('')}
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 4px;">Core Features:</div>
+                    <ul style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #334155; line-height: 1.4;">
+                      ${(p.features || []).map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                  </div>
+                </div>
+
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px; margin-top: 10px;">
+                  <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: #7C3AED; margin-bottom: 3px;">
+                    <i class="fas fa-bullhorn" style="margin-right: 4px;"></i>Recruiter Interview Pitch:
+                  </div>
+                  <div style="font-size: 0.8rem; color: #475569; font-style: italic; line-height: 1.4;">"${p.interview_pitch}"</div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+          }
+
+          window.switchPrepTab = function(categoryName) {
+            const tabMap = {
+              'Quantitative Aptitude': 'tab-btn-quant',
+              'Logical Reasoning': 'tab-btn-logical',
+              'Technical Interview Questions': 'tab-btn-technical',
+              'HR & Behavioral Questions': 'tab-btn-hr'
+            };
+
+            Object.entries(tabMap).forEach(([cat, btnId]) => {
+              const btn = document.getElementById(btnId);
+              if (btn) {
+                if (cat === categoryName) {
+                  btn.style.borderBottom = '3px solid #7C3AED';
+                  btn.style.color = '#7C3AED';
+                } else {
+                  btn.style.borderBottom = '3px solid transparent';
+                  btn.style.color = '#64748B';
+                }
+              }
+            });
+
+            const content = document.getElementById('prep-tab-content');
+            const items = activePrepBank[categoryName] || [];
+
+            if (!items.length) {
+              content.innerHTML = '<div style="color:#64748B; padding:20px; text-align:center;">No questions found for this category.</div>';
+              return;
+            }
+
+            content.innerHTML = items.map((q, idx) => {
+              if (categoryName === 'HR & Behavioral Questions') {
+                return `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #1E1B4B; margin-bottom: 6px;">Q${idx + 1}. ${q.question}</div>
+                    <div style="background: #FFFFFF; border-left: 3px solid #7C3AED; padding: 8px 14px; border-radius: 4px; font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                      <strong>STAR Framework Answer Guide:</strong> ${q.answer}
+                    </div>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                      <div style="font-size: 0.95rem; font-weight: 800; color: #1E1B4B;">Q${idx + 1}. ${q.question}</div>
+                      ${q.topic ? `<span class="badge" style="background:#EDE9FE; color:#7C3AED; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:4px;">${q.topic}</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #15803D; font-weight: 700; margin-bottom: 4px;">
+                      <i class="fas fa-check-circle" style="margin-right: 4px;"></i>Answer: ${q.answer}
+                    </div>
+                    ${q.explanation ? `
+                      <div style="font-size: 0.82rem; color: #475569; line-height: 1.45;">
+                        <strong>Explanation / Key Concept:</strong> ${q.explanation}
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }
+            }).join('');
+          };
+
+          function renderResources(resources) {
+            const container = document.getElementById('roadmap-resources-container');
+            container.innerHTML = '';
+
+            resources.forEach(r => {
+              const card = document.createElement('a');
+              card.href = r.url;
+              card.target = '_blank';
+              card.rel = 'noopener noreferrer';
+              card.style.cssText = 'text-decoration: none; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; background: #FFFFFF; transition: all 0.2s ease; display: block; box-shadow: 0 2px 6px rgba(0,0,0,0.02);';
+              card.onmouseover = function() { this.style.borderColor = '#7C3AED'; this.style.transform = 'translateY(-2px)'; };
+              card.onmouseout = function() { this.style.borderColor = '#E2E8F0'; this.style.transform = 'translateY(0)'; };
+
+              card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span class="badge" style="background:#E0F2FE; color:#0284C7; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:4px;">${r.category}</span>
+                  <i class="fas fa-external-link-alt" style="font-size: 0.8rem; color: #94A3B8;"></i>
+                </div>
+                <h4 style="margin: 0 0 4px 0; font-size: 1rem; font-weight: 800; color: #1E1B4B;">${r.title}</h4>
+                <p style="margin: 0; font-size: 0.82rem; color: #64748B; line-height: 1.4;">${r.description}</p>
+              `;
+              container.appendChild(card);
+            });
+          }
+
+          window.applyCareerPlan = async function() {
+            const targetSelect = document.getElementById('input-target-role');
+            const customInput = document.getElementById('input-custom-role');
+            const targetRole = targetSelect.value === 'Custom' ? (customInput.value.trim() || 'Software Developer') : targetSelect.value;
+            const timeline = document.getElementById('input-timeline').value;
+            const hours = document.getElementById('input-daily-hours').value;
+            const level = document.getElementById('input-skill-level').value;
+            const prefLang = document.getElementById('input-pref-lang').value;
+
+            const payload = {
+              target_role: targetRole,
+              timeline_days: timeline,
+              daily_hours: hours,
+              skill_level: level,
+              preferred_language: prefLang,
+              skill_assessments: currentSkillAssessments,
+              completed_tasks: currentCompletedTasks
+            };
+
+            await sendRoadmapUpdate(payload);
+          };
+
+          window.saveRoadmapToServer = async function(showMessage) {
+            const targetSelect = document.getElementById('input-target-role');
+            const customInput = document.getElementById('input-custom-role');
+            const targetRole = targetSelect.value === 'Custom' ? (customInput.value.trim() || 'Software Developer') : targetSelect.value;
+            const timeline = document.getElementById('input-timeline').value;
+            const hours = document.getElementById('input-daily-hours').value;
+            const level = document.getElementById('input-skill-level').value;
+            const prefLang = document.getElementById('input-pref-lang').value;
+
+            const payload = {
+              target_role: targetRole,
+              timeline_days: timeline,
+              daily_hours: hours,
+              skill_level: level,
+              preferred_language: prefLang,
+              skill_assessments: currentSkillAssessments,
+              completed_tasks: currentCompletedTasks
+            };
+
+            await sendRoadmapUpdate(payload, showMessage);
+          };
+
+          async function sendRoadmapUpdate(payload, showMessage) {
+            try {
+              const res = await fetch('/api/student/roadmap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              if (!res.ok) throw new Error('Failed to update plan');
+              const data = await res.json();
+              currentRoadmapData = data;
+              renderAllRoadmapSections(data);
+
+              const status = document.getElementById('plan-save-status');
+              if (status) {
+                status.style.display = 'inline-flex';
+                status.innerHTML = '<i class="fas fa-check-circle" style="margin-right:5px;"></i> Plan &amp; Progress Saved!';
+                setTimeout(() => { status.style.display = 'none'; }, 3500);
+              }
+            } catch (err) {
+              console.error('Error saving roadmap:', err);
+              alert('Could not save roadmap progress. Please check connection.');
+            }
+          }
+        })();
+      </script>
+
 
       <!-- ========================================================================= -->
       <!-- SECTION 7: SKILLS -->
@@ -1025,107 +2431,207 @@
           </div>
         </div>
 
-        <!-- Standout Strengths & Risk Factors -->
-        <div class="grid-2-col" style="margin-bottom:24px;">
-          
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div>
-                <h3 class="glass-card-title">Standout Strengths</h3>
-                <p class="glass-card-subtitle">Positive drivers boosting your success score</p>
-              </div>
-              <span class="badge badge-low">Key Pillars</span>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
-              {% if metrics.positive_factors %}
-                {% for pf in metrics.positive_factors %}
-                <div class="factor-card success">
-                  <div class="factor-card-top">
-                    <span class="factor-title">{{ pf.title }}</span>
-                    <span class="factor-impact">{{ pf.impact }}</span>
-                  </div>
-                  <p class="factor-desc">{{ pf.description }}</p>
-                </div>
-                {% endfor %}
-              {% else %}
-                <div class="factor-card success">
-                  <div class="factor-card-top">
-                    <span class="factor-title">Solid Academic Foundation</span>
-                    <span class="factor-impact">Positive</span>
-                  </div>
-                  <p class="factor-desc">Maintaining steady progress across ongoing curriculum modules.</p>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div>
-                <h3 class="glass-card-title">Growth Areas & Risk Bottlenecks</h3>
-                <p class="glass-card-subtitle">Factor attribution explaining score penalties</p>
-              </div>
-              <span class="badge badge-high">Actionable</span>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
-              {% if metrics.risk_factors %}
-                {% for rf in metrics.risk_factors %}
-                <div class="factor-card {{ rf.severity }}">
-                  <div class="factor-card-top">
-                    <span class="factor-title">{{ rf.title }}</span>
-                    <span class="factor-impact">{{ rf.impact }}</span>
-                  </div>
-                  <p class="factor-desc">{{ rf.description }}</p>
-                </div>
-                {% endfor %}
-              {% else %}
-                <div class="factor-card success">
-                  <div class="factor-card-top">
-                    <span class="factor-title">No Critical Risk Alerts</span>
-                    <span class="factor-impact">Safe</span>
-                  </div>
-                  <p class="factor-desc">You are currently meeting or exceeding all university academic criteria.</p>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Recommended Interventions / Learning Roadmap -->
+        <!-- ============================================================= -->
+        <!-- CampusIQ Study Assistant Chatbot                              -->
+        <!-- ============================================================= -->
         <div class="glass-card">
           <div class="glass-card-header">
             <div>
-              <h3 class="glass-card-title">Tailored Academic Roadmap</h3>
-              <p class="glass-card-subtitle">Recommended interventions and suggested learning activities</p>
+              <h3 class="glass-card-title">CampusIQ Multilingual Study Assistant</h3>
+              <p class="glass-card-subtitle">Ask questions about your academics, attendance, study plans, or recommendations in English, Telugu (తెలుగు), Hindi (हिन्दी), or any preferred language</p>
             </div>
+            <button id="ciqChatClear" class="btn-sm-action" title="Clear chat history">Clear Chat</button>
           </div>
 
-          <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
-            {% if metrics.recommended_interventions %}
-              {% for intv in metrics.recommended_interventions %}
-              <div style="background:rgba(30, 15, 60, 0.7); border:1px solid rgba(196, 181, 253, 0.2); border-radius:10px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <div style="font-weight:700; font-size:0.9rem; color:#FFFFFF;">{{ intv.action }}</div>
-                  <div style="font-size:0.78rem; color:#DDD6FE; margin-top:3px;">{{ intv.rationale }}</div>
-                  <div style="font-size:0.7rem; color:#A78BFA; margin-top:4px;">
-                    Domain: <strong>{{ intv.category }}</strong> &bull; Target Horizon: <strong>{{ intv.timeline }}</strong>
-                  </div>
-                </div>
-                <span class="badge {% if intv.urgency == 'Immediate' %}badge-high{% elif intv.urgency == 'High' %}badge-medium{% else %}badge-low{% endif %}">
-                  {{ intv.urgency }}
-                </span>
-              </div>
-              {% endfor %}
-            {% else %}
-              <div style="padding:16px; background:rgba(30, 15, 60, 0.7); border-radius:10px; color:#DDD6FE; font-size:0.85rem;">
-                Keep maintaining your stellar pace! Focus on advanced algorithmic coding and industry certifications.
-              </div>
-            {% endif %}
+          <!-- Chat Messages Area -->
+          <div id="ciqChatMessages" class="ciq-chat-messages"></div>
+
+          <!-- Suggested Questions -->
+          <div class="ciq-chat-suggestions">
+            <button class="ciq-chat-suggestion" data-question="How can I improve my academic performance?">📈 Academics</button>
+            <button class="ciq-chat-suggestion" data-question="How can I improve my attendance?">📅 Attendance</button>
+            <button class="ciq-chat-suggestion" data-question="Help me make a study plan.">📝 Study plan</button>
+            <button class="ciq-chat-suggestion" data-question="How can I reduce my academic risk?">⚠️ Reduce risk</button>
+            <button class="ciq-chat-suggestion" data-question="నా అటెండెన్స్ ఎంత?">🇮🇳 తెలుగు (Telugu)</button>
+            <button class="ciq-chat-suggestion" data-question="मेरी उपस्थिति और सीजीपीए कितना है?">🇮🇳 हिन्दी (Hindi)</button>
+            <button class="ciq-chat-suggestion" data-question="Explain in Telugu">🗣️ Explain in Telugu</button>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="ciq-chat-input-wrap">
+            <input type="text" id="ciqChatInput" class="ciq-chat-input" placeholder="Type your question in English, Telugu (తెలుగు), Hindi (हिन्दी)..." maxlength="1000" autocomplete="off">
+            <button id="ciqChatSend" class="ciq-chat-send-btn" title="Send message">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
           </div>
         </div>
+
+        <!-- Chatbot-Scoped Styles -->
+        <style>
+          /* Chat messages container */
+          .ciq-chat-messages {
+            max-height: 360px;
+            min-height: 120px;
+            overflow-y: auto;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(248, 246, 255, 0.03);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            margin-top: 8px;
+          }
+
+          /* Chat row layout */
+          .ciq-chat-row {
+            display: flex;
+            gap: 8px;
+            max-width: 88%;
+            animation: ciqFadeIn 0.25s ease;
+          }
+          .ciq-chat-user { align-self: flex-end; justify-content: flex-end; }
+          .ciq-chat-bot  { align-self: flex-start; }
+
+          /* Bot avatar */
+          .ciq-chat-avatar {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border-radius: 50%;
+            background: var(--grad-primary);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 800;
+            margin-top: 2px;
+          }
+
+          /* Chat bubbles */
+          .ciq-chat-bubble {
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.8125rem;
+            line-height: 1.55;
+            word-wrap: break-word;
+          }
+          .ciq-chat-bubble-bot {
+            background: #F3F0FF;
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(139, 92, 246, 0.12);
+          }
+          .ciq-chat-bubble-user {
+            background: var(--grad-primary);
+            color: #FFFFFF;
+            border-bottom-right-radius: 4px;
+          }
+
+          /* Typing indicator */
+          .ciq-chat-typing {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 12px 18px;
+          }
+          .ciq-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--lilac-muted);
+            animation: ciqBounce 1.2s infinite;
+          }
+          .ciq-dot:nth-child(2) { animation-delay: 0.2s; }
+          .ciq-dot:nth-child(3) { animation-delay: 0.4s; }
+
+          @keyframes ciqBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+          }
+          @keyframes ciqFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+
+          /* Suggested question pills */
+          .ciq-chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 0 6px;
+          }
+          .ciq-chat-suggestion {
+            background: var(--purple-soft);
+            border: 1px solid rgba(124, 58, 237, 0.18);
+            color: var(--purple-deep);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+          }
+          .ciq-chat-suggestion:hover {
+            background: #DDD6FE;
+            border-color: var(--purple-electric);
+            transform: translateY(-1px);
+          }
+
+          /* Chat input area */
+          .ciq-chat-input-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+          }
+          .ciq-chat-input {
+            flex: 1;
+            font-family: var(--font-sans);
+            font-size: 0.8125rem;
+            padding: 10px 14px;
+            background: #F9FAFB;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            outline: none;
+            transition: var(--transition);
+          }
+          .ciq-chat-input:focus {
+            border-color: var(--purple-electric);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+            background: #FFFFFF;
+          }
+          .ciq-chat-send-btn {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: var(--radius-md);
+            background: var(--grad-primary);
+            color: #FFFFFF;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-purple-sm);
+          }
+          .ciq-chat-send-btn:hover {
+            filter: brightness(1.12);
+            transform: translateY(-1px);
+          }
+
+          /* Responsive adjustments */
+          @media (max-width: 768px) {
+            .ciq-chat-messages { max-height: 280px; }
+            .ciq-chat-row { max-width: 95%; }
+            .ciq-chat-suggestions { gap: 4px; }
+            .ciq-chat-suggestion { font-size: 0.68rem; padding: 4px 8px; }
+          }
+        </style>
       </section>
 
       <!-- ========================================================================= -->
@@ -1187,87 +2693,121 @@
       <!-- SECTION 10: MY PROFILE -->
       <!-- ========================================================================= -->
       <section id="section-my-profile" class="dashboard-section">
-        <div class="section-title-wrap">
+        <div class="section-title-wrap" style="margin-bottom:24px;">
           <div>
-            <h2 class="section-heading">My Student Profile & Mentorship Information</h2>
-            <p class="section-subheading">Personal institutional record, assigned faculty advisor, and contact details</p>
+            <h2 class="section-heading">My Student Profile</h2>
+            <p class="section-subheading">Personal institutional record, contact details, and assigned faculty mentor</p>
           </div>
         </div>
 
-        <div class="grid-2-col">
+        <!-- Student Basic Profile Information Card (6 Primary Fields) -->
+        <div class="glass-card" style="max-width:850px; margin-bottom:28px; padding:28px; background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; box-shadow:0 4px 20px rgba(124,58,237,0.06);">
           
-          <!-- Student Card -->
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div>
-                <h3 class="glass-card-title">Student Academic Information</h3>
-                <p class="glass-card-subtitle">Official university enrollment records</p>
-              </div>
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid #F1EFF9;">
+            <div style="width:56px; height:56px; border-radius:14px; {% if student.gender and student.gender|lower == 'male' %}background:linear-gradient(135deg,#2563EB,#0EA5E9); box-shadow:0 4px 14px rgba(37,99,235,0.35);{% elif student.gender and student.gender|lower == 'female' %}background:linear-gradient(135deg,#EC4899,#F43F5E); box-shadow:0 4px 14px rgba(236,72,153,0.35);{% else %}background:linear-gradient(135deg,#7C3AED,#EC4899); box-shadow:0 4px 14px rgba(124,58,237,0.25);{% endif %} display:flex; align-items:center; justify-content:center; color:#FFFFFF;">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c0-4 3.58-6.5 8-6.5s8 2.5 8 6.5"/>
+                {% if student.gender and student.gender|lower == 'male' %}<line x1="16" y1="4" x2="19" y2="2"/><polyline points="16 2 19 2 19 5"/>{% elif student.gender and student.gender|lower == 'female' %}<line x1="12" y1="16" x2="12" y2="21"/><line x1="9.5" y1="19" x2="14.5" y2="19"/>{% endif %}
+              </svg>
             </div>
-
-            <div style="display:flex; align-items:center; gap:16px; margin:16px 0 20px;">
-              <div style="width:64px; height:64px; border-radius:50%; background:var(--grad-pink-purple); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:1.4rem; font-weight:800; box-shadow:var(--glow-purple);">
-                {{ student.name[:2].upper() }}
-              </div>
-              <div>
-                <h3 style="font-size:1.15rem; font-weight:800; color:#FFFFFF;">{{ student.name }}</h3>
-                <p style="font-size:0.8rem; color:#DDD6FE; margin:2px 0 0;">{{ student.student_id }} &bull; {{ student.email }}</p>
-                <span class="badge badge-accent" style="margin-top:6px;">{{ student.department_name }}</span>
-              </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:0.8125rem;">
-              <div>
-                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Department</span>
-                <strong style="color:#FFFFFF;">{{ student.department }}</strong>
-              </div>
-              <div>
-                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Semester & Section</span>
-                <strong style="color:#FFFFFF;">Sem {{ student.semester }} (Section {{ student.section }})</strong>
-              </div>
-              <div>
-                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Contact Phone</span>
-                <strong style="color:#FFFFFF;">{{ student.phone or '+91 9800000000' }}</strong>
-              </div>
-              <div>
-                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Gender</span>
-                <strong style="color:#FFFFFF;">{{ student.gender or 'Not Specified' }}</strong>
-              </div>
+            <div>
+              <h3 style="font-size:1.3rem; font-weight:800; color:#17112B; margin:0 0 4px 0;">
+                {{ student.name or 'Not available' }}
+              </h3>
+              <span style="font-size:0.8rem; color:#6B7280;">
+                CampusIQ Verified Official Student Record
+              </span>
             </div>
           </div>
 
-          <!-- Advisor Card -->
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div>
-                <h3 class="glass-card-title">Assigned Faculty Advisor</h3>
-                <p class="glass-card-subtitle">Your designated mentor for academic guidance and counseling</p>
-              </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px;">
+            
+            <!-- 1. Student Name -->
+            <div style="background:#FAF9FE; border:1px solid rgba(124,58,237,0.1); border-radius:10px; padding:14px 16px;">
+              <span style="font-size:0.72rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em; margin-bottom:4px;">
+                Student Name
+              </span>
+              <strong style="color:#17112B; font-size:1rem;">
+                {{ student.name or 'Not available' }}
+              </strong>
             </div>
 
-            <div style="display:flex; align-items:center; gap:16px; margin:16px 0 20px;">
-              <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #43187D, #8B5CF6); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:1.2rem; font-weight:800;">
-                {{ student.mentor_name[:2].upper() }}
-              </div>
-              <div>
-                <h4 style="font-size:1.05rem; font-weight:800; color:#FFFFFF;">{{ student.mentor_name }}</h4>
-                <p style="font-size:0.78rem; color:#DDD6FE; margin:2px 0 0;">Faculty Advisor &bull; {{ student.department }} Department</p>
-                <span class="badge badge-low" style="margin-top:6px;">Office Hours: Mon-Fri 3-5 PM</span>
-              </div>
+            <!-- 2. Roll Number -->
+            <div style="background:#FAF9FE; border:1px solid rgba(124,58,237,0.1); border-radius:10px; padding:14px 16px;">
+              <span style="font-size:0.72rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em; margin-bottom:4px;">
+                Roll Number
+              </span>
+              <strong style="color:#17112B; font-size:1rem; font-family:monospace;">
+                {{ student.student_id or 'Not available' }}
+              </strong>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:10px; font-size:0.8125rem; margin-bottom:16px;">
-              <div>
-                <span style="color:#A78BFA; display:block; font-size:0.72rem; text-transform:uppercase;">Mentorship Caseload</span>
-                <span style="color:#FFFFFF;">Academic counseling, attendance monitoring, and placement support</span>
-              </div>
+            <!-- 3. Current Semester -->
+            <div style="background:#FAF9FE; border:1px solid rgba(124,58,237,0.1); border-radius:10px; padding:14px 16px;">
+              <span style="font-size:0.72rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em; margin-bottom:4px;">
+                Current Semester
+              </span>
+              <strong style="color:#17112B; font-size:1rem;">
+                {{ ('Semester ' ~ student.semester) if student.semester else 'Not available' }}
+              </strong>
             </div>
 
-            <button class="btn-action-primary" style="width:100%;" onclick="alert('Advising appointment requested with {{ student.mentor_name }}. An email confirmation has been dispatched.')">
-              Request Mentorship Counseling Session
+            <!-- 4. Branch / Department -->
+            <div style="background:#FAF9FE; border:1px solid rgba(124,58,237,0.1); border-radius:10px; padding:14px 16px;">
+              <span style="font-size:0.72rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em; margin-bottom:4px;">
+                Branch / Department
+              </span>
+              <strong style="color:#17112B; font-size:1rem;">
+                {{ student.department_name or student.department or 'Not available' }}
+              </strong>
+            </div>
+
+            <!-- 5. Phone Number -->
+            <div style="background:#FAF9FE; border:1px solid rgba(124,58,237,0.1); border-radius:10px; padding:14px 16px;">
+              <span style="font-size:0.72rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em; margin-bottom:4px;">
+                Phone Number
+              </span>
+              <strong style="color:#17112B; font-size:1rem;">
+                {{ student.phone or 'Not available' }}
+              </strong>
+            </div>
+
+            <!-- 6. Class Faculty Mentor -->
+            <div style="background:#FAF9FE; border:1px solid rgba(124,58,237,0.1); border-radius:10px; padding:14px 16px;">
+              <span style="font-size:0.72rem; color:#6B7280; text-transform:uppercase; font-weight:700; display:block; letter-spacing:0.04em; margin-bottom:4px;">
+                Class Faculty Mentor
+              </span>
+              <strong style="color:#17112B; font-size:1rem;">
+                {{ student.mentor_name or 'Not available' }}
+              </strong>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Mentorship & Counseling Details Card -->
+        <div class="glass-card" style="max-width:850px; padding:24px 28px; background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; box-shadow:0 4px 20px rgba(124,58,237,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:52px; height:52px; border-radius:14px; background:linear-gradient(135deg, #43187D, #8B5CF6); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:1.15rem; font-weight:800;">
+                {{ (student.mentor_name[:2]|upper) if student.mentor_name else 'FA' }}
+              </div>
+              <div>
+                <h4 style="font-size:1.05rem; font-weight:800; color:#17112B; margin:0 0 4px 0;">
+                  {{ student.mentor_name or 'Assigned Faculty Mentor' }}
+                </h4>
+                <p style="font-size:0.8rem; color:#6B7280; margin:0;">
+                  Faculty Mentor &bull; {{ student.department or 'Department' }} &bull; Office Hours: Mon-Fri 3-5 PM
+                </p>
+              </div>
+            </div>
+            
+            <button class="btn-action-primary" style="padding:10px 20px; font-size:0.85rem;" onclick="alert('Advising appointment requested with {{ student.mentor_name }}. An email confirmation has been dispatched.')">
+              Request Mentorship Session
             </button>
           </div>
-
         </div>
       </section>
 
@@ -1280,5 +2820,126 @@
     window.STUDENT_METRICS = {{ metrics|tojson }};
   </script>
   <script src="{{ url_for('static', filename='js/app.js') }}?v=2026.1"></script>
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}?v=2026.1"></script>
+
+  <script>
+    // =========================================================================
+    // Academic Records Portfolio & Mid-Exam Interactive Controls
+    // =========================================================================
+    function toggleSemesterAccordion(semLabel) {
+      const body = document.getElementById('sem-body-' + semLabel);
+      const chevron = document.getElementById('chevron-' + semLabel);
+      if (!body) return;
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      } else {
+        body.style.display = 'none';
+        if (chevron) chevron.style.transform = 'rotate(-90deg)';
+      }
+    }
+
+    function applyAcademicFilters() {
+      const yearFilter = document.getElementById('acadYearFilter') ? document.getElementById('acadYearFilter').value : 'ALL';
+      const semFilter = document.getElementById('acadSemFilter') ? document.getElementById('acadSemFilter').value : 'ALL';
+      const searchVal = (document.getElementById('acadSubjectSearch') ? document.getElementById('acadSubjectSearch').value : '').trim().toLowerCase();
+
+      const panels = document.querySelectorAll('.acad-semester-panel');
+      const noRecordsAlert = document.getElementById('acadNoRecordsAlert');
+      const container = document.getElementById('acadSemestersContainer');
+      const counter = document.getElementById('acadRecordCount');
+
+      let totalVisibleCourses = 0;
+      let totalVisiblePanels = 0;
+
+      panels.forEach(panel => {
+        const panelYear = panel.getAttribute('data-year');
+        const panelSem = panel.getAttribute('data-semester');
+
+        // Check if panel matches year and semester filters
+        const matchesYear = (yearFilter === 'ALL' || yearFilter === panelYear);
+        const matchesSem = (semFilter === 'ALL' || semFilter === panelSem);
+
+        if (!matchesYear || !matchesSem) {
+          panel.style.display = 'none';
+          return;
+        }
+
+        // Filter rows inside panel
+        const rows = panel.querySelectorAll('.acad-course-row');
+        let visibleRowsInPanel = 0;
+
+        rows.forEach(row => {
+          const code = (row.getAttribute('data-code') || '').toLowerCase();
+          const name = (row.getAttribute('data-name') || '').toLowerCase();
+          const matchesSearch = !searchVal || code.includes(searchVal) || name.includes(searchVal);
+
+          if (matchesSearch) {
+            row.style.display = '';
+            visibleRowsInPanel++;
+            totalVisibleCourses++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        if (visibleRowsInPanel > 0) {
+          panel.style.display = 'block';
+          totalVisiblePanels++;
+          // Ensure body is visible when searching
+          const body = panel.querySelector('.acad-sem-body');
+          if (body && searchVal) {
+            body.style.display = 'block';
+            const chev = panel.querySelector('svg[id^="chevron-"]');
+            if (chev) chev.style.transform = 'rotate(0deg)';
+          }
+        } else {
+          panel.style.display = 'none';
+        }
+      });
+
+      if (totalVisibleCourses === 0) {
+        if (noRecordsAlert) noRecordsAlert.style.display = 'block';
+        if (container) container.style.display = 'none';
+        if (counter) counter.textContent = '0 courses found';
+      } else {
+        if (noRecordsAlert) noRecordsAlert.style.display = 'none';
+        if (container) container.style.display = 'block';
+        if (counter) counter.textContent = `Showing ${totalVisibleCourses} courses (${totalVisiblePanels} semester${totalVisiblePanels === 1 ? '' : 's'})`;
+      }
+    }
+
+    function resetAcademicFilters() {
+      const yearEl = document.getElementById('acadYearFilter');
+      const semEl = document.getElementById('acadSemFilter');
+      const searchEl = document.getElementById('acadSubjectSearch');
+
+      if (yearEl) yearEl.value = 'ALL';
+      if (semEl) semEl.value = 'ALL';
+      if (searchEl) searchEl.value = '';
+
+      applyAcademicFilters();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const yearEl = document.getElementById('acadYearFilter');
+      const semEl = document.getElementById('acadSemFilter');
+      const searchEl = document.getElementById('acadSubjectSearch');
+      const resetBtn = document.getElementById('btnResetAcademicFilter');
+
+      if (yearEl) yearEl.addEventListener('change', applyAcademicFilters);
+      if (semEl) semEl.addEventListener('change', applyAcademicFilters);
+      if (searchEl) searchEl.addEventListener('input', applyAcademicFilters);
+      if (resetBtn) resetBtn.addEventListener('click', resetAcademicFilters);
+
+      // Support direct hash navigation (e.g. #section-fee-details)
+      if (window.location.hash) {
+        const hashSec = window.location.hash.substring(1);
+        if (document.getElementById(hashSec) && typeof window.switchSection === 'function') {
+          window.switchSection(hashSec);
+        }
+      }
+    });
+  </script>
 </body>
 </html>

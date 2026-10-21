@@ -1,0 +1,902 @@
+<!-- ========================================================================= -->
+      <!-- SECTION 6: JOB PREPARATION & SKILLS ROADMAP (Replaces Placement Readiness) -->
+      <!-- ========================================================================= -->
+      <section id="section-placement-readiness" class="dashboard-section">
+        <!-- HEADER -->
+        <div class="section-title-wrap" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); border-radius: 20px; font-size: 0.82rem; font-weight: 700; color: #7C3AED; margin-bottom: 8px;">
+                <i class="fas fa-route"></i> Career Pathway &amp; Placement Readiness
+              </div>
+              <h2 class="section-heading" style="font-size: 1.85rem; font-weight: 800; color: #1E1B4B; margin: 0 0 6px 0;">Personalized Job Preparation &amp; Skills Roadmap</h2>
+              <p class="section-subheading" style="color: #64748B; font-size: 0.95rem; margin: 0;">Step-by-step role discovery, verified syllabus milestones, interview prep bank, and measurable readiness tracking.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" id="btn-save-plan" class="btn" style="background: linear-gradient(135deg, #7C3AED, #6D28D9); color: #fff; font-weight: 700; border-radius: 10px; padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px; border: none; box-shadow: 0 4px 14px rgba(124,58,237,0.3); cursor: pointer; transition: all 0.2s ease;">
+                <i class="fas fa-save"></i> Save My Progress
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 9 PREVIEW / HERO READINESS PROGRESS BANNER -->
+        <div class="glass-card" style="background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%); color: #fff; border-radius: 18px; padding: 26px 30px; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(76,29,149,0.25); position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -30px; bottom: -30px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(167,139,250,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%;"></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; align-items: center; position: relative; z-index: 1;">
+            <div>
+              <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #C4B5FD; font-weight: 700;">Target Role Selected</span>
+              <h3 id="hero-target-role" style="color: #fff; font-size: 1.6rem; font-weight: 800; margin: 4px 0 8px 0;">Software Developer</h3>
+              <p id="hero-timeline-desc" style="color: #E2E8F0; font-size: 0.9rem; margin: 0; opacity: 0.9;">
+                <i class="fas fa-calendar-alt" style="color: #A78BFA; margin-right: 6px;"></i><span id="hero-timeline-text">90 Days Preparation Plan &bull; 2-3 hrs/day</span>
+              </p>
+            </div>
+
+            <!-- Readiness Gauge -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <span style="font-size: 0.85rem; font-weight: 700; color: #E0E7FF;">Job Readiness Score</span>
+                <span id="hero-readiness-pct" style="font-size: 1.8rem; font-weight: 900; color: #34D399;">0%</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.15); border-radius: 12px; height: 12px; overflow: hidden; position: relative;">
+                <div id="hero-readiness-bar" style="background: linear-gradient(90deg, #10B981, #34D399); width: 0%; height: 100%; border-radius: 12px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+              </div>
+              <p id="hero-readiness-explain" style="font-size: 0.78rem; color: #CBD5E1; margin-top: 6px; line-height: 1.4;">Calculated as: 50% Core Skills Confident + 50% Roadmap Milestone Checklists Completed.</p>
+            </div>
+
+            <!-- Metric Badges -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Confident Skills</div>
+                <div id="hero-count-confident" style="font-size: 1.4rem; font-weight: 800; color: #34D399;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Skills In-Progress</div>
+                <div id="hero-count-learning" style="font-size: 1.4rem; font-weight: 800; color: #FBBF24;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Skills To Learn</div>
+                <div id="hero-count-needed" style="font-size: 1.4rem; font-weight: 800; color: #F87171;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="font-size: 0.75rem; color: #CBD5E1; font-weight: 600;">Tasks Done</div>
+                <div id="hero-count-tasks" style="font-size: 1.4rem; font-weight: 800; color: #60A5FA;">0 / 0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: CHOOSE YOUR CAREER GOAL -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(124,58,237,0.12); color: #7C3AED; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">1. Choose Your Career Goal</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Tailor your roadmap to your target specialization, current semester level, and available study hours.</p>
+            </div>
+          </div>
+
+          <form id="form-career-goal" onsubmit="event.preventDefault(); applyCareerPlan();">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 20px;">
+              <!-- Target Job Role -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Target Job Role <span style="color:#DC2626;">*</span>
+                </label>
+                <select id="input-target-role" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="Software Developer">Software Developer (Core &amp; DSA)</option>
+                  <option value="Full-Stack Developer">Full-Stack Developer (MERN / Python)</option>
+                  <option value="Data Analyst">Data Analyst (SQL, BI, Python)</option>
+                  <option value="AI / ML Engineer">AI / ML Engineer (Deep Learning &amp; LLMs)</option>
+                  <option value="Frontend Developer">Frontend Developer (Modern Web &amp; UI)</option>
+                  <option value="Cybersecurity Analyst">Cybersecurity Analyst (SOC, Threat &amp; SecOps)</option>
+                  <option value="Electronics / Embedded Systems Engineer">Electronics / Embedded Systems Engineer (IoT, C/C++)</option>
+                  <option value="Custom">Custom Role Specification...</option>
+                </select>
+                <input type="text" id="input-custom-role" placeholder="Enter custom target role..." style="display:none; margin-top:8px; width:100%; padding:9px 13px; border-radius:8px; border:1.5px solid #CBD5E1; font-size:0.88rem;" />
+              </div>
+
+              <!-- Academic Branch (Pre-filled) -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Degree &amp; Department (Pre-filled)
+                </label>
+                <input type="text" id="input-student-branch" class="form-control" value="{{ student.department }} ({{ student.roll_number }})" readonly style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #E2E8F0; font-size:0.92rem; color:#64748B; background:#F1F5F9; font-weight:600;" />
+              </div>
+
+              <!-- Current Semester (Pre-filled) -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Current Semester
+                </label>
+                <input type="text" id="input-student-sem" class="form-control" value="Semester {{ student.semester }} (Year {{ acad_year }})" readonly style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #E2E8F0; font-size:0.92rem; color:#64748B; background:#F1F5F9; font-weight:600;" />
+              </div>
+
+              <!-- Current Skill Level -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Current Technical Level
+                </label>
+                <select id="input-skill-level" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="Beginner">Beginner (Starting fundamentals)</option>
+                  <option value="Intermediate" selected>Intermediate (Familiar with syntax &amp; college labs)</option>
+                  <option value="Advanced">Advanced (Built projects, ready for mock rounds)</option>
+                </select>
+              </div>
+
+              <!-- Target Timeline -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Target Placement Timeline
+                </label>
+                <select id="input-timeline" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="30">30 Days (Intensive Sprint)</option>
+                  <option value="60">60 Days (Structured Preparation)</option>
+                  <option value="90" selected>90 Days (Complete Mastery)</option>
+                </select>
+              </div>
+
+              <!-- Daily Hours -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Available Daily Study Time
+                </label>
+                <select id="input-daily-hours" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="1-2">1 - 2 Hours / day (Consistent pace)</option>
+                  <option value="2-3" selected>2 - 3 Hours / day (Recommended)</option>
+                  <option value="4+">4+ Hours / day (Full immersion)</option>
+                </select>
+              </div>
+
+              <!-- Preferred Language -->
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                  Primary Programming Language
+                </label>
+                <select id="input-pref-lang" class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid #CBD5E1; font-size:0.92rem; font-weight:600; color:#1E293B; background:#F8FAFC;">
+                  <option value="Python" selected>Python</option>
+                  <option value="Java">Java</option>
+                  <option value="C++">C++</option>
+                  <option value="JavaScript">JavaScript / TypeScript</option>
+                  <option value="C">C</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-start; align-items: center; border-top: 1px dashed #E2E8F0; padding-top: 16px;">
+              <button type="submit" class="btn" style="background: #7C3AED; color: #fff; font-weight: 700; border-radius: 10px; padding: 11px 24px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-magic"></i> Create / Update My Job Preparation Plan
+              </button>
+              <span id="plan-save-status" style="font-size: 0.88rem; font-weight: 600; color: #059669; display: none;">
+                <i class="fas fa-check-circle"></i> Roadmap regenerated successfully!
+              </span>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2-COLUMN GRID: SECTION 2 (REQUIRED SKILLS) & SECTION 4 (SKILL GAP ANALYSIS) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-bottom: 28px;">
+          <!-- SECTION 2: REQUIRED SKILLS FOR SELECTED JOB -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:26px 28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(59,130,246,0.12); color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                <i class="fas fa-layer-group"></i>
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #1E1B4B;">2. Required Skills for Selected Job</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: #64748B;">Core technical pillars vs. role-enhancing optional skills</p>
+              </div>
+            </div>
+
+            <!-- Core Skills Block -->
+            <div style="margin-bottom: 18px;">
+              <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: #7C3AED; letter-spacing: 0.06em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-star" style="font-size: 0.75rem;"></i> Core Skills (Essential)
+              </div>
+              <div id="role-core-skills-badges" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Optional Skills Block -->
+            <div>
+              <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: #64748B; letter-spacing: 0.06em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-plus-circle" style="font-size: 0.75rem;"></i> Role-Enhancing / Optional Skills
+              </div>
+              <div id="role-optional-skills-badges" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: SKILL GAP ANALYSIS -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:26px 28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245,158,11,0.12); color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #1E1B4B;">4. Skill Gap Analysis</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: #64748B;">Clear distinction between validated, active, and missing requirements</p>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Skills I Know -->
+              <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 12px 14px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #15803D; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                  <span><i class="fas fa-check-circle" style="margin-right: 5px;"></i> Skills I Know / Practiced</span>
+                  <span id="gap-count-known" class="badge" style="background:#16A34A; color:#fff; font-size:0.75rem;">0</span>
+                </div>
+                <div id="gap-list-known" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; color: #166534;">
+                  <span style="color:#64748B; font-style:italic;">None evaluated yet</span>
+                </div>
+              </div>
+
+              <!-- Skills I Am Learning -->
+              <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 12px 14px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #B45309; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                  <span><i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Skills I Am Learning</span>
+                  <span id="gap-count-learning" class="badge" style="background:#D97706; color:#fff; font-size:0.75rem;">0</span>
+                </div>
+                <div id="gap-list-learning" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; color: #92400E;">
+                  <span style="color:#64748B; font-style:italic;">None currently in progress</span>
+                </div>
+              </div>
+
+              <!-- Skills I Need To Learn -->
+              <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 12px 14px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #B91C1C; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                  <span><i class="fas fa-exclamation-triangle" style="margin-right: 5px;"></i> Skills I Need To Learn (High Priority)</span>
+                  <span id="gap-count-needed" class="badge" style="background:#DC2626; color:#fff; font-size:0.75rem;">0</span>
+                </div>
+                <div id="gap-list-needed" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; color: #991B1B;">
+                  <span style="color:#64748B; font-style:italic;">All core requirements met!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: MY CURRENT SKILLS (EVALUATION MATRIX) -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16,185,129,0.12); color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">3. My Current Skills Self-Evaluation</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Accurately mark your status for each skill: <em>Not Started</em>, <em>Learning</em>, <em>Practiced</em>, or <em>Confident</em>.</p>
+              </div>
+            </div>
+            <!-- Add Custom Skill -->
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="input-add-custom-skill" placeholder="Add custom skill (e.g. Docker, OpenCV)..." style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid #CBD5E1; font-size: 0.85rem; width: 220px;" />
+              <button type="button" onclick="addCustomSkillToMatrix()" class="btn" style="background: #10B981; color: #fff; font-weight: 700; border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; border: none; cursor: pointer;">
+                <i class="fas fa-plus"></i> Add
+              </button>
+            </div>
+          </div>
+
+          <!-- Skills Evaluation Table / Matrix -->
+          <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;">
+              <thead>
+                <tr style="background: #F8FAFC; text-align: left; color: #475569; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; border-top-left-radius: 10px;">Skill Name</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0;">Importance</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center;">Not Started</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center;">Learning</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center;">Practiced</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #E2E8F0; text-align: center; border-top-right-radius: 10px;">Confident</th>
+                </tr>
+              </thead>
+              <tbody id="skill-matrix-tbody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION 5: PERSONALIZED LEARNING ROADMAP (TIMELINE & CHECKLISTS) -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(124,58,237,0.12); color: #7C3AED; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-road"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">5. Step-by-Step Learning Roadmap</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Structured syllabus broken into chronological stages with actionable checklist tasks.</p>
+            </div>
+          </div>
+
+          <div id="roadmap-stages-container" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Stages rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- SECTION 6: PROJECTS TO BUILD -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(236,72,153,0.12); color: #EC4899; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-laptop-code"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">6. Recommended Projects to Build</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Stand out in resume screening and recruiter interviews with proof-of-work projects.</p>
+            </div>
+          </div>
+
+          <div id="roadmap-projects-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- SECTION 7: PRACTICE FOR PLACEMENTS (APTITUDE, CODING, INTERVIEWS) -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(99,102,241,0.12); color: #6366F1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">7. Placement Practice Bank (Aptitude, Technical &amp; HR)</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Comprehensive preparation questions with detailed answers and STAR methodology tips.</p>
+            </div>
+          </div>
+
+          <!-- Practice Tabs -->
+          <div style="display: flex; gap: 10px; border-bottom: 2px solid #E2E8F0; margin-bottom: 20px; flex-wrap: wrap;">
+            <button type="button" class="prep-tab-btn active-prep-tab" onclick="switchPrepTab('Quantitative Aptitude')" id="tab-btn-quant" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid #7C3AED; color: #7C3AED;">
+              <i class="fas fa-calculator" style="margin-right: 6px;"></i> Quantitative Aptitude
+            </button>
+            <button type="button" class="prep-tab-btn" onclick="switchPrepTab('Logical Reasoning')" id="tab-btn-logical" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B;">
+              <i class="fas fa-brain" style="margin-right: 6px;"></i> Logical Reasoning
+            </button>
+            <button type="button" class="prep-tab-btn" onclick="switchPrepTab('Technical Interview Questions')" id="tab-btn-technical" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B;">
+              <i class="fas fa-code" style="margin-right: 6px;"></i> Technical Rounds
+            </button>
+            <button type="button" class="prep-tab-btn" onclick="switchPrepTab('HR & Behavioral Questions')" id="tab-btn-hr" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 700; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B;">
+              <i class="fas fa-comments" style="margin-right: 6px;"></i> HR &amp; Behavioral (STAR)
+            </button>
+          </div>
+
+          <div id="prep-tab-content" style="min-height: 220px;">
+            <!-- Tab content dynamically populated -->
+          </div>
+        </div>
+
+        <!-- SECTION 8: VERIFIED LEARNING RESOURCES -->
+        <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:18px; padding:28px 32px; margin-bottom:28px; box-shadow:0 6px 20px rgba(124,58,237,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(14,165,233,0.12); color: #0EA5E9; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="fas fa-book-reader"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #1E1B4B;">8. Verified Learning Documentation &amp; Platforms</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.88rem; color: #64748B;">Official documentation, open textbooks, interactive sandboxes, and problem banks.</p>
+            </div>
+          </div>
+
+          <div id="roadmap-resources-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- CAREER ROADMAP CONTROLLER JAVASCRIPT -->
+      <script>
+        (function() {
+          let currentRoadmapData = null;
+          let activePrepBank = {};
+          let currentSkillAssessments = {};
+          let currentCompletedTasks = {};
+
+          window.addEventListener('DOMContentLoaded', function() {
+            initRoadmap();
+
+            const targetSelect = document.getElementById('input-target-role');
+            if (targetSelect) {
+              targetSelect.addEventListener('change', function(e) {
+                const customInput = document.getElementById('input-custom-role');
+                if (e.target.value === 'Custom') {
+                  customInput.style.display = 'block';
+                } else {
+                  customInput.style.display = 'none';
+                }
+              });
+            }
+
+            const saveBtn = document.getElementById('btn-save-plan');
+            if (saveBtn) {
+              saveBtn.addEventListener('click', function() {
+                saveRoadmapToServer(true);
+              });
+            }
+          });
+
+          async function initRoadmap() {
+            try {
+              const res = await fetch('/api/student/roadmap');
+              if (!res.ok) throw new Error('Failed to load roadmap data');
+              const data = await res.json();
+              currentRoadmapData = data;
+              renderAllRoadmapSections(data);
+            } catch (err) {
+              console.error('Error fetching roadmap:', err);
+            }
+          }
+
+          function renderAllRoadmapSections(data) {
+            const plan = data.plan || {};
+            const roleData = data.role_data || {};
+            activePrepBank = data.interview_prep || {};
+
+            // 1. Form controls sync
+            const targetSelect = document.getElementById('input-target-role');
+            const customInput = document.getElementById('input-custom-role');
+            const matchedOption = Array.from(targetSelect.options).some(o => o.value === plan.target_role);
+            if (matchedOption) {
+              targetSelect.value = plan.target_role;
+              customInput.style.display = 'none';
+            } else if (plan.target_role) {
+              targetSelect.value = 'Custom';
+              customInput.value = plan.target_role;
+              customInput.style.display = 'block';
+            }
+
+            if (plan.skill_level) document.getElementById('input-skill-level').value = plan.skill_level;
+            if (plan.timeline_days) document.getElementById('input-timeline').value = plan.timeline_days;
+            if (plan.daily_hours) document.getElementById('input-daily-hours').value = plan.daily_hours;
+            if (plan.preferred_language) document.getElementById('input-pref-lang').value = plan.preferred_language;
+
+            // 2. Hero update
+            const displayRole = (targetSelect.value === 'Custom' && customInput.value.trim()) ? customInput.value.trim() : targetSelect.value;
+            document.getElementById('hero-target-role').textContent = displayRole;
+            document.getElementById('hero-timeline-text').textContent = (plan.timeline_days || '90') + ' Days Preparation Plan • ' + (plan.daily_hours || '2-3') + ' hrs/day';
+
+            currentSkillAssessments = plan.skill_assessments || {};
+            currentCompletedTasks = plan.completed_tasks || {};
+
+            // 3. Section 2: Required Skills
+            renderRequiredSkills(roleData);
+
+            // 4. Section 3: Skill Matrix
+            renderSkillMatrix(roleData, currentSkillAssessments);
+
+            // 5. Section 4 & Section 9: Compute & Render Gap Analysis & Readiness
+            recomputeAndRenderReadiness(roleData);
+
+            // 6. Section 5: Roadmap stages
+            renderStages(roleData.stages || [], currentCompletedTasks);
+
+            // 7. Section 6: Projects
+            renderProjects(roleData.projects || []);
+
+            // 8. Section 7: Practice tabs
+            switchPrepTab('Quantitative Aptitude');
+
+            // 9. Section 8: Resources gathered from stages
+            const resources = [];
+            (roleData.stages || []).forEach(stg => {
+              (stg.resources || []).forEach(resItem => {
+                if (!resources.some(r => r.url === resItem.url)) {
+                  resources.push({
+                    title: resItem.name,
+                    category: resItem.type || 'Official Documentation',
+                    url: resItem.url,
+                    description: 'Recommended for Stage ' + stg.stage_num + ': ' + stg.title
+                  });
+                }
+              });
+            });
+            renderResources(resources);
+          }
+
+          function renderRequiredSkills(roleData) {
+            const coreContainer = document.getElementById('role-core-skills-badges');
+            const optContainer = document.getElementById('role-optional-skills-badges');
+            coreContainer.innerHTML = '';
+            optContainer.innerHTML = '';
+
+            (roleData.core_skills || []).forEach(skill => {
+              const badge = document.createElement('span');
+              badge.className = 'badge';
+              badge.style.cssText = 'background: rgba(124,58,237,0.12); color: #7C3AED; border: 1px solid rgba(124,58,237,0.3); font-weight: 700; padding: 6px 12px; font-size: 0.82rem; border-radius: 8px;';
+              badge.innerHTML = '<i class="fas fa-check" style="margin-right: 4px;"></i>' + skill;
+              coreContainer.appendChild(badge);
+            });
+
+            (roleData.optional_skills || []).forEach(skill => {
+              const badge = document.createElement('span');
+              badge.className = 'badge';
+              badge.style.cssText = 'background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; font-weight: 600; padding: 6px 12px; font-size: 0.82rem; border-radius: 8px;';
+              badge.innerHTML = skill;
+              optContainer.appendChild(badge);
+            });
+          }
+
+          function renderSkillMatrix(roleData, assessments) {
+            const tbody = document.getElementById('skill-matrix-tbody');
+            tbody.innerHTML = '';
+
+            const allSkills = [];
+            (roleData.core_skills || []).forEach(s => allSkills.push({ name: s, isCore: true }));
+            (roleData.optional_skills || []).forEach(s => allSkills.push({ name: s, isCore: false }));
+
+            // Add any custom assessed skills not in role list
+            Object.keys(assessments).forEach(s => {
+              if (!allSkills.some(item => item.name.toLowerCase() === s.toLowerCase())) {
+                allSkills.push({ name: s, isCore: false, isCustom: true });
+              }
+            });
+
+            allSkills.forEach((item, idx) => {
+              const tr = document.createElement('tr');
+              tr.style.borderBottom = '1px solid #F1F5F9';
+              if (idx % 2 === 1) tr.style.background = '#FAFAFD';
+
+              const currentLevel = assessments[item.name] || 'Not Started';
+
+              tr.innerHTML = `
+                <td style="padding: 12px 16px; font-weight: 700; color: #1E293B;">
+                  ${item.name}
+                  ${item.isCustom ? '<span style="font-size:0.7rem; color:#6B7280; margin-left:6px;">(Custom)</span>' : ''}
+                </td>
+                <td style="padding: 12px 16px;">
+                  <span class="badge" style="${item.isCore ? 'background:#EDE9FE; color:#7C3AED; font-weight:700;' : 'background:#F1F5F9; color:#64748B;'} padding:4px 8px; border-radius:6px; font-size:0.75rem;">
+                    ${item.isCore ? 'Core Required' : 'Optional / Plus'}
+                  </span>
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Not Started" ${currentLevel === 'Not Started' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Learning" ${currentLevel === 'Learning' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Practiced" ${currentLevel === 'Practiced' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+                <td style="text-align: center; padding: 12px 16px;">
+                  <input type="radio" name="skill_${encodeURIComponent(item.name)}" value="Confident" ${currentLevel === 'Confident' ? 'checked' : ''} onchange="onSkillLevelChange('${item.name.replace(/'/g, "\\'")}', this.value)" style="cursor: pointer;" />
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+
+          window.onSkillLevelChange = function(skillName, value) {
+            currentSkillAssessments[skillName] = value;
+            if (currentRoadmapData && currentRoadmapData.role_data) {
+              recomputeAndRenderReadiness(currentRoadmapData.role_data);
+            }
+          };
+
+          window.addCustomSkillToMatrix = function() {
+            const input = document.getElementById('input-add-custom-skill');
+            const skillName = (input.value || '').trim();
+            if (!skillName) return;
+            currentSkillAssessments[skillName] = 'Learning';
+            input.value = '';
+            if (currentRoadmapData && currentRoadmapData.role_data) {
+              renderSkillMatrix(currentRoadmapData.role_data, currentSkillAssessments);
+              recomputeAndRenderReadiness(currentRoadmapData.role_data);
+            }
+          };
+
+          function recomputeAndRenderReadiness(roleData) {
+            const coreSkills = roleData.core_skills || [];
+            const known = [];
+            const learning = [];
+            const needed = [];
+
+            // Classify all evaluated skills
+            Object.keys(currentSkillAssessments).forEach(s => {
+              const val = currentSkillAssessments[s];
+              if (val === 'Confident' || val === 'Practiced') {
+                known.push(s);
+              } else if (val === 'Learning') {
+                learning.push(s);
+              }
+            });
+
+            // Core skills not marked Confident or Practiced are needed
+            coreSkills.forEach(s => {
+              const val = currentSkillAssessments[s];
+              if (val !== 'Confident' && val !== 'Practiced') {
+                if (!needed.includes(s)) needed.push(s);
+              }
+            });
+
+            // Update Section 4 DOM
+            document.getElementById('gap-count-known').textContent = known.length;
+            document.getElementById('gap-count-learning').textContent = learning.length;
+            document.getElementById('gap-count-needed').textContent = needed.length;
+
+            const listKnown = document.getElementById('gap-list-known');
+            listKnown.innerHTML = known.length ? known.map(s => `<span class="badge" style="background:#DCFCE7; color:#15803D; padding:4px 8px; border-radius:6px; font-weight:700;"><i class="fas fa-check" style="font-size:0.7rem; margin-right:4px;"></i>${s}</span>`).join('') : '<span style="color:#64748B; font-style:italic;">None evaluated yet</span>';
+
+            const listLearning = document.getElementById('gap-list-learning');
+            listLearning.innerHTML = learning.length ? learning.map(s => `<span class="badge" style="background:#FEF3C7; color:#92400E; padding:4px 8px; border-radius:6px; font-weight:700;"><i class="fas fa-clock" style="font-size:0.7rem; margin-right:4px;"></i>${s}</span>`).join('') : '<span style="color:#64748B; font-style:italic;">None in-progress</span>';
+
+            const listNeeded = document.getElementById('gap-list-needed');
+            listNeeded.innerHTML = needed.length ? needed.map(s => `<span class="badge" style="background:#FEE2E2; color:#B91C1C; padding:4px 8px; border-radius:6px; font-weight:700;"><i class="fas fa-bolt" style="font-size:0.7rem; margin-right:4px;"></i>${s}</span>`).join('') : '<span style="color:#16A34A; font-weight:700;"><i class="fas fa-star" style="margin-right:4px;"></i>All core skills practiced!</span>';
+
+            // Calculate overall readiness
+            let totalTasks = 0;
+            let doneTasks = 0;
+            (roleData.stages || []).forEach(stage => {
+              (stage.practical_tasks || []).forEach(t => {
+                totalTasks += 1;
+                if (currentCompletedTasks[t]) doneTasks += 1;
+              });
+            });
+
+            const totalCore = coreSkills.length || 1;
+            const confidentCoreCount = coreSkills.filter(s => currentSkillAssessments[s] === 'Confident' || currentSkillAssessments[s] === 'Practiced').length;
+            const skillScore = Math.min(100, Math.round((confidentCoreCount / totalCore) * 50));
+            const taskScore = totalTasks > 0 ? Math.min(100, Math.round((doneTasks / totalTasks) * 50)) : 25;
+            const readinessPct = Math.min(100, skillScore + taskScore);
+
+            // Update Hero & Section 9 metrics
+            document.getElementById('hero-readiness-pct').textContent = readinessPct + '%';
+            document.getElementById('hero-readiness-bar').style.width = readinessPct + '%';
+            document.getElementById('hero-count-confident').textContent = known.length;
+            document.getElementById('hero-count-learning').textContent = learning.length;
+            document.getElementById('hero-count-needed').textContent = needed.length;
+            document.getElementById('hero-count-tasks').textContent = doneTasks + ' / ' + totalTasks;
+          }
+
+          function renderStages(stages, completedTasks) {
+            const container = document.getElementById('roadmap-stages-container');
+            container.innerHTML = '';
+
+            stages.forEach((stage, idx) => {
+              const card = document.createElement('div');
+              card.style.cssText = 'border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03);';
+
+              let topicsHtml = (stage.topics || []).map(tp => `<span class="badge" style="background:#F1F5F9; color:#334155; font-weight:600; padding:4px 8px; border-radius:6px; font-size:0.78rem;">${tp}</span>`).join('');
+
+              let checklistsHtml = (stage.practical_tasks || []).map(task => {
+                const isChecked = !!completedTasks[task];
+                return `
+                  <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; color: #334155; cursor: pointer; padding: 6px 0;">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="onTaskToggle('${task.replace(/'/g, "\\'")}', this.checked)" style="margin-top: 3px; accent-color: #7C3AED; cursor: pointer;" />
+                    <span style="${isChecked ? 'text-decoration: line-through; color: #94A3B8;' : ''}">${task}</span>
+                  </label>
+                `;
+              }).join('');
+
+              card.innerHTML = `
+                <div style="background: linear-gradient(90deg, #F8FAFC, #EEF2FF); padding: 16px 20px; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #7C3AED; letter-spacing: 0.06em;">Stage ${stage.stage_num || (idx + 1)} &bull; ${stage.time_allocation}</span>
+                    <h4 style="margin: 2px 0 0 0; font-size: 1.1rem; font-weight: 800; color: #1E1B4B;">${stage.title}</h4>
+                  </div>
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #059669; background: #ECFDF5; padding: 4px 10px; border-radius: 20px; border: 1px solid #A7F3D0;">
+                    <i class="fas fa-flag-checkered" style="margin-right: 4px;"></i>${stage.completion_goal}
+                  </div>
+                </div>
+                <div style="padding: 18px 20px;">
+                  <div style="margin-bottom: 14px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 6px;">Key Topics &amp; Competencies:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">${topicsHtml}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 6px;">Actionable Checklist:</div>
+                    <div style="display: flex; flex-direction: column;">${checklistsHtml}</div>
+                  </div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+          }
+
+          window.onTaskToggle = function(taskName, isChecked) {
+            currentCompletedTasks[taskName] = isChecked;
+            if (currentRoadmapData && currentRoadmapData.role_data) {
+              recomputeAndRenderReadiness(currentRoadmapData.role_data);
+            }
+          };
+
+          function renderProjects(projects) {
+            const container = document.getElementById('roadmap-projects-container');
+            container.innerHTML = '';
+
+            projects.forEach(p => {
+              const card = document.createElement('div');
+              let badgeStyle = 'background:#E0E7FF; color:#4338CA;';
+              if ((p.level || '').includes('Intermediate')) badgeStyle = 'background:#FEF3C7; color:#92400E;';
+              if ((p.level || '').includes('Advanced')) badgeStyle = 'background:#FCE7F3; color:#9D174D;';
+
+              card.style.cssText = 'border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between;';
+              card.innerHTML = `
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="badge" style="${badgeStyle} font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">${p.level}</span>
+                  </div>
+                  <h4 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: #1E1B4B;">${p.title}</h4>
+                  <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; line-height: 1.45;"><strong>Problem Solved:</strong> ${p.problem}</p>
+                  
+                  <div style="margin-bottom: 10px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 4px;">Skills Utilized:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                      ${(p.skills_practiced || []).map(s => `<span class="badge" style="background:#F1F5F9; color:#334155; font-size:0.75rem; padding:2px 6px; border-radius:4px;">${s}</span>`).join('')}
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #64748B; margin-bottom: 4px;">Core Features:</div>
+                    <ul style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #334155; line-height: 1.4;">
+                      ${(p.features || []).map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                  </div>
+                </div>
+
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px; margin-top: 10px;">
+                  <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: #7C3AED; margin-bottom: 3px;">
+                    <i class="fas fa-bullhorn" style="margin-right: 4px;"></i>Recruiter Interview Pitch:
+                  </div>
+                  <div style="font-size: 0.8rem; color: #475569; font-style: italic; line-height: 1.4;">"${p.interview_pitch}"</div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+          }
+
+          window.switchPrepTab = function(categoryName) {
+            const tabMap = {
+              'Quantitative Aptitude': 'tab-btn-quant',
+              'Logical Reasoning': 'tab-btn-logical',
+              'Technical Interview Questions': 'tab-btn-technical',
+              'HR & Behavioral Questions': 'tab-btn-hr'
+            };
+
+            Object.entries(tabMap).forEach(([cat, btnId]) => {
+              const btn = document.getElementById(btnId);
+              if (btn) {
+                if (cat === categoryName) {
+                  btn.style.borderBottom = '3px solid #7C3AED';
+                  btn.style.color = '#7C3AED';
+                } else {
+                  btn.style.borderBottom = '3px solid transparent';
+                  btn.style.color = '#64748B';
+                }
+              }
+            });
+
+            const content = document.getElementById('prep-tab-content');
+            const items = activePrepBank[categoryName] || [];
+
+            if (!items.length) {
+              content.innerHTML = '<div style="color:#64748B; padding:20px; text-align:center;">No questions found for this category.</div>';
+              return;
+            }
+
+            content.innerHTML = items.map((q, idx) => {
+              if (categoryName === 'HR & Behavioral Questions') {
+                return `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #1E1B4B; margin-bottom: 6px;">Q${idx + 1}. ${q.question}</div>
+                    <div style="background: #FFFFFF; border-left: 3px solid #7C3AED; padding: 8px 14px; border-radius: 4px; font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                      <strong>STAR Framework Answer Guide:</strong> ${q.answer}
+                    </div>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                      <div style="font-size: 0.95rem; font-weight: 800; color: #1E1B4B;">Q${idx + 1}. ${q.question}</div>
+                      ${q.topic ? `<span class="badge" style="background:#EDE9FE; color:#7C3AED; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:4px;">${q.topic}</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #15803D; font-weight: 700; margin-bottom: 4px;">
+                      <i class="fas fa-check-circle" style="margin-right: 4px;"></i>Answer: ${q.answer}
+                    </div>
+                    ${q.explanation ? `
+                      <div style="font-size: 0.82rem; color: #475569; line-height: 1.45;">
+                        <strong>Explanation / Key Concept:</strong> ${q.explanation}
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }
+            }).join('');
+          };
+
+          function renderResources(resources) {
+            const container = document.getElementById('roadmap-resources-container');
+            container.innerHTML = '';
+
+            resources.forEach(r => {
+              const card = document.createElement('a');
+              card.href = r.url;
+              card.target = '_blank';
+              card.rel = 'noopener noreferrer';
+              card.style.cssText = 'text-decoration: none; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; background: #FFFFFF; transition: all 0.2s ease; display: block; box-shadow: 0 2px 6px rgba(0,0,0,0.02);';
+              card.onmouseover = function() { this.style.borderColor = '#7C3AED'; this.style.transform = 'translateY(-2px)'; };
+              card.onmouseout = function() { this.style.borderColor = '#E2E8F0'; this.style.transform = 'translateY(0)'; };
+
+              card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span class="badge" style="background:#E0F2FE; color:#0284C7; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:4px;">${r.category}</span>
+                  <i class="fas fa-external-link-alt" style="font-size: 0.8rem; color: #94A3B8;"></i>
+                </div>
+                <h4 style="margin: 0 0 4px 0; font-size: 1rem; font-weight: 800; color: #1E1B4B;">${r.title}</h4>
+                <p style="margin: 0; font-size: 0.82rem; color: #64748B; line-height: 1.4;">${r.description}</p>
+              `;
+              container.appendChild(card);
+            });
+          }
+
+          window.applyCareerPlan = async function() {
+            const targetSelect = document.getElementById('input-target-role');
+            const customInput = document.getElementById('input-custom-role');
+            const targetRole = targetSelect.value === 'Custom' ? (customInput.value.trim() || 'Software Developer') : targetSelect.value;
+            const timeline = document.getElementById('input-timeline').value;
+            const hours = document.getElementById('input-daily-hours').value;
+            const level = document.getElementById('input-skill-level').value;
+            const prefLang = document.getElementById('input-pref-lang').value;
+
+            const payload = {
+              target_role: targetRole,
+              timeline_days: timeline,
+              daily_hours: hours,
+              skill_level: level,
+              preferred_language: prefLang,
+              skill_assessments: currentSkillAssessments,
+              completed_tasks: currentCompletedTasks
+            };
+
+            await sendRoadmapUpdate(payload);
+          };
+
+          window.saveRoadmapToServer = async function(showMessage) {
+            const targetSelect = document.getElementById('input-target-role');
+            const customInput = document.getElementById('input-custom-role');
+            const targetRole = targetSelect.value === 'Custom' ? (customInput.value.trim() || 'Software Developer') : targetSelect.value;
+            const timeline = document.getElementById('input-timeline').value;
+            const hours = document.getElementById('input-daily-hours').value;
+            const level = document.getElementById('input-skill-level').value;
+            const prefLang = document.getElementById('input-pref-lang').value;
+
+            const payload = {
+              target_role: targetRole,
+              timeline_days: timeline,
+              daily_hours: hours,
+              skill_level: level,
+              preferred_language: prefLang,
+              skill_assessments: currentSkillAssessments,
+              completed_tasks: currentCompletedTasks
+            };
+
+            await sendRoadmapUpdate(payload, showMessage);
+          };
+
+          async function sendRoadmapUpdate(payload, showMessage) {
+            try {
+              const res = await fetch('/api/student/roadmap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              if (!res.ok) throw new Error('Failed to update plan');
+              const data = await res.json();
+              currentRoadmapData = data;
+              renderAllRoadmapSections(data);
+
+              const status = document.getElementById('plan-save-status');
+              if (status) {
+                status.style.display = 'inline-flex';
+                status.innerHTML = '<i class="fas fa-check-circle" style="margin-right:5px;"></i> Plan &amp; Progress Saved!';
+                setTimeout(() => { status.style.display = 'none'; }, 3500);
+              }
+            } catch (err) {
+              console.error('Error saving roadmap:', err);
+              alert('Could not save roadmap progress. Please check connection.');
+            }
+          }
+        })();
+      </script>

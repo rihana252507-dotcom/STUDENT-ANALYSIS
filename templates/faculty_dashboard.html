@@ -55,6 +55,12 @@
         </a>
 
         <div class="sidebar-nav-category">Action Hub</div>
+        <a class="sidebar-nav-link" data-section="section-notifications" id="sidebarNavNotifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notifications</span>
+          <span id="facultySidebarNotifDot" class="unread-dot" style="display:none; width:8px; height:8px; background:#DC2626; border-radius:50%; margin-left:auto;"></span>
+        </a>
+
         <a class="sidebar-nav-link" data-section="section-interventions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>Interventions</span>
@@ -111,9 +117,9 @@
             <span>What-If Simulator</span>
           </button>
 
-          <button id="btnToggleNotifications" class="topbar-icon-btn" title="Caseload Alerts">
+          <button id="btnToggleNotifications" class="topbar-icon-btn" title="Caseload Alerts" style="position:relative;">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span class="topbar-notif-dot"></span>
+            <span id="facultyTopbarNotifDot" class="topbar-notif-dot" style="display:none; background:#DC2626;"></span>
           </button>
 
           <div class="topbar-profile-container" style="position:relative;">
@@ -147,20 +153,13 @@
       </header>
 
       <!-- Notifications Dropdown Popover -->
-      <div id="notificationsDropdown" class="notifications-dropdown" style="display:none; position:absolute; right:28px; top:70px;">
+      <div id="notificationsDropdown" class="notifications-dropdown" style="display:none; position:absolute; right:28px; top:70px; width:380px;">
         <div class="notifications-header">
-          <h4>Caseload Risk Alerts</h4>
-          <span style="font-size:0.7rem; color:var(--purple-electric); font-weight:700;">Live Feed</span>
+          <h4>Intervention &amp; Caseload Alerts</h4>
+          <span id="facultyNotifCountBadge" style="font-size:0.7rem; color:var(--purple-electric); font-weight:700;">Live Feed</span>
         </div>
-        <div class="notifications-list">
-          <div class="notification-item">
-            <strong style="color:#DC2626; font-size:0.75rem;">Urgent Review: Kabir Mehta</strong>
-            <span style="color:var(--text-secondary); font-size:0.72rem;">68.0% attendance trigger. Counseling minutes pending.</span>
-          </div>
-          <div class="notification-item">
-            <strong style="color:#D97706; font-size:0.75rem;">Placement Advisory: Rohan Sharma</strong>
-            <span style="color:var(--text-secondary); font-size:0.72rem;">CGPA 8.40 with technical aptitude score &lt; 65.</span>
-          </div>
+        <div class="notifications-list" id="facultyNotificationsList">
+          <!-- Populated dynamically via JS -->
         </div>
       </div>
 
@@ -233,34 +232,115 @@
           </div>
         </div>
 
-        <!-- Advisee Quick Roster -->
-        <div class="glass-card-container">
-          <div class="glass-card-header">
-            <div>
-              <h3 class="glass-card-title">Assigned Advisees Overview</h3>
-              <span class="glass-card-subtitle">Real-time academic telemetry and early risk scores</span>
+        <!-- ========================================================================= -->
+        <!-- Three Graphical Student Analytics Indicators (Attendance, Backlogs, Risk)   -->
+        <!-- ========================================================================= -->
+        <div id="facultyAnalyticsEmptyState" style="display:none; background:#FFFFFF; border:1px solid var(--border-light); border-radius:16px; padding:32px; text-align:center; color:var(--text-muted); font-size:0.95rem; margin-top:20px;">
+          No assigned student records are available for analytics yet.
+        </div>
+
+        <div id="facultyAnalyticsIndicatorsRow" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px; margin-top:24px;">
+          
+          <!-- Indicator 1: Student Attendance -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; padding:24px 20px; box-shadow:0 4px 20px rgba(124,58,237,0.06); text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:260px;">
+            <span style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--purple-deep); margin-bottom:10px; display:block;">
+              Student Attendance
+            </span>
+
+            <div id="facultyAttGraphicContainer" style="position:relative; width:130px; height:130px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+              <svg width="130" height="130" viewBox="0 0 100 100" style="transform:rotate(-90deg);">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1EFF9" stroke-width="9" />
+                <circle id="facultyAttCircleProgress" cx="50" cy="50" r="42" fill="none" stroke="#10B981" stroke-width="9" stroke-linecap="round"
+                  stroke-dasharray="263.89" stroke-dashoffset="52.78" />
+              </svg>
+              <div style="position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span id="facultyAttVal" style="font-size:1.5rem; font-weight:800; color:#17112B; line-height:1;">
+                  --%
+                </span>
+                <span id="facultyAttStatusTag" style="font-size:0.65rem; font-weight:700; color:#10B981; text-transform:uppercase; margin-top:3px;">
+                  Compliant
+                </span>
+              </div>
             </div>
-            <button class="btn-table-inspect" onclick="switchSection('section-my-students')">View Full Caseload</button>
+
+            <div id="facultyAttUnavailable" style="display:none; padding:36px 10px; color:#6B7280; font-size:0.875rem; font-weight:600;">
+              Attendance data unavailable
+            </div>
+
+            <p style="font-size:0.8rem; color:#6B7280; margin:12px 0 0 0; line-height:1.4;">
+              Average attendance across your assigned students.
+            </p>
           </div>
-          <div class="glass-table-responsive">
-            <table class="cyber-table">
-              <thead>
-                <tr>
-                  <th>Advisee</th>
-                  <th>Semester</th>
-                  <th>CGPA</th>
-                  <th>Attendance</th>
-                  <th>Backlogs</th>
-                  <th>Success Score</th>
-                  <th>Risk Category</th>
-                  <th style="text-align:right;">Action</th>
-                </tr>
-              </thead>
-              <tbody id="facultyOverviewTableBody">
-                <!-- Populated dynamically via JS -->
-              </tbody>
-            </table>
+
+          <!-- Indicator 2: Student Backlogs -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; padding:24px 20px; box-shadow:0 4px 20px rgba(124,58,237,0.06); text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:260px;">
+            <span style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--purple-deep); margin-bottom:10px; display:block;">
+              Student Backlogs
+            </span>
+
+            <div id="facultyBacklogGraphicContainer" style="position:relative; width:130px; height:130px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+              <svg width="130" height="130" viewBox="0 0 100 100" style="transform:rotate(-90deg);">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1EFF9" stroke-width="9" />
+                <circle id="facultyBacklogCircleProgress" cx="50" cy="50" r="42" fill="none" stroke="#F43F5E" stroke-width="9" stroke-linecap="round"
+                  stroke-dasharray="263.89" stroke-dashoffset="131.95" />
+              </svg>
+              <div style="position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span id="facultyBacklogTotalVal" style="font-size:1.5rem; font-weight:800; color:#DC2626; line-height:1;">
+                  0
+                </span>
+                <span style="font-size:0.62rem; font-weight:700; color:#6B7280; text-transform:uppercase; margin-top:2px;">
+                  Active Backlogs
+                </span>
+              </div>
+            </div>
+
+            <div id="facultyBacklogUnavailable" style="display:none; padding:36px 10px; color:#6B7280; font-size:0.875rem; font-weight:600;">
+              Backlog data unavailable
+            </div>
+
+            <div style="margin-top:10px;">
+              <span id="facultyBacklogSummaryBadge" class="badge badge-medium" style="font-size:0.72rem; padding:3px 10px;">
+                -- students with backlogs
+              </span>
+              <p style="font-size:0.78rem; color:#6B7280; margin:6px 0 0 0; line-height:1.35;">
+                Total active arrears across assigned cohort.
+              </p>
+            </div>
           </div>
+
+          <!-- Indicator 3: Student Academic Risk -->
+          <div class="glass-card" style="background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:16px; padding:24px 20px; box-shadow:0 4px 20px rgba(124,58,237,0.06); text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:260px;">
+            <span style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--purple-deep); margin-bottom:10px; display:block;">
+              Student Academic Risk
+            </span>
+
+            <div id="facultyRiskGraphicContainer" style="position:relative; width:130px; height:130px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+              <canvas id="facultyRiskDoughnutChart" width="130" height="130"></canvas>
+            </div>
+
+            <div id="facultyRiskUnavailable" style="display:none; padding:36px 10px; color:#6B7280; font-size:0.875rem; font-weight:600;">
+              Risk assessment unavailable
+            </div>
+
+            <div id="facultyRiskLegend" style="display:flex; justify-content:center; gap:12px; font-size:0.72rem; margin-top:10px; flex-wrap:wrap;">
+              <span style="display:inline-flex; align-items:center; gap:4px; color:#059669; font-weight:700;">
+                <span style="width:8px; height:8px; background:#10B981; border-radius:50%; display:inline-block;"></span>
+                <span id="facultyRiskLowCount">0</span> Low
+              </span>
+              <span style="display:inline-flex; align-items:center; gap:4px; color:#D97706; font-weight:700;">
+                <span style="width:8px; height:8px; background:#F59E0B; border-radius:50%; display:inline-block;"></span>
+                <span id="facultyRiskMedCount">0</span> Moderate
+              </span>
+              <span style="display:inline-flex; align-items:center; gap:4px; color:#DC2626; font-weight:700;">
+                <span style="width:8px; height:8px; background:#F43F5E; border-radius:50%; display:inline-block;"></span>
+                <span id="facultyRiskHighCount">0</span> High
+              </span>
+            </div>
+            <p style="font-size:0.78rem; color:#6B7280; margin:6px 0 0 0;">
+              Academic risk tier distribution.
+            </p>
+          </div>
+
         </div>
       </section>
 
@@ -430,17 +510,24 @@
         <div class="glass-card-container">
           <div class="glass-card-header">
             <div>
-              <h2 class="glass-card-title">Quick Student Profile Lookup</h2>
-              <span class="glass-card-subtitle">Search advisee to view complete 5-pillar profile and explainable risk decomposition.</span>
+              <h2 class="glass-card-title">Student Search &amp; Profile Lookup</h2>
+              <span class="glass-card-subtitle">Search by full name, partial name, student ID, or roll number. Select a result to view the complete academic profile.</span>
             </div>
           </div>
-          <div style="display:flex; gap:12px; margin-bottom:18px;">
-            <input type="text" id="profileSearchInput" class="cyber-search-box" style="flex:1; padding:10px 16px; background:rgba(30,15,60,0.8); border:1px solid var(--border-glass); border-radius:10px; color:#FFFFFF;" placeholder="Type student ID (e.g. student008) or name...">
-            <button class="btn-action-primary" onclick="searchAndInspectStudent()">Inspect Profile</button>
+          <div style="display:flex; gap:12px; margin-bottom:10px;">
+            <input type="text" id="profileSearchInput" class="cyber-search-box" style="flex:1; padding:10px 16px; background:#FAF9FE; border:1.5px solid rgba(124,58,237,0.3); border-radius:10px; color:#17112B; font-size:0.9rem;" placeholder="e.g. Akula Naga Jyothi, Akula, student008, CIQ-2026-008...">
+            <button class="btn-action-primary" onclick="searchAndInspectStudent()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              Search Student
+            </button>
+          </div>
+          <div style="font-size:0.73rem; color:#9CA3AF; margin-bottom:16px; padding-left:2px;">
+            💡 Tip: Search by partial name (e.g. "Akula"), exact ID (e.g. "student008"), or roll number. Press Enter or click Search.
           </div>
           <div id="quickProfileResult"></div>
         </div>
       </section>
+
 
       <!-- ========================================================================= -->
       <!-- SECTION 7: INTERVENTIONS TRACKING                                         -->
@@ -460,10 +547,12 @@
                 <tr>
                   <th>Log ID</th>
                   <th>Advisee</th>
-                  <th>Protocol Action</th>
+                  <th>Intervention / Action</th>
                   <th>Priority</th>
-                  <th>Discussion Notes</th>
+                  <th>Instructions &amp; Notes</th>
+                  <th>Action Taken</th>
                   <th>Status</th>
+                  <th style="text-align:right;">Action</th>
                 </tr>
               </thead>
               <tbody id="interventionsTableBody">
@@ -526,12 +615,13 @@
       <section id="section-notifications" class="dashboard-section">
         <div class="glass-card-container">
           <div class="glass-card-header">
-            <h2 class="glass-card-title">Faculty Caseload Alerts</h2>
+            <div>
+              <h2 class="glass-card-title">Intervention &amp; Caseload Alerts</h2>
+              <span class="glass-card-subtitle">Admin-assigned academic interventions, caseload alerts, and guidance requests.</span>
+            </div>
           </div>
-          <div style="background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.4); border-radius:12px; padding:14px 18px; margin-bottom:10px;">
-            <strong style="color:#FECDD3;">Attendance Alert</strong>
-            <p style="color:#F3E8FF; font-size:0.8125rem; margin-top:2px;">Advisees currently below 75% classroom attendance.</p>
-            <span style="font-size:0.7rem; color:#C4B5FD;">Today, 09:00 AM</span>
+          <div id="facultyNotificationsFeed" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Populated dynamically via JS -->
           </div>
         </div>
       </section>
@@ -736,83 +826,131 @@
   <!-- MODAL: WHAT-IF SCENARIO SIMULATOR -->
   <div id="simulatorModal" class="glass-modal-overlay" style="display:none;" aria-hidden="true" role="dialog">
     <div class="glass-modal-card" style="max-width:800px;">
-      <div class="glass-modal-header">
+      <div class="glass-modal-header" style="background:#FAF9FE; border-bottom:1px solid #E5E7EB; padding:16px 20px;">
         <div>
-          <h3 style="color:#FFFFFF; font-size:1.25rem; font-weight:800;">CampusIQ What-If Academic Simulator</h3>
-          <p style="font-size:0.78rem; color:#DDD6FE;">Simulate the exact numerical impact of faculty intervention on advisee risk categories.</p>
+          <h3 style="color:#111827; font-size:1.25rem; font-weight:800; margin:0;">CampusIQ What-If Academic Simulator</h3>
+          <p style="font-size:0.8125rem; color:#4B5563; margin-top:3px; margin-bottom:0;">Simulate the exact numerical impact of faculty intervention on advisee risk categories.</p>
         </div>
-        <button id="btnCloseSimulator" class="btn-close-modal-icon">&times;</button>
+        <button id="btnCloseSimulator" class="btn-close-modal-icon" style="color:#374151;">&times;</button>
       </div>
 
-      <div class="glass-modal-body">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-          <label for="simStudentSelect" style="font-weight:700; font-size:0.85rem; color:#C4B5FD;">Select Advisee:</label>
-          <select id="simStudentSelect" class="cyber-select" style="flex:1;"></select>
+      <div class="glass-modal-body" style="padding:20px; background:#FFFFFF;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+          <label for="simStudentSelect" style="font-weight:700; font-size:0.85rem; color:#1F2937;">Select Advisee:</label>
+          <select id="simStudentSelect" class="cyber-select" style="flex:1; background:#FFFFFF; color:#111827; border:1px solid #D1D5DB; font-weight:600;"></select>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-          <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; flex-direction:column; gap:14px;">
             <div class="input-group-custom" style="margin-bottom:0;">
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
-                <label>Attendance Boost:</label>
-                <strong id="valSimAttendance" style="color:#EC4899;">+10%</strong>
+              <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                <label style="color:#1F2937; font-weight:700; font-size:0.8125rem;">Attendance Boost:</label>
+                <strong id="valSimAttendance" style="color:#DB2777; font-weight:800;">+10%</strong>
               </div>
-              <input type="range" id="rangeSimAttendance" min="0" max="30" value="10" step="1" style="accent-color:#EC4899;">
+              <input type="range" id="rangeSimAttendance" min="0" max="30" value="10" step="1" style="accent-color:#DB2777; width:100%;">
             </div>
 
             <div class="input-group-custom" style="margin-bottom:0;">
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
-                <label>Backlogs Cleared:</label>
-                <strong id="valSimBacklogs" style="color:#EC4899;">1 Backlog</strong>
+              <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                <label style="color:#1F2937; font-weight:700; font-size:0.8125rem;">Backlogs Cleared:</label>
+                <strong id="valSimBacklogs" style="color:#7C3AED; font-weight:800;">1 Backlog</strong>
               </div>
-              <input type="range" id="rangeSimBacklogs" min="0" max="3" value="1" step="1" style="accent-color:#EC4899;">
+              <input type="range" id="rangeSimBacklogs" min="0" max="3" value="1" step="1" style="accent-color:#7C3AED; width:100%;">
             </div>
 
             <div class="input-group-custom" style="margin-bottom:0;">
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
-                <label>Weekly LMS Hours:</label>
-                <strong id="valSimLms" style="color:#EC4899;">+5 hrs/wk</strong>
+              <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                <label style="color:#1F2937; font-weight:700; font-size:0.8125rem;">Weekly LMS Hours:</label>
+                <strong id="valSimLms" style="color:#0284C7; font-weight:800;">+5 hrs/wk</strong>
               </div>
-              <input type="range" id="rangeSimLms" min="0" max="15" value="5" step="1" style="accent-color:#EC4899;">
+              <input type="range" id="rangeSimLms" min="0" max="15" value="5" step="1" style="accent-color:#0284C7; width:100%;">
             </div>
 
             <div class="input-group-custom" style="margin-bottom:0;">
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
-                <label>Assignment Rate Boost:</label>
-                <strong id="valSimAssignment" style="color:#EC4899;">+15%</strong>
+              <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:4px;">
+                <label style="color:#1F2937; font-weight:700; font-size:0.8125rem;">Assignment Rate Boost:</label>
+                <strong id="valSimAssignment" style="color:#059669; font-weight:800;">+15%</strong>
               </div>
-              <input type="range" id="rangeSimAssignment" min="0" max="30" value="15" step="1" style="accent-color:#EC4899;">
+              <input type="range" id="rangeSimAssignment" min="0" max="30" value="15" step="1" style="accent-color:#059669; width:100%;">
             </div>
 
             <button id="btnRunSimulation" class="btn-action-primary" style="justify-content:center; margin-top:8px;">Recalculate Score</button>
           </div>
 
-          <div style="display:flex; flex-direction:column; justify-content:space-between;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div style="flex:1; background:rgba(35,18,70,0.6); border:1px solid var(--border-glass); border-radius:12px; padding:14px; text-align:center;">
-                <span style="font-size:0.7rem; color:#A78BFA; font-weight:700;">CURRENT</span>
-                <div style="font-size:1.8rem; font-weight:800; color:#FFFFFF;" id="simCurrentScore">--</div>
+          <div style="display:flex; flex-direction:column; justify-content:space-between; gap:14px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <div style="flex:1; background:#FAF9FE; border:1px solid #E5E7EB; border-radius:12px; padding:14px; text-align:center;">
+                <span style="font-size:0.75rem; color:#6B21A8; font-weight:800; letter-spacing:0.04em;">CURRENT</span>
+                <div style="font-size:1.8rem; font-weight:800; color:#111827;" id="simCurrentScore">--</div>
                 <div id="simCurrentBadge" class="badge badge-high">High Risk</div>
               </div>
 
-              <span style="color:#EC4899; font-size:1.2rem; font-weight:800;">&rarr;</span>
+              <span style="color:#7C3AED; font-size:1.4rem; font-weight:800;">&rarr;</span>
 
-              <div style="flex:1; background:rgba(35,18,70,0.6); border:1px solid var(--border-glass); border-radius:12px; padding:14px; text-align:center;">
-                <span style="font-size:0.7rem; color:#A78BFA; font-weight:700;">SIMULATED</span>
-                <div style="font-size:1.8rem; font-weight:800; color:#10B981;" id="simProjectedScore">--</div>
+              <div style="flex:1; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:14px; text-align:center;">
+                <span style="font-size:0.75rem; color:#065F46; font-weight:800; letter-spacing:0.04em;">SIMULATED</span>
+                <div style="font-size:1.8rem; font-weight:800; color:#059669;" id="simProjectedScore">--</div>
                 <div id="simProjectedBadge" class="badge badge-low">Low Risk</div>
               </div>
             </div>
 
-            <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:14px; margin-top:12px;">
-              <strong style="color:#6EE7B7; font-size:0.875rem;" id="simDeltaHighlight">Success Score Delta: +14.5 pts</strong>
-              <p style="color:#D1FAE5; font-size:0.78rem; margin-top:4px;" id="simRecommendationText">
+            <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:12px; padding:14px; margin-top:6px;">
+              <strong style="color:#065F46; font-size:0.875rem; display:block;" id="simDeltaHighlight">Success Score Delta: +14.5 pts</strong>
+              <p style="color:#047857; font-size:0.8125rem; margin-top:4px; margin-bottom:0; line-height:1.5; font-weight:500;" id="simRecommendationText">
                 Simulated remediation effectively clears statutory thresholds!
               </p>
             </div>
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FACULTY RECORD INTERVENTION ACTION & NOTES -->
+  <div id="modalUpdateIntervention" class="glass-modal-overlay" style="display:none;" aria-hidden="true" role="dialog">
+    <div class="glass-modal-card" style="max-width:560px;">
+      <div class="glass-modal-header">
+        <div>
+          <h3 style="color:#FFFFFF; font-size:1.15rem; font-weight:800;" id="modalIntvHeaderTitle">Record Intervention Progress</h3>
+          <p style="font-size:0.75rem; color:#DDD6FE;" id="modalIntvHeaderSub">Update status, record action taken, and add counseling notes.</p>
+        </div>
+        <button id="btnCloseUpdateIntv" class="btn-close-modal-icon">&times;</button>
+      </div>
+      <div class="glass-modal-body">
+        <form id="formUpdateInterventionAction" style="display:flex; flex-direction:column; gap:12px;">
+          <input type="hidden" id="editIntvId">
+
+          <div style="background:rgba(30,15,60,0.6); border:1px solid rgba(196,181,253,0.2); border-radius:10px; padding:12px;">
+            <div style="font-size:0.75rem; color:#A78BFA; font-weight:700; text-transform:uppercase;">Intervention Assigned By Admin</div>
+            <div style="font-size:0.95rem; font-weight:700; color:#FFFFFF; margin-top:4px;" id="modalIntvDisplayTitle">--</div>
+            <div style="font-size:0.8rem; color:#DDD6FE; margin-top:4px;" id="modalIntvDisplayInstructions">--</div>
+          </div>
+
+          <div class="input-group-custom" style="margin-bottom:0;">
+            <label>Progress Status</label>
+            <select id="editIntvStatus" class="cyber-select" required>
+              <option value="Assigned">Assigned (Not Started)</option>
+              <option value="In Progress">In Progress (Working on it)</option>
+              <option value="Completed">Completed (Action Fully Done)</option>
+            </select>
+          </div>
+
+          <div class="input-group-custom" style="margin-bottom:0;">
+            <label>Action Taken by Faculty</label>
+            <textarea id="editIntvActionTaken" rows="2" style="background:rgba(25,12,50,0.8); border:1px solid var(--border-glass-strong); border-radius:8px; padding:10px; color:#FFFFFF; font-family:var(--font-sans); outline:none;" placeholder="e.g. Conducted 1-on-1 counseling meeting, mapped study schedule..." required></textarea>
+          </div>
+
+          <div class="input-group-custom" style="margin-bottom:0;">
+            <label>Implementation &amp; Follow-up Notes</label>
+            <textarea id="editIntvNotes" rows="2" style="background:rgba(25,12,50,0.8); border:1px solid var(--border-glass-strong); border-radius:8px; padding:10px; color:#FFFFFF; font-family:var(--font-sans); outline:none;" placeholder="Student agreed to 90% attendance in 2 weeks..."></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
+            <button type="button" class="btn-secondary" id="btnCancelUpdateIntv" style="padding:6px 14px; font-size:0.8rem;">Cancel</button>
+            <button type="submit" class="btn-action-primary" style="padding:6px 16px; font-size:0.8rem;">Save Progress to SQLite</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
