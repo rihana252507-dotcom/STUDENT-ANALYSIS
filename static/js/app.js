@@ -49,6 +49,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // If on Student dashboard, initialize radar chart and personal simulator
   if (document.getElementById("studentPillarRadarChart")) {
     initStudentRadar();
+  }
+  if (window.STUDENT_DATA || document.getElementById("personalRangeAttendance")) {
     initPersonalSimulator();
   }
 });
@@ -117,6 +119,19 @@ window.switchSection = function(sectionId) {
   if (sidebar && sidebar.classList.contains("mobile-open")) {
     sidebar.classList.remove("mobile-open");
   }
+
+  // Risk Monitoring: re-render list whenever this section is activated
+  if (sectionId === "section-risk-monitoring") {
+    const listView = document.getElementById("adminRiskListView");
+    const detailView = document.getElementById("adminRiskDetailView");
+    if (detailView) detailView.style.display = "none";
+    if (listView) listView.style.display = "block";
+    if (STATE && STATE.atRiskStudents && STATE.atRiskStudents.length >= 0) {
+      if (typeof renderAdminRiskList === "function") {
+        renderAdminRiskList(STATE.atRiskStudents);
+      }
+    }
+  }
 };
 
 // ==============================================================================
@@ -171,12 +186,27 @@ function updateDynamicKpis(students, totalCount) {
   const compliantCount = students.filter(s => s.attendance_pct >= 75.0).length;
   const compliantPct = ((compliantCount / total) * 100).toFixed(1);
 
+  const SUCCESS_TARGET = 70;
+  const ATT_THRESHOLD = 75;
+
   if (kpiTotal) kpiTotal.textContent = total;
-  if (kpiSuccess) kpiSuccess.innerHTML = `${avgSuccess}<span class="kpi-sub">/100</span>`;
+  if (kpiSuccess) {
+    const successVal = parseFloat(avgSuccess);
+    const successColor = successVal < SUCCESS_TARGET ? '#DC2626' : '#172B4D';
+    kpiSuccess.innerHTML = `<span style="color:${successColor}; font-weight:800;">${avgSuccess}</span><span class="kpi-sub">/100</span>`;
+  }
   if (kpiHigh) kpiHigh.textContent = highRiskCount;
   if (kpiHighPct) kpiHighPct.textContent = `${((highRiskCount / total) * 100).toFixed(1)}%`;
-  if (kpiAttRate) kpiAttRate.textContent = `${compliantPct}%`;
-  if (kpiAttAvg) kpiAttAvg.textContent = `Avg: ${avgAttendance}%`;
+  if (kpiAttRate) {
+    const rateVal = parseFloat(compliantPct);
+    const rateColor = rateVal < ATT_THRESHOLD ? '#DC2626' : '#172B4D';
+    kpiAttRate.innerHTML = `<span style="color:${rateColor}; font-weight:700;">${compliantPct}%</span>`;
+  }
+  if (kpiAttAvg) {
+    const attVal = parseFloat(avgAttendance);
+    const attColor = attVal < ATT_THRESHOLD ? '#DC2626' : '#172B4D';
+    kpiAttAvg.innerHTML = `Avg: <span style="color:${attColor}; font-weight:700;">${avgAttendance}%</span>`;
+  }
 }
 
 function updateCohortSegments(students) {
@@ -255,6 +285,7 @@ window.showSegmentStudents = function(segmentType) {
       var attColor  = s.attendance_pct < 75 ? '#DC2626' : '#10B981';
       var cgpa      = parseFloat(s.cgpa || 0).toFixed(2);
       var score     = s.success_score != null ? s.success_score : '—';
+      var scoreColor = (s.success_score != null && parseFloat(s.success_score) < 70) ? '#DC2626' : '#111827';
       var name      = (s.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return '<tr style="cursor:pointer;" onclick="inspectStudent(\'' + s.student_id + '\')">' +
         '<td><strong style="color:#111827;">' + name + '</strong>' +
@@ -263,9 +294,19 @@ window.showSegmentStudents = function(segmentType) {
         '<td>Sem ' + (s.semester || '—') + '</td>' +
         '<td><strong style="color:' + attColor + ';">' + s.attendance_pct + '%</strong></td>' +
         '<td><strong>' + cgpa + '</strong></td>' +
-        '<td><span style="color:' + (s.backlogs > 0 ? '#DC2626' : '#10B981') + '; font-weight:700;">' + s.backlogs + '</span></td>' +
+        (function(){
+          var bCell = '<span style="color:' + (s.backlogs > 0 ? '#DC2626' : '#10B981') + '; font-weight:700;">' + s.backlogs + '</span>';
+          if (s.backlogs > 0 && s.backlog_details && s.backlog_details.length > 0) {
+            var subjList = s.backlog_details.map(function(b) { return (b.display || b.course_name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }).join(', ');
+            bCell += '<div style="font-size:0.70rem; color:#DC2626; margin-top:2px; max-width:180px; word-break:break-word;">' + subjList + '</div>';
+          } else if (s.backlogs > 0 && s.backlog_subjects) {
+            var subjList2 = (Array.isArray(s.backlog_subjects) ? s.backlog_subjects : [s.backlog_subjects]).join(', ').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            bCell += '<div style="font-size:0.70rem; color:#DC2626; margin-top:2px; max-width:180px; word-break:break-word;">' + subjList2 + '</div>';
+          }
+          return '<td>' + bCell + '</td>';
+        }()) +
         '<td><span class="badge ' + riskClass + '">' + (s.risk_level || '—') + ' Risk</span></td>' +
-        '<td><strong>' + score + '</strong>/100</td>' +
+        '<td><strong style="color:' + scoreColor + ';">' + score + '</strong>/100</td>' +
         '<td style="text-align:right;"><button class="btn-inspect" onclick="event.stopPropagation(); inspectStudent(\'' + s.student_id + '\')">Inspect &rarr;</button></td>' +
       '</tr>';
     }).join('');
@@ -302,8 +343,8 @@ async function fetchDepartmentBenchmarks() {
           <td>${d.medium_risk_count}</td>
           <td><span style="color:#10B981; font-weight:700;">${d.low_risk_count}</span></td>
           <td><strong>${d.avg_cgpa}</strong></td>
-          <td>${d.avg_attendance}%</td>
-          <td><strong>${d.avg_success_score}</strong>/100</td>
+          <td><span style="color:${parseFloat(d.avg_attendance) < 75 ? '#DC2626' : '#172B4D'}; font-weight:${parseFloat(d.avg_attendance) < 75 ? '700' : '400'}">${d.avg_attendance}%</span></td>
+          <td><strong style="color:${parseFloat(d.avg_success_score) < 70 ? '#DC2626' : '#172B4D'}">${d.avg_success_score}</strong>/100</td>
           <td>${d.placement_ready_rate}%</td>
           <td>${auditBadge}</td>
         </tr>
@@ -556,13 +597,13 @@ function renderCharts(data) {
           {
             label: "Success Score (0-100)",
             data: dc.avg_success,
-            backgroundColor: "#7C3AED",
+            backgroundColor: "#2F80ED",
             borderRadius: 6
           },
           {
             label: "Avg CGPA (x10)",
             data: dc.avg_cgpa.map(c => c * 10),
-            backgroundColor: "#EC4899",
+            backgroundColor: "#16A6A1",
             borderRadius: 6
           }
         ]
@@ -594,7 +635,7 @@ function renderCharts(data) {
         datasets: [{
           label: "Students",
           data: data.scatter_data,
-          pointBackgroundColor: data.scatter_data.map(p => colorMap[p.risk] || "#7C3AED"),
+          pointBackgroundColor: data.scatter_data.map(p => colorMap[p.risk] || "#2F80ED"),
           pointBorderColor: "#FFFFFF",
           pointBorderWidth: 1.5,
           pointRadius: 6,
@@ -639,7 +680,7 @@ function renderCharts(data) {
         datasets: [{
           label: "Students Affected",
           data: sc.counts,
-          backgroundColor: ["#DC2626", "#EC4899", "#D97706", "#F59E0B", "#7C3AED", "#8B5CF6", "#0284C7"],
+          backgroundColor: ["#DC2626", "#2F80ED", "#D97706", "#F59E0B", "#123B66", "#16A6A1", "#0284C7"],
           borderRadius: 6
         }]
       },
@@ -678,12 +719,12 @@ function initStudentRadar() {
         label: "My Evaluated Score",
         data: [p.academic, p.attendance, p.lms, p.placement, p.wellbeing],
         fill: true,
-        backgroundColor: "rgba(236, 72, 153, 0.25)",
-        borderColor: "#EC4899",
-        pointBackgroundColor: "#A855F7",
+        backgroundColor: "rgba(47, 128, 237, 0.20)",
+        borderColor: "#2F80ED",
+        pointBackgroundColor: "#123B66",
         pointBorderColor: "#FFFFFF",
         pointHoverBackgroundColor: "#FFFFFF",
-        pointHoverBorderColor: "#EC4899"
+        pointHoverBorderColor: "#2F80ED"
       }]
     },
     options: {
@@ -722,10 +763,14 @@ function renderStudentTable(students) {
   tbody.innerHTML = students.map(s => {
     const initials = s.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
     const riskBadgeClass = `badge-${s.risk_badge || s.risk_level.toLowerCase()}`;
-    const attWarning = s.attendance_pct < 75 ? "color:#F43F5E; font-weight:700;" : "";
+    const attWarning = s.attendance_pct < 75 ? "color:#DC2626; font-weight:700;" : "";
     const attBadge = s.attendance_pct < 75 ? `<span class="badge badge-high" style="font-size:0.65rem; padding:1px 5px;">&lt; 75%</span>` : "";
+    const studentBacklogSubjs = s.backlog_details && s.backlog_details.length > 0
+      ? s.backlog_details.map(b => b.display).join(", ")
+      : (s.backlog_subjects || "");
     const backlogHtml = s.backlogs > 0
-      ? `<span class="badge badge-high" style="padding:2px 6px;">${s.backlogs} Backlog${s.backlogs > 1 ? 's' : ''}</span>`
+      ? `<span class="badge badge-high" style="padding:2px 6px;">${s.backlogs} Backlog${s.backlogs > 1 ? 's' : ''}</span>` +
+        (studentBacklogSubjs ? `<div style="font-size:0.72rem; color:#DC2626; font-weight:600; margin-top:3px; max-width:200px; word-break:break-word;">${escapeHtml(studentBacklogSubjs)}</div>` : "")
       : `<span class="badge badge-low" style="padding:2px 6px;">None</span>`;
 
     let scoreColor = "#10B981";
@@ -753,7 +798,7 @@ function renderStudentTable(students) {
         <td>${backlogHtml}</td>
         <td>
           <div class="progress-cell">
-            <strong>${s.success_score}</strong>
+            <strong style="color:${parseFloat(s.success_score) < 70 ? '#DC2626' : '#172B4D'}; font-weight:800;">${s.success_score}</strong>
             <div class="table-progress-bar">
               <div class="table-progress-fill" style="width: ${s.success_score}%; background-color: ${scoreColor};"></div>
             </div>
@@ -972,7 +1017,7 @@ function renderRiskWatchlist(students) {
           <td><span class="badge badge-accent">${s.department}</span></td>
           <td><span style="color:#F43F5E; font-weight:700;">${s.attendance_pct}%</span></td>
           <td><span style="color:#F43F5E; font-weight:700;">${s.backlogs}</span></td>
-          <td><strong>${s.success_score}</strong>/100</td>
+          <td><strong style="color:${(parseFloat(s.success_score) < 70) ? '#DC2626' : '#000000'};">${s.success_score}</strong>/100</td>
           <td><span style="font-size:0.75rem; color:#DC2626; font-weight:600;">${driver}</span></td>
           <td style="text-align:right;">
             <button class="btn-inspect" onclick="inspectStudent('${s.student_id}')">Intervene &rarr;</button>
@@ -1013,7 +1058,7 @@ function renderAdminRiskList(studentsList) {
         </strong>
       </td>
       <td style="padding:12px 16px;">
-        <span class="student-id-code" style="font-size:0.8125rem; font-weight:600; color:#5B21B6;">
+        <span class="student-id-code" style="font-size:0.8125rem; font-weight:600; color:#123B66;">
           ${s.student_id}
         </span>
       </td>
@@ -1065,7 +1110,7 @@ window.openAdminRiskDetail = async function(studentId) {
     const avatarContainer = document.getElementById("riskDetailAvatarContainer");
     if (avatarContainer) {
       const g = (s.gender || "").toLowerCase();
-      let gradStyle = "background:linear-gradient(135deg,#7C3AED,#EC4899);"; // neutral default
+      let gradStyle = "background:linear-gradient(135deg,#123B66,#2F80ED);"; // neutral default
       let genderIcon = "";
       if (g === "male") {
         gradStyle = "background:linear-gradient(135deg,#2563EB,#0EA5E9);";
@@ -1318,7 +1363,7 @@ window.openAdminRiskDetail = async function(studentId) {
             <td><strong style="color:#DC2626;">${escapeHtml(f.factor)}</strong></td>
             <td><strong style="color:#111827;">${escapeHtml(f.evidence)}</strong></td>
             <td><span style="color:#4B5563;">${escapeHtml(f.reason)}</span></td>
-            <td><span style="color:#5B21B6; font-weight:600;">${escapeHtml(f.action)}</span></td>
+            <td><span style="color:#123B66; font-weight:600;">${escapeHtml(f.action)}</span></td>
           </tr>
         `).join("");
       }
@@ -1437,7 +1482,7 @@ window.openAdminRiskDetail = async function(studentId) {
               <span class="badge ${item.urgency === 'Immediate' ? 'badge-high' : 'badge-medium'}" style="font-size:0.7rem;">${item.urgency || 'High'}</span>
             </div>
             <p style="font-size:0.75rem; color:#4B5563; margin:0; line-height:1.4;">${escapeHtml(item.rationale || item.description || '')}</p>
-            <div style="font-size:0.7rem; color:#5B21B6; font-weight:600; margin-top:4px;">Timeline: ${escapeHtml(item.timeline || 'Upcoming evaluation cycle')}</div>
+            <div style="font-size:0.7rem; color:#123B66; font-weight:600; margin-top:4px;">Timeline: ${escapeHtml(item.timeline || 'Upcoming evaluation cycle')}</div>
           </div>
         `).join("");
       }
@@ -1489,8 +1534,17 @@ function renderRiskAlertsTable(students) {
     return risk === "high" || risk === "medium" || backlogs > 0 || (att > 0 && att < 75) || (score > 0 && score < 70) || (marks > 0 && marks < 50) || (cgpa > 0 && cgpa < 6.0);
   });
 
+  // Sort High -> Medium -> Low risk order; within same tier, lowest success score first
+  const riskPriority = { 'high': 0, 'medium': 1, 'low': 2 };
+  atRisk.sort((a, b) => {
+    const ra = riskPriority[(a.risk_level || '').toLowerCase()] ?? 2;
+    const rb = riskPriority[(b.risk_level || '').toLowerCase()] ?? 2;
+    if (ra !== rb) return ra - rb;
+    return (parseFloat(a.success_score) || 0) - (parseFloat(b.success_score) || 0);
+  });
+
   if (atRisk.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:#C4B5FD;">No at-risk advisees identified for your caseload.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:#5B6B82;">No at-risk advisees identified for your caseload.</td></tr>`;
     return;
   }
 
@@ -1505,10 +1559,18 @@ function renderRiskAlertsTable(students) {
     const cgpa = parseFloat(s.cgpa) || 0;
     const marks = parseFloat(s.academic_marks_pct) || 0;
 
+    const bSubj = s.backlog_details && s.backlog_details.length > 0
+      ? s.backlog_details.map(b => b.display).join(", ")
+      : (s.backlog_subjects || "");
+
     if (att > 0 && att < 75 && backlogs > 0) {
-      drivers.push(`Attendance (${att}%) & ${backlogs} Backlog${backlogs > 1 ? 's' : ''}`);
+      const subjNote = bSubj ? ` (${bSubj})` : '';
+      drivers.push(`Attendance (${att}%) & ${backlogs} Backlog${backlogs > 1 ? 's' : ''}${subjNote}`);
     } else {
-      if (backlogs > 0) drivers.push(`${backlogs} Active Backlog${backlogs > 1 ? 's' : ''}`);
+      if (backlogs > 0) {
+        const subjNote = bSubj ? `: ${bSubj}` : '';
+        drivers.push(`${backlogs} Active Backlog${backlogs > 1 ? 's' : ''}${subjNote}`);
+      }
       if (att > 0 && att < 75) drivers.push(`Attendance Shortage (${att}%)`);
     }
     if (cgpa > 0 && cgpa < 6.0) drivers.push(`Low CGPA (${cgpa})`);
@@ -1526,7 +1588,7 @@ function renderRiskAlertsTable(students) {
         <div class="student-id-code">${s.student_id} &bull; ${s.department}</div>
       </td>
       <td><span class="badge ${riskClass}">${riskDisplay}</span></td>
-      <td><strong>${s.success_score || '--'}</strong>/100</td>
+      <td><strong style="color:${(parseFloat(s.success_score) < 70) ? '#DC2626' : '#172B4D'};">${s.success_score || '--'}</strong>/100</td>
       <td><span style="font-size:0.75rem; color:#DC2626; font-weight:600;">${driverText}</span></td>
       <td style="text-align:right;"><button class="btn-inspect" onclick="inspectStudent('${s.student_id}')">Intervene &rarr;</button></td>
     </tr>`;
@@ -1553,10 +1615,13 @@ function renderAcademicPerf(students) {
 
   tbody.innerHTML = sorted.map(s => {
     const backlogsCount = parseInt(s.backlogs) || 0;
+    const acadBacklogSubjs = s.backlog_details && s.backlog_details.length > 0
+      ? s.backlog_details.map(b => b.display).join("; ")
+      : (s.backlog_subjects || (backlogsCount + ' active backlog(s)'));
     const backlogHtml = backlogsCount > 0
       ? `<span class="badge badge-high">${backlogsCount} Active</span>
          <div style="font-size:0.75rem; color:#DC2626; font-weight:600; margin-top:4px; max-width:240px; word-break:break-word;">
-           ${s.backlog_subjects ? escapeHtml(s.backlog_subjects) : backlogsCount + ' active backlog(s)'}
+           ${escapeHtml(acadBacklogSubjs)}
          </div>`
       : `<span class="badge badge-low">None (0)</span>`;
 
@@ -1627,7 +1692,7 @@ window.inspectStudent = async function(studentId) {
     const avatarEl = document.getElementById("modalStudentAvatar");
     if (avatarEl) {
       const gender = (s.gender || "").toLowerCase();
-      let gradStyle = "background:linear-gradient(135deg,#7C3AED,#EC4899);"; // neutral/default
+      let gradStyle = "background:linear-gradient(135deg,#123B66,#2F80ED);"; // neutral/default
       let genderIcon = "";
       if (gender === "male") {
         gradStyle = "background:linear-gradient(135deg,#2563EB,#0EA5E9);";
@@ -1653,6 +1718,8 @@ window.inspectStudent = async function(studentId) {
 
     // Composite Success Score & Progress
     setTxt("modalSuccessScore", s.success_score);
+    const mScoreEl = document.getElementById("modalSuccessScore");
+    if (mScoreEl) mScoreEl.style.color = (parseFloat(s.success_score) < 70) ? "#DC2626" : "#FFFFFF";
     const progBar = document.getElementById("modalProgressBar");
     if (progBar) progBar.style.width = `${Math.min(100, Math.max(5, s.success_score))}%`;
 
@@ -1678,8 +1745,56 @@ window.inspectStudent = async function(studentId) {
     setTxt("modalCgpa", parseFloat(s.cgpa).toFixed(2));
     setTxt("modalMarks", `${s.academic_marks_pct}%`);
     setTxt("modalAttendance", `${s.attendance_pct}%`);
+    const mAttEl = document.getElementById("modalAttendance");
+    if (mAttEl) mAttEl.style.color = (parseFloat(s.attendance_pct) < 75.0) ? "#DC2626" : "#FFFFFF";
     setTxt("modalBacklogs", s.backlogs);
     setTxt("modalLmsHours", `${s.lms_weekly_hours} hrs/wk`);
+
+    // Render Backlog Subjects Breakdown Section if present
+    const backlogSec = document.getElementById("modalBacklogsBreakdownSection");
+    const backlogCont = document.getElementById("modalBacklogSubjectsContainer");
+    const backlogBadge = document.getElementById("modalBacklogCountBadge");
+    const bCount = parseInt(s.backlogs) || 0;
+
+    if (backlogSec && backlogCont) {
+      if (s.backlog_details && s.backlog_details.length > 0) {
+        backlogSec.style.display = "block";
+        if (backlogBadge) backlogBadge.textContent = `${s.backlog_details.length} Active Pending`;
+        backlogCont.innerHTML = `
+          <table style="width:100%; border-collapse:collapse; font-size:0.82rem; text-align:left;">
+            <thead>
+              <tr style="border-bottom:1px solid #DCE4EE; color:#5B6B82; font-size:0.75rem; text-transform:uppercase;">
+                <th style="padding:6px 8px;">Subject / Course Name</th>
+                <th style="padding:6px 8px;">Course Code</th>
+                <th style="padding:6px 8px;">Semester</th>
+                <th style="padding:6px 8px; text-align:right;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${s.backlog_details.map(b => `
+                <tr style="border-bottom:1px solid #F1F5F9; color:#172B4D;">
+                  <td style="padding:6px 8px; font-weight:600;">${escapeHtml(b.course_name)}</td>
+                  <td style="padding:6px 8px;"><code style="background:#F4F7FB; padding:2px 6px; border-radius:4px; font-size:0.75rem; color:#123B66; border:1px solid #DCE4EE;">${escapeHtml(b.course_code || '--')}</code></td>
+                  <td style="padding:6px 8px; color:#5B6B82;">Sem ${b.semester || '--'}${b.academic_year ? ` &bull; ${escapeHtml(b.academic_year)}` : ''}</td>
+                  <td style="padding:6px 8px; text-align:right;"><span class="badge badge-high" style="font-size:0.7rem; padding:2px 6px;">Backlog (${escapeHtml(b.grade || 'F')})</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (bCount > 0 && s.backlog_subjects) {
+        backlogSec.style.display = "block";
+        if (backlogBadge) backlogBadge.textContent = `${bCount} Active Pending`;
+        backlogCont.innerHTML = `
+          <div style="color:#DC2626; font-weight:600; font-size:0.85rem; padding:6px 4px;">
+            ${escapeHtml(s.backlog_subjects)}
+          </div>
+        `;
+      } else {
+        backlogSec.style.display = "none";
+        backlogCont.innerHTML = "";
+      }
+    }
     setTxt("modalAssignmentRate", `${s.assignment_completion_pct}%`);
     setTxt("modalAptitude", `${s.placement_aptitude_score}/100`);
     setTxt("modalTech", `${s.technical_skills_score}/100`);
@@ -1735,11 +1850,11 @@ window.inspectStudent = async function(studentId) {
     if (intvWrap) {
       if (s.recommended_interventions && s.recommended_interventions.length > 0) {
         intvWrap.innerHTML = s.recommended_interventions.map(intv => `
-          <div class="intervention-card" style="background:rgba(30,15,60,0.7); border:1px solid rgba(196,181,253,0.2); border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div class="intervention-card" style="background:rgba(18,59,102,0.7); border:1px solid rgba(47,128,237,0.2); border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
             <div>
               <div style="font-weight:700; font-size:0.875rem; color:#FFFFFF;">${escapeHtml(intv.action)}</div>
-              <div style="font-size:0.75rem; color:#DDD6FE;">${escapeHtml(intv.rationale)}</div>
-              <div style="font-size:0.7rem; color:#A78BFA; margin-top:2px;">Category: ${escapeHtml(intv.category)} &bull; Target: ${escapeHtml(intv.timeline)}</div>
+              <div style="font-size:0.75rem; color:#D4E9FF;">${escapeHtml(intv.rationale)}</div>
+              <div style="font-size:0.7rem; color:#5B6B82; margin-top:2px;">Category: ${escapeHtml(intv.category)} &bull; Target: ${escapeHtml(intv.timeline)}</div>
             </div>
             <span class="badge ${intv.urgency === 'Immediate' ? 'badge-high' : (intv.urgency === 'High' ? 'badge-medium' : 'badge-low')}">${intv.urgency}</span>
           </div>
@@ -1777,17 +1892,17 @@ function renderInterventionHistory(history) {
   if (!container) return;
 
   if (!history || history.length === 0) {
-    container.innerHTML = `<p style="font-size:0.75rem; color:#A78BFA; font-style:italic;">No recorded counseling sessions yet for this student.</p>`;
+    container.innerHTML = `<p style="font-size:0.75rem; color:#5B6B82; font-style:italic;">No recorded counseling sessions yet for this student.</p>`;
     return;
   }
 
   container.innerHTML = history.map(item => `
-    <div style="background:rgba(30,15,60,0.7); border:1px solid rgba(196,181,253,0.2); border-radius:8px; padding:10px 14px; margin-bottom:8px;">
+    <div style="background:rgba(18,59,102,0.7); border:1px solid rgba(47,128,237,0.2); border-radius:8px; padding:10px 14px; margin-bottom:8px;">
       <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.78rem;">
-        <span style="color:#FFFFFF;">${escapeHtml(item.title || item.action_type)} &bull; <strong style="color:#EC4899;">${escapeHtml(item.faculty_name)}</strong></span>
-        <span style="font-size:0.7rem; color:#A78BFA;">${item.created_at || 'Recently logged'}</span>
+        <span style="color:#FFFFFF;">${escapeHtml(item.title || item.action_type)} &bull; <strong style="color:#2F80ED;">${escapeHtml(item.faculty_name)}</strong></span>
+        <span style="font-size:0.7rem; color:#5B6B82;">${item.created_at || 'Recently logged'}</span>
       </div>
-      <p style="font-size:0.75rem; color:#DDD6FE; margin-top:4px;">${escapeHtml(item.instructions || item.notes)}</p>
+      <p style="font-size:0.75rem; color:#D4E9FF; margin-top:4px;">${escapeHtml(item.instructions || item.notes)}</p>
       ${item.action_taken ? `<p style="font-size:0.72rem; color:#10B981; margin-top:2px;"><strong>Action Taken:</strong> ${escapeHtml(item.action_taken)}</p>` : ''}
     </div>
   `).join("");
@@ -1827,7 +1942,7 @@ window.searchAndInspectStudent = async function() {
     return;
   }
 
-  resultContainer.innerHTML = `<p style="color:#A78BFA; font-size:0.82rem; padding:12px;">Searching...</p>`;
+  resultContainer.innerHTML = `<p style="color:#5B6B82; font-size:0.82rem; padding:12px;">Searching...</p>`;
 
   try {
     const res = await fetch(`/api/students?search=${encodeURIComponent(query)}`);
@@ -1855,7 +1970,7 @@ window.searchAndInspectStudent = async function() {
     // Multiple matches – show a result list
     resultContainer.innerHTML = `
       <div style="margin-bottom:10px;">
-        <span style="font-size:0.8rem; color:#6B7280; font-weight:600;">${students.length} students found matching "<strong style='color:#7C3AED'>${escapeHtml(query)}</strong>" — click to view profile:</span>
+        <span style="font-size:0.8rem; color:#6B7280; font-weight:600;">${students.length} students found matching "<strong style='color:#2F80ED'>${escapeHtml(query)}</strong>" — click to view profile:</span>
       </div>
       <div style="display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto;">
         ${students.map(s => {
@@ -1866,10 +1981,10 @@ window.searchAndInspectStudent = async function() {
             ? `<span style="background:#FEE2E2; color:#DC2626; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:4px;">${s.backlogs} Backlog${s.backlogs > 1 ? 's' : ''}</span>`
             : `<span style="background:#DCFCE7; color:#16A34A; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:4px;">No Backlogs</span>`;
           return `
-            <div onclick="inspectStudent('${s.student_id}')" style="display:flex; align-items:center; gap:14px; background:#FFFFFF; border:1px solid rgba(124,58,237,0.18); border-radius:12px; padding:12px 16px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='#7C3AED'; this.style.boxShadow='0 2px 12px rgba(124,58,237,0.15)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.18)'; this.style.boxShadow='none'">
-              <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#7C3AED,#EC4899); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-weight:800; font-size:0.85rem; flex-shrink:0;">${initials}</div>
+            <div onclick="inspectStudent('${s.student_id}')" style="display:flex; align-items:center; gap:14px; background:#FFFFFF; border:1px solid #DCE4EE; border-radius:12px; padding:12px 16px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='#2F80ED'; this.style.boxShadow='0 2px 12px rgba(47,128,237,0.15)'" onmouseout="this.style.borderColor='#DCE4EE'; this.style.boxShadow='none'">
+              <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#123B66,#2F80ED); display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-weight:800; font-size:0.85rem; flex-shrink:0;">${initials}</div>
               <div style="flex:1; min-width:0;">
-                <div style="font-weight:700; color:#17112B; font-size:0.88rem;">${escapeHtml(s.name)}</div>
+                <div style="font-weight:700; color:#172B4D; font-size:0.88rem;">${escapeHtml(s.name)}</div>
                 <div style="font-size:0.72rem; color:#6B7280; margin-top:2px;">${s.student_id} &bull; ${s.department} &bull; Sem ${s.semester}</div>
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
@@ -1877,7 +1992,7 @@ window.searchAndInspectStudent = async function() {
                 <span style="font-size:0.72rem; color:${riskColor}; font-weight:700;">${s.attendance_pct}% att${attWarning}</span>
                 ${backlogBadge}
               </div>
-              <div style="color:#7C3AED; flex-shrink:0;">
+              <div style="color:#2F80ED; flex-shrink:0;">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
               </div>
             </div>`;
@@ -1973,7 +2088,7 @@ async function handleInterventionSubmit(e) {
     if (res.ok) {
       if (instructionsEl) instructionsEl.value = "";
       if (notesEl) notesEl.value = "";
-      alert("Intervention assigned successfully and saved to SQLite!");
+      alert("Intervention assigned successfully and saved!");
       
       // Refresh timeline & interventions table
       const profileRes = await fetch(`/api/students/${STATE.selectedStudentId}`);
@@ -2131,12 +2246,17 @@ async function calcPersonalSim() {
     if (res.ok) {
       const data = await res.json();
       setTxt("personalProjectedScore", data.simulated.success_score);
-      setTxt("personalDeltaText", `(+${data.score_delta} pts)`);
+      const formattedDelta = String(data.score_delta).startsWith('+') || String(data.score_delta).startsWith('-')
+        ? `(${data.score_delta} pts)`
+        : `(+${data.score_delta} pts)`;
+      setTxt("personalDeltaText", formattedDelta);
       const badge = document.getElementById("personalProjectedBadge");
       if (badge) {
         badge.className = `badge badge-${data.simulated.risk_level.toLowerCase()}`;
         badge.textContent = `${data.simulated.risk_level} Risk`;
       }
+    } else {
+      setTxt("personalDeltaText", "(Calculation failed)");
     }
   } catch (err) {
     console.error("Error in personal simulator:", err);
@@ -2252,14 +2372,28 @@ function setupEventListeners() {
     detailModal.addEventListener("click", (e) => { if (e.target === detailModal) detailModal.style.display = "none"; });
   }
 
-  // Simulator Modal Open/Close
-  const btnOpenSim = document.getElementById("btnOpenSimulator") || document.getElementById("btnOpenStudentSim");
+  // Simulator Modal Open/Close (Admin) & Topbar What-If Simulator (Student)
+  const btnOpenSim = document.getElementById("btnOpenSimulator");
   const simModal = document.getElementById("simulatorModal");
   const btnCloseSim = document.getElementById("btnCloseSimulator");
   if (btnOpenSim && simModal) {
     btnOpenSim.addEventListener("click", () => { simModal.style.display = "flex"; });
     if (btnCloseSim) btnCloseSim.addEventListener("click", () => { simModal.style.display = "none"; });
     simModal.addEventListener("click", (e) => { if (e.target === simModal) simModal.style.display = "none"; });
+  }
+
+  const btnOpenStudentSim = document.getElementById("btnOpenStudentSim");
+  if (btnOpenStudentSim) {
+    btnOpenStudentSim.addEventListener("click", () => {
+      if (typeof window.switchSection === "function") {
+        window.switchSection("section-my-success-score");
+      }
+      const simPanel = document.getElementById("personalRangeAttendance");
+      if (simPanel) {
+        simPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+        simPanel.focus();
+      }
+    });
   }
 
   // Simulator slider listeners (Admin)
@@ -2423,6 +2557,7 @@ function setupEventListeners() {
         name: document.getElementById("newFacName").value.trim(),
         email: document.getElementById("newFacEmail").value.trim(),
         department: document.getElementById("newFacDept").value,
+        role: document.getElementById("newFacRole")?.value || "faculty",
         password: document.getElementById("newFacPassword")?.value.trim() || "Faculty@123",
         phone: document.getElementById("newFacPhone")?.value.trim() || "+91 9811223344",
         designation: document.getElementById("newFacDesig").value.trim(),
@@ -2459,6 +2594,20 @@ function setupEventListeners() {
 
   window.exportCohortCSV = function() {
     window.location.href = `/api/export/csv?department=${STATE.activeDept}&risk_level=${STATE.activeRisk}`;
+  };
+
+  window.exportCohortExcel = function() {
+    window.location.href = `/api/export/xlsx?department=${STATE.activeDept}&risk_level=${STATE.activeRisk}`;
+  };
+
+  window.exportRiskCSV = function(riskLevel) {
+    const risk = riskLevel || 'High';
+    window.location.href = `/api/export/csv?department=${STATE.activeDept}&risk_level=${risk}`;
+  };
+
+  window.exportRiskExcel = function(riskLevel) {
+    const risk = riskLevel || 'High';
+    window.location.href = `/api/export/xlsx?department=${STATE.activeDept}&risk_level=${risk}`;
   };
 
   // Faculty Update Intervention Modal & Form

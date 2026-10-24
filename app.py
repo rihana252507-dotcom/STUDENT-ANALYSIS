@@ -15,6 +15,10 @@ Features:
 import os
 import csv
 import io
+import datetime
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 from pathlib import Path
 from flask import (
     Flask, render_template, request, redirect, url_for,
@@ -38,6 +42,10 @@ app = Flask(
     static_folder=str(BASE_DIR / "static")
 )
 app.secret_key = os.environ.get("SECRET_KEY", "campusiq-kpmg-hackathon-production-key-2026")
+from datetime import timedelta
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = False
 app.json.ensure_ascii = False
 
 # Auto-initialize SQLite database on launch
@@ -56,6 +64,8 @@ def index():
             return redirect(url_for("admin_dashboard"))
         elif role == "faculty":
             return redirect(url_for("faculty_dashboard"))
+        elif role == "hod":
+            return redirect(url_for("hod_dashboard"))
         elif role == "student":
             return redirect(url_for("student_dashboard"))
     return redirect(url_for("login"))
@@ -81,13 +91,15 @@ def login():
                     "department": user.get("department", "")
                 }), 200
 
-            flash(f"Welcome back, {user['name']}!", "success")
+            flash(f"Welcome back, {user['name']}! You are logged in successfully.", "success")
             
             # Redirect to respective authorized dashboard
             if user["role"] == "admin":
                 return redirect(url_for("admin_dashboard"))
             elif user["role"] == "faculty":
                 return redirect(url_for("faculty_dashboard"))
+            elif user["role"] == "hod":
+                return redirect(url_for("hod_dashboard"))
             elif user["role"] == "student":
                 return redirect(url_for("student_dashboard"))
             return redirect(url_for("index"))
@@ -107,7 +119,7 @@ def login():
 def logout():
     """Terminates user session and redirects to login."""
     logout_user()
-    flash("You have been signed out safely.", "warning")
+    flash("Logged out successfully.", "success")
     return redirect(url_for("login"))
 
 
@@ -116,6 +128,7 @@ def logout():
 # ==============================================================================
 
 @app.route("/admin")
+@app.route("/admin/dashboard")
 @login_required
 @role_required("admin")
 def admin_dashboard():
@@ -124,7 +137,29 @@ def admin_dashboard():
     return render_template("admin_dashboard.html", user=user)
 
 
+@app.route("/hod")
+@app.route("/hod/dashboard")
+@login_required
+@role_required("hod")
+def hod_dashboard():
+    """Departmental Governance and Monitoring View for Head of Department (HOD)."""
+    user = get_current_user()
+    dept_code = (user.get("department") or "").strip().upper()
+    
+    dept_info = None
+    if dept_code:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM departments WHERE code = ? COLLATE NOCASE", (dept_code,))
+        row = cursor.fetchone()
+        dept_info = dict(row) if row else None
+        conn.close()
+
+    return render_template("hod_dashboard.html", user=user, dept_code=dept_code, dept_info=dept_info)
+
+
 @app.route("/faculty")
+@app.route("/faculty/dashboard")
 @login_required
 @role_required("faculty")
 def faculty_dashboard():
@@ -134,16 +169,18 @@ def faculty_dashboard():
 
 
 @app.route("/student")
+@app.route("/student/dashboard")
 @login_required
 @role_required("student")
 def student_dashboard():
     """Personalized Academic Radar & Success View for Logged-In Student."""
     user = get_current_user()
     student_id = user["user_id"]
+    canonical_id = session.get("student_id") or student_id
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM students WHERE student_id = ? OR user_id = ? OR email = ?", (student_id, student_id, user.get("email", "")))
+    cursor.execute("SELECT * FROM students WHERE UPPER(student_id) = UPPER(?) OR UPPER(student_id) = UPPER(?) OR UPPER(user_id) = UPPER(?) OR UPPER(email) = UPPER(?)", (canonical_id, student_id, student_id, user.get("email", "")))
     student_row = cursor.fetchone()
 
     if not student_row:
@@ -538,7 +575,11 @@ def get_students():
     cursor = conn.cursor()
 
     # Query with role filter
-    if current_role == "faculty":
+    if current_role == "hod":
+        if not current_dept:
+            return jsonify({"error": "Forbidden", "message": "No department assigned to HOD account"}), 403
+        cursor.execute("SELECT * FROM students WHERE department = ? COLLATE NOCASE", (current_dept,))
+    elif current_role == "faculty":
         faculty_name = session.get("name", "")
         cursor.execute("""
             SELECT * FROM students 
@@ -552,33 +593,42 @@ def get_students():
     
     rows = cursor.fetchall()
 
-    # Query academic_records to accurately attach backlog subjects and count
+    # Query academic_records to accurately attach backlog subjects, structured details, and count
     cursor.execute("""
-        SELECT student_id, GROUP_CONCAT(course_name, ', ') AS backlog_subjects, COUNT(*) AS backlog_records_count
+        SELECT student_id, course_name, course_code, semester, academic_year, grade, status
         FROM academic_records
         WHERE LOWER(status) NOT IN ('passed', 'pass', 'completed', 'clear')
-        GROUP BY student_id
+        ORDER BY semester ASC, id ASC
     """)
-    backlogs_map = {
-        r["student_id"]: {
-            "subjects": r["backlog_subjects"],
-            "count": r["backlog_records_count"]
+    backlogs_details_map = {}
+    backlogs_subjects_map = {}
+    for r in cursor.fetchall():
+        sid = r["student_id"]
+        c_code = r["course_code"] or ""
+        disp = f"{r['course_name']} — {c_code}" if c_code else r["course_name"]
+        item = {
+            "course_name": r["course_name"],
+            "course_code": c_code,
+            "semester": r["semester"],
+            "academic_year": r["academic_year"] or "",
+            "grade": r["grade"] or "F",
+            "display": disp
         }
-        for r in cursor.fetchall()
-    }
+        backlogs_details_map.setdefault(sid, []).append(item)
+        backlogs_subjects_map.setdefault(sid, []).append(r["course_name"])
     conn.close()
 
     students = []
     for r in rows:
         s = dict(r)
-        b_info = backlogs_map.get(s["student_id"], {})
-        rec_count = b_info.get("count", 0)
-        raw_subjects = b_info.get("subjects") or ""
-        
+        b_items = backlogs_details_map.get(s["student_id"], [])
+        rec_count = len(b_items)
+        s["backlog_details"] = b_items
+
         actual_backlogs = max(s.get("backlogs") or 0, rec_count)
         s["backlogs"] = actual_backlogs
-        if raw_subjects:
-            s["backlog_subjects"] = raw_subjects
+        if b_items:
+            s["backlog_subjects"] = ", ".join(backlogs_subjects_map.get(s["student_id"], []))
         elif actual_backlogs > 0:
             s["backlog_subjects"] = "1 Active Backlog" if actual_backlogs == 1 else f"{actual_backlogs} Active Backlogs"
         else:
@@ -669,6 +719,19 @@ def get_student_detail(student_id):
     current_role = session.get("role")
     current_user_id = session.get("user_id", "")
 
+    # Strict permission check for HOD: can only view students in their assigned department
+    if current_role == "hod":
+        current_dept = session.get("department", "")
+        if not current_dept:
+            return jsonify({"error": "Forbidden", "message": "No department assigned to HOD account"}), 403
+        conn_check = get_db()
+        c_check = conn_check.cursor()
+        c_check.execute("SELECT department FROM students WHERE student_id = ? COLLATE NOCASE OR user_id = ? COLLATE NOCASE", (student_id, student_id))
+        s_dept_row = c_check.fetchone()
+        conn_check.close()
+        if not s_dept_row or (s_dept_row["department"] or "").strip().upper() != current_dept.strip().upper():
+            return jsonify({"error": "Forbidden", "message": "Access denied: student does not belong to your department"}), 403
+
     # Strict permission check for students: can view by user_id ('student001') or student_id ('CIQ-2026-001')
     if current_role == "student":
         allowed_ids = {current_user_id.upper(), session.get("student_id", "").upper()}
@@ -717,6 +780,28 @@ def get_student_detail(student_id):
     academic_records = [dict(r) for r in cursor.fetchall()]
     conn.close()
 
+    # Structured backlog details with subject names, codes, semester, academic year
+    backlog_items = [
+        {
+            "course_name": r["course_name"],
+            "course_code": r.get("course_code") or "",
+            "semester": r.get("semester"),
+            "academic_year": r.get("academic_year") or "",
+            "grade": r.get("grade") or "F",
+            "display": f"{r['course_name']} — {r['course_code']}" if r.get("course_code") else r["course_name"]
+        }
+        for r in academic_records
+        if (r.get("status") or "").lower() not in ("passed", "pass", "completed", "clear")
+    ]
+    student["backlog_details"] = backlog_items
+    if backlog_items:
+        student["backlog_subjects"] = "; ".join([b["display"] for b in backlog_items])
+        student["backlogs"] = max(student.get("backlogs") or 0, len(backlog_items))
+    else:
+        student["backlog_subjects"] = ""
+        if not student.get("backlogs"):
+            student["backlogs"] = 0
+
     student["logged_interventions"] = interventions
     student["academic_records"] = academic_records
     return jsonify(student)
@@ -724,7 +809,7 @@ def get_student_detail(student_id):
 
 @app.route("/api/students/<student_id>/intervention", methods=["POST"])
 @login_required
-@role_required("admin", "faculty")
+@role_required("admin", "faculty", "hod")
 def log_intervention(student_id):
     """Records faculty counseling minutes and intervention protocol in SQLite."""
     data = request.get_json(silent=True) or {}
@@ -747,6 +832,13 @@ def log_intervention(student_id):
     if not student:
         conn.close()
         return jsonify({"error": "Not Found", "message": "Student not found"}), 404
+
+    # Enforce department restriction for HOD
+    if current_role == "hod":
+        dept = (session.get("department") or "").upper()
+        if (student["department"] or "").upper() != dept:
+            conn.close()
+            return jsonify({"error": "Forbidden", "message": "Cannot log intervention for student from another department"}), 403
 
     # 2. Determine and verify assigned faculty
     target_faculty_id = data.get("faculty_id") or data.get("assigned_faculty")
@@ -772,6 +864,9 @@ def log_intervention(student_id):
         if current_role == "faculty":
             faculty_id = current_user_id
             faculty_name = session.get("name", "Faculty Mentor")
+        elif current_role == "hod":
+            faculty_id = current_user_id
+            faculty_name = session.get("name", "Head of Department")
         else:
             conn.close()
             return jsonify({"error": "Bad Request", "message": "A valid faculty member must be selected."}), 400
@@ -787,7 +882,7 @@ def log_intervention(student_id):
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             student["student_id"], faculty_id, faculty_name, action_type, title,
-            priority, instructions, notes, due_date, "Assigned" if current_role == "admin" else "In Progress"
+            priority, instructions, notes, due_date, "Assigned" if current_role in ("admin", "hod") else "In Progress"
         ))
         intervention_id = cursor.lastrowid
 
@@ -828,9 +923,11 @@ def simulate():
     current_role = session.get("role")
     current_user_id = session.get("user_id")
 
-    # Enforce student permission
-    if current_role == "student" and current_user_id.upper() != str(student_id).upper():
-        return jsonify({"error": "Forbidden", "message": "Unauthorized simulation"}), 403
+    # Enforce student permission: allow matching by user_id or student_id
+    if current_role == "student":
+        allowed_ids = {str(current_user_id).upper(), str(session.get("student_id", "")).upper()}
+        if str(student_id).upper() not in allowed_ids:
+            return jsonify({"error": "Forbidden", "message": "Unauthorized simulation"}), 403
 
     conn = get_db()
     cursor = conn.cursor()
@@ -853,10 +950,199 @@ def simulate():
     return jsonify(result)
 
 
+
+
+# ==============================================================================
+# UNIFIED EXPORT HELPERS (EXCEL & CSV COMPLIANT WITH BOM & FORMULA PROTECTION)
+# ==============================================================================
+
+def _sanitize_csv_cell(val):
+    """
+    Sanitizes cell values to prevent CSV/Excel Formula Injection vulnerabilities
+    while accurately preserving valid numeric values and ordinary text.
+    """
+    if val is None:
+        return ""
+    if isinstance(val, bool):
+        return "Yes" if val else "No"
+    if isinstance(val, (int, float)):
+        return val
+    s = str(val).strip()
+    if not s:
+        return ""
+    try:
+        float(s)
+        return s
+    except ValueError:
+        pass
+    if s[0] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + s
+    return s
+
+
+def _make_csv_response(output_str, filename):
+    """
+    Wraps CSV string output in a UTF-8 BOM response (\ufeff) for native,
+    flawless Microsoft Excel compatibility across Windows and macOS.
+    """
+    bom_content = "\ufeff" + output_str
+    return Response(
+        bom_content,
+        mimetype="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-cache, no-store, must-revalidate"
+        }
+    )
+
+
+def _make_excel_response(wb, filename):
+    """Saves openpyxl Workbook to memory BytesIO and returns streaming Excel response."""
+    out = io.BytesIO()
+    wb.save(out)
+    out.seek(0)
+    return Response(
+        out.getvalue(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-cache, no-store, must-revalidate"
+        }
+    )
+
+
+def _style_excel_sheet(ws, title_text, columns):
+    """
+    Applies Enterprise Blue + Teal styling, text formatting on identifiers,
+    and automatic column widths to an openpyxl worksheet.
+    """
+    ws.insert_rows(1)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(columns))
+    title_cell = ws.cell(row=1, column=1, value=title_text)
+    title_cell.font = Font(name="Calibri", size=14, bold=True, color="FFFFFF")
+    title_cell.fill = PatternFill(start_color="123B66", end_color="123B66", fill_type="solid")
+    title_cell.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[1].height = 28
+
+    ws.insert_rows(2)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=len(columns))
+    sub_cell = ws.cell(row=2, column=1, value=f"Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Confidential CampusIQ Institutional Report")
+    sub_cell.font = Font(name="Calibri", size=9, italic=True, color="5B6B82")
+    sub_cell.fill = PatternFill(start_color="F4F7FB", end_color="F4F7FB", fill_type="solid")
+    sub_cell.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[2].height = 18
+
+    ws.insert_rows(3)
+    ws.row_dimensions[3].height = 6
+
+    header_row = 4
+    ws.row_dimensions[header_row].height = 24
+    header_fill = PatternFill(start_color="123B66", end_color="123B66", fill_type="solid")
+    header_font = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    thin_border = Border(
+        left=Side(style='thin', color='DCE4EE'),
+        right=Side(style='thin', color='DCE4EE'),
+        top=Side(style='thin', color='DCE4EE'),
+        bottom=Side(style='thin', color='DCE4EE')
+    )
+
+    for col_idx, col_name in enumerate(columns, 1):
+        cell = ws.cell(row=header_row, column=col_idx, value=col_name)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    data_font = Font(name="Calibri", size=10, color="172B4D")
+    alt_fill = PatternFill(start_color="F8FBFF", end_color="F8FBFF", fill_type="solid")
+    white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+
+    for row_idx in range(header_row + 1, ws.max_row + 1):
+        ws.row_dimensions[row_idx].height = 20
+        row_fill = alt_fill if row_idx % 2 == 0 else white_fill
+        for col_idx in range(1, len(columns) + 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.font = data_font
+            cell.fill = row_fill
+            cell.border = thin_border
+            if isinstance(cell.value, (int, float)) and not isinstance(cell.value, bool):
+                cell.alignment = Alignment(horizontal="right", vertical="center")
+            else:
+                cell.number_format = '@'
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+
+    for col_idx, col_name in enumerate(columns, 1):
+        max_len = len(str(col_name))
+        for row in range(header_row, ws.max_row + 1):
+            val = ws.cell(row=row, column=col_idx).value
+            if val is not None:
+                max_len = max(max_len, len(str(val)))
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = min(max(max_len + 4, 12), 40)
+
+
+def _get_student_cohort_data(current_role, current_user_id, current_dept, dept_filter="ALL", risk_filter="ALL"):
+    """Fetches and structures student records according to role and security scope."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if current_role == "hod":
+        cursor.execute("SELECT * FROM students WHERE department = ? COLLATE NOCASE ORDER BY name ASC", (current_dept,))
+    elif current_role == "faculty":
+        cursor.execute("SELECT * FROM students WHERE faculty_id = ? OR department = ? ORDER BY name ASC", (current_user_id, current_dept))
+    else:
+        cursor.execute("SELECT * FROM students ORDER BY name ASC")
+
+    students = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    if current_role == "hod":
+        dept_filter = current_dept
+    if dept_filter != "ALL":
+        students = [s for s in students if (s.get("department") or "").upper() == dept_filter.upper()]
+    if risk_filter != "ALL":
+        students = [s for s in students if (s.get("risk_level") or "").lower() == risk_filter.lower()]
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    risk_part = f"_{risk_filter.capitalize()}_Risk" if risk_filter != "ALL" else ""
+    dept_part = f"_{dept_filter.upper()}" if dept_filter != "ALL" else ""
+    filename_base = f"Student_Report{dept_part}{risk_part}_{today_str}"
+
+    headers = [
+        "Student ID", "Name", "Email", "Department", "Semester", "Section", "Advisor",
+        "CGPA", "Exam Marks %", "Attendance %", "Backlogs", "LMS Weekly Hours",
+        "Assignment Rate %", "Aptitude Score", "Tech Skills", "Success Score", "Risk Category"
+    ]
+
+    rows = []
+    for s in students:
+        rows.append([
+            _sanitize_csv_cell(s.get("student_id", "")),
+            _sanitize_csv_cell(s.get("name", "")),
+            _sanitize_csv_cell(s.get("email", "")),
+            _sanitize_csv_cell(s.get("department", "")),
+            _sanitize_csv_cell(s.get("semester", "")),
+            _sanitize_csv_cell(s.get("section", "")),
+            _sanitize_csv_cell(s.get("mentor_name", "Unassigned")),
+            s.get("cgpa", 0.0),
+            s.get("academic_marks_pct", 0),
+            s.get("attendance_pct", 0),
+            s.get("backlogs", 0),
+            s.get("lms_weekly_hours", 0),
+            s.get("assignment_completion_pct", 0),
+            s.get("placement_aptitude_score", 0),
+            s.get("technical_skills_score", 0),
+            s.get("success_score", 0),
+            _sanitize_csv_cell(s.get("risk_level", "Low"))
+        ])
+
+    return headers, rows, filename_base
+
+
+
 @app.route("/api/export/csv", methods=["GET"])
 @login_required
 def export_csv():
-    """Generates and downloads dynamic CSV report based on caller's role and filters."""
+    """Generates and downloads Excel-compatible CSV report with UTF-8 BOM based on caller's role and filters."""
     current_role = session.get("role")
     current_user_id = session.get("user_id")
     current_dept = session.get("department", "")
@@ -864,48 +1150,407 @@ def export_csv():
     if current_role == "student":
         return jsonify({"error": "Forbidden"}), 403
 
-    conn = get_db()
-    cursor = conn.cursor()
+    if current_role == "hod" and not current_dept:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
 
-    if current_role == "faculty":
-        cursor.execute("SELECT * FROM students WHERE faculty_id = ? OR department = ?", (current_user_id, current_dept))
-    else:
-        cursor.execute("SELECT * FROM students")
-
-    students = [dict(r) for r in cursor.fetchall()]
-    conn.close()
-
-    # Optional department & risk filters
     dept = request.args.get("department", "ALL")
     risk = request.args.get("risk_level", "ALL")
 
-    if dept != "ALL":
-        students = [s for s in students if s["department"].upper() == dept.upper()]
-    if risk != "ALL":
-        students = [s for s in students if s["risk_level"].lower() == risk.lower()]
+    headers, rows, filename_base = _get_student_cohort_data(current_role, current_user_id, current_dept, dept, risk)
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "Student ID", "Name", "Email", "Department", "Semester", "Section", "Advisor",
-        "CGPA", "Exam Marks %", "Attendance %", "Backlogs", "LMS Weekly Hours",
-        "Assignment Rate %", "Aptitude Score", "Tech Skills", "Success Score", "Risk Category"
-    ])
+    writer.writerow(headers)
+    for r in rows:
+        writer.writerow(r)
 
-    for s in students:
+    return _make_csv_response(output.getvalue(), f"{filename_base}.csv")
+
+
+@app.route("/api/export/xlsx", methods=["GET"])
+@login_required
+def export_xlsx():
+    """Generates and downloads genuine Microsoft Excel (.xlsx) workbook for student cohort records."""
+    current_role = session.get("role")
+    current_user_id = session.get("user_id")
+    current_dept = session.get("department", "")
+
+    if current_role == "student":
+        return jsonify({"error": "Forbidden"}), 403
+
+    if current_role == "hod" and not current_dept:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    dept = request.args.get("department", "ALL")
+    risk = request.args.get("risk_level", "ALL")
+
+    headers, rows, filename_base = _get_student_cohort_data(current_role, current_user_id, current_dept, dept, risk)
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Student Cohort"
+    for r in rows:
+        ws.append(r)
+
+    title = f"CampusIQ Institutional Student Cohort Performance Report"
+    if dept != "ALL":
+        title += f" ({dept})"
+    if risk != "ALL":
+        title += f" - {risk.capitalize()} Risk"
+
+    _style_excel_sheet(ws, title, headers)
+    return _make_excel_response(wb, f"{filename_base}.xlsx")
+
+
+@app.route("/api/interventions/export/csv", methods=["GET"])
+@login_required
+@role_required("admin", "faculty", "hod")
+def export_interventions_csv():
+    """Generates and downloads Excel-compatible CSV of student interventions within authorized scope."""
+    current_role = session.get("role")
+    current_user_id = session.get("user_id")
+    current_dept = session.get("department", "")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    if current_role == "hod":
+        cursor.execute("""
+            SELECT i.*, s.name as student_name, s.department as student_dept
+            FROM interventions i
+            JOIN students s ON s.student_id = i.student_id
+            WHERE s.department = ? COLLATE NOCASE
+            ORDER BY i.id DESC
+        """, (current_dept,))
+    elif current_role == "faculty":
+        cursor.execute("""
+            SELECT i.*, s.name as student_name, s.department as student_dept
+            FROM interventions i
+            JOIN students s ON s.student_id = i.student_id
+            WHERE i.faculty_id = ? OR s.department = ?
+            ORDER BY i.id DESC
+        """, (current_user_id, current_dept))
+    else:
+        cursor.execute("""
+            SELECT i.*, s.name as student_name, s.department as student_dept
+            FROM interventions i
+            LEFT JOIN students s ON s.student_id = i.student_id
+            ORDER BY i.id DESC
+        """)
+
+    rows_data = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    headers = [
+        "Intervention ID", "Student ID", "Student Name", "Department",
+        "Faculty Mentor", "Action Type", "Priority", "Title",
+        "Instructions & Notes", "Status", "Created Date", "Completed Date"
+    ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(headers)
+
+    for i in rows_data:
         writer.writerow([
-            s["student_id"], s["name"], s["email"], s["department"], s["semester"], s["section"],
-            s.get("mentor_name", ""), s["cgpa"], s["academic_marks_pct"], s["attendance_pct"],
-            s["backlogs"], s["lms_weekly_hours"], s["assignment_completion_pct"],
-            s["placement_aptitude_score"], s["technical_skills_score"],
-            s["success_score"], s["risk_level"]
+            f"#INT-{i['id']}",
+            _sanitize_csv_cell(i.get("student_id", "")),
+            _sanitize_csv_cell(i.get("student_name", "")),
+            _sanitize_csv_cell(i.get("student_dept", "")),
+            _sanitize_csv_cell(i.get("faculty_name", "")),
+            _sanitize_csv_cell(i.get("action_type", "")),
+            _sanitize_csv_cell(i.get("priority", "Medium")),
+            _sanitize_csv_cell(i.get("title", "")),
+            _sanitize_csv_cell(i.get("instructions") or i.get("notes") or ""),
+            _sanitize_csv_cell(i.get("status", "Assigned")),
+            _sanitize_csv_cell(i.get("created_at", "")),
+            _sanitize_csv_cell(i.get("completed_at", "") or "In Progress")
         ])
 
-    return Response(
-        output.getvalue(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment;filename=CampusIQ_Student_Report.csv"}
-    )
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    dept_prefix = f"{current_dept}_" if current_dept else ""
+    filename = f"{dept_prefix}Intervention_Report_{today_str}.csv"
+    return _make_csv_response(output.getvalue(), filename)
+
+
+@app.route("/api/interventions/export/xlsx", methods=["GET"])
+@login_required
+@role_required("admin", "faculty", "hod")
+def export_interventions_xlsx():
+    """Generates and downloads genuine Excel (.xlsx) workbook of student interventions within authorized scope."""
+    current_role = session.get("role")
+    current_user_id = session.get("user_id")
+    current_dept = session.get("department", "")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    if current_role == "hod":
+        cursor.execute("""
+            SELECT i.*, s.name as student_name, s.department as student_dept
+            FROM interventions i
+            JOIN students s ON s.student_id = i.student_id
+            WHERE s.department = ? COLLATE NOCASE
+            ORDER BY i.id DESC
+        """, (current_dept,))
+    elif current_role == "faculty":
+        cursor.execute("""
+            SELECT i.*, s.name as student_name, s.department as student_dept
+            FROM interventions i
+            JOIN students s ON s.student_id = i.student_id
+            WHERE i.faculty_id = ? OR s.department = ?
+            ORDER BY i.id DESC
+        """, (current_user_id, current_dept))
+    else:
+        cursor.execute("""
+            SELECT i.*, s.name as student_name, s.department as student_dept
+            FROM interventions i
+            LEFT JOIN students s ON s.student_id = i.student_id
+            ORDER BY i.id DESC
+        """)
+
+    rows_data = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    headers = [
+        "Intervention ID", "Student ID", "Student Name", "Department",
+        "Faculty Mentor", "Action Type", "Priority", "Title",
+        "Instructions & Notes", "Status", "Created Date", "Completed Date"
+    ]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Interventions"
+
+    for i in rows_data:
+        ws.append([
+            f"#INT-{i['id']}",
+            _sanitize_csv_cell(i.get("student_id", "")),
+            _sanitize_csv_cell(i.get("student_name", "")),
+            _sanitize_csv_cell(i.get("student_dept", "")),
+            _sanitize_csv_cell(i.get("faculty_name", "")),
+            _sanitize_csv_cell(i.get("action_type", "")),
+            _sanitize_csv_cell(i.get("priority", "Medium")),
+            _sanitize_csv_cell(i.get("title", "")),
+            _sanitize_csv_cell(i.get("instructions") or i.get("notes") or ""),
+            _sanitize_csv_cell(i.get("status", "Assigned")),
+            _sanitize_csv_cell(i.get("created_at", "")),
+            _sanitize_csv_cell(i.get("completed_at", "") or "In Progress")
+        ])
+
+    _style_excel_sheet(ws, "CampusIQ Student Success Interventions & Advising Log", headers)
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    dept_prefix = f"{current_dept}_" if current_dept else ""
+    filename = f"{dept_prefix}Intervention_Report_{today_str}.xlsx"
+    return _make_excel_response(wb, filename)
+
+
+@app.route("/api/faculty/export/csv", methods=["GET"])
+@login_required
+@role_required("admin", "hod")
+def export_faculty_csv():
+    """Generates and downloads Excel-compatible CSV directory of faculty members."""
+    current_role = session.get("role")
+    current_dept = session.get("department", "")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    if current_role == "hod":
+        cursor.execute("SELECT * FROM faculty WHERE department = ? COLLATE NOCASE ORDER BY name ASC", (current_dept,))
+    else:
+        cursor.execute("SELECT * FROM faculty ORDER BY department ASC, name ASC")
+    faculty = [dict(r) for r in cursor.fetchall()]
+
+    for f in faculty:
+        cursor.execute("SELECT COUNT(*) as cnt FROM students WHERE faculty_id = ? OR department = ?", (f["faculty_id"], f["department"]))
+        f["advisee_count"] = cursor.fetchone()["cnt"]
+    conn.close()
+
+    headers = [
+        "Faculty ID", "Full Name", "Designation", "Department", "Email Address", "Phone",
+        "Specialization", "Courses Count", "Assigned Advisees", "Attendance Tracking Status"
+    ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(headers)
+
+    for f in faculty:
+        writer.writerow([
+            _sanitize_csv_cell(f["faculty_id"]),
+            _sanitize_csv_cell(f["name"]),
+            _sanitize_csv_cell(f.get("designation", "Faculty Mentor")),
+            _sanitize_csv_cell(f["department"]),
+            _sanitize_csv_cell(f.get("email", "")),
+            _sanitize_csv_cell(f.get("phone", "")),
+            _sanitize_csv_cell(f.get("specialization", "General")),
+            f.get("courses_count", 0),
+            f.get("advisee_count", 0),
+            "Attendance tracking not active in current system"
+        ])
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    dept_prefix = f"{current_dept}_" if current_role == "hod" else ""
+    filename = f"{dept_prefix}Faculty_Report_{today_str}.csv"
+    return _make_csv_response(output.getvalue(), filename)
+
+
+@app.route("/api/faculty/export/xlsx", methods=["GET"])
+@login_required
+@role_required("admin", "hod")
+def export_faculty_xlsx():
+    """Generates and downloads genuine Excel (.xlsx) directory of faculty members."""
+    current_role = session.get("role")
+    current_dept = session.get("department", "")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    if current_role == "hod":
+        cursor.execute("SELECT * FROM faculty WHERE department = ? COLLATE NOCASE ORDER BY name ASC", (current_dept,))
+    else:
+        cursor.execute("SELECT * FROM faculty ORDER BY department ASC, name ASC")
+    faculty = [dict(r) for r in cursor.fetchall()]
+
+    for f in faculty:
+        cursor.execute("SELECT COUNT(*) as cnt FROM students WHERE faculty_id = ? OR department = ?", (f["faculty_id"], f["department"]))
+        f["advisee_count"] = cursor.fetchone()["cnt"]
+    conn.close()
+
+    headers = [
+        "Faculty ID", "Full Name", "Designation", "Department", "Email Address", "Phone",
+        "Specialization", "Courses Count", "Assigned Advisees", "Attendance Tracking Status"
+    ]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Faculty Directory"
+
+    for f in faculty:
+        ws.append([
+            _sanitize_csv_cell(f["faculty_id"]),
+            _sanitize_csv_cell(f["name"]),
+            _sanitize_csv_cell(f.get("designation", "Faculty Mentor")),
+            _sanitize_csv_cell(f["department"]),
+            _sanitize_csv_cell(f.get("email", "")),
+            _sanitize_csv_cell(f.get("phone", "")),
+            _sanitize_csv_cell(f.get("specialization", "General")),
+            f.get("courses_count", 0),
+            f.get("advisee_count", 0),
+            "Attendance tracking not active in current system"
+        ])
+
+    _style_excel_sheet(ws, "CampusIQ Institutional Faculty Directory & Workload Report", headers)
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    dept_prefix = f"{current_dept}_" if current_role == "hod" else ""
+    filename = f"{dept_prefix}Faculty_Report_{today_str}.xlsx"
+    return _make_excel_response(wb, filename)
+
+
+@app.route("/api/student/transcript/export/csv", methods=["GET"])
+@login_required
+@role_required("student")
+def export_student_transcript_csv():
+    """Generates and downloads Excel-compatible CSV of the authenticated student's academic transcript."""
+    current_user = get_current_user()
+    student_id = session.get("student_id") or current_user["user_id"]
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM academic_records
+        WHERE student_id = ? COLLATE NOCASE
+        ORDER BY year ASC, semester ASC, course_code ASC
+    """, (student_id,))
+    records = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    headers = [
+        "Year", "Semester", "Academic Year", "Course Code", "Course Name",
+        "Credits", "Mid 1 Marks", "Mid 2 Marks", "Internal Marks",
+        "External Marks", "Total Marks", "Max Marks", "Grade",
+        "Attendance (%)", "SGPA", "Status"
+    ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(headers)
+
+    for r in records:
+        writer.writerow([
+            r.get("year", 1),
+            _sanitize_csv_cell(r.get("semester_label") or r.get("semester", "")),
+            _sanitize_csv_cell(r.get("academic_year", "")),
+            _sanitize_csv_cell(r.get("course_code", "")),
+            _sanitize_csv_cell(r.get("course_name", "")),
+            r.get("credits", 0),
+            r.get("mid1_marks", 0),
+            r.get("mid2_marks", 0),
+            r.get("internal_marks", 0),
+            r.get("external_marks", 0),
+            r.get("total_marks", 0),
+            r.get("total_max", 100),
+            _sanitize_csv_cell(r.get("grade", "P")),
+            r.get("attendance_pct", 0),
+            r.get("sgpa", 0.0),
+            _sanitize_csv_cell(r.get("status", "Completed"))
+        ])
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"Student_Transcript_{student_id}_{today_str}.csv"
+    return _make_csv_response(output.getvalue(), filename)
+
+
+@app.route("/api/student/transcript/export/xlsx", methods=["GET"])
+@login_required
+@role_required("student")
+def export_student_transcript_xlsx():
+    """Generates and downloads genuine Excel (.xlsx) workbook of the authenticated student's academic transcript."""
+    current_user = get_current_user()
+    student_id = session.get("student_id") or current_user["user_id"]
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM academic_records
+        WHERE student_id = ? COLLATE NOCASE
+        ORDER BY year ASC, semester ASC, course_code ASC
+    """, (student_id,))
+    records = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    headers = [
+        "Year", "Semester", "Academic Year", "Course Code", "Course Name",
+        "Credits", "Mid 1 Marks", "Mid 2 Marks", "Internal Marks",
+        "External Marks", "Total Marks", "Max Marks", "Grade",
+        "Attendance (%)", "SGPA", "Status"
+    ]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Academic Transcript"
+
+    for r in records:
+        ws.append([
+            r.get("year", 1),
+            _sanitize_csv_cell(r.get("semester_label") or r.get("semester", "")),
+            _sanitize_csv_cell(r.get("academic_year", "")),
+            _sanitize_csv_cell(r.get("course_code", "")),
+            _sanitize_csv_cell(r.get("course_name", "")),
+            r.get("credits", 0),
+            r.get("mid1_marks", 0),
+            r.get("mid2_marks", 0),
+            r.get("internal_marks", 0),
+            r.get("external_marks", 0),
+            r.get("total_marks", 0),
+            r.get("total_max", 100),
+            _sanitize_csv_cell(r.get("grade", "P")),
+            r.get("attendance_pct", 0),
+            r.get("sgpa", 0.0),
+            _sanitize_csv_cell(r.get("status", "Completed"))
+        ])
+
+    _style_excel_sheet(ws, f"Official Student Academic Transcript & Grades ({student_id})", headers)
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"Student_Transcript_{student_id}_{today_str}.xlsx"
+    return _make_excel_response(wb, filename)
 
 
 # ==============================================================================
@@ -914,12 +1559,18 @@ def export_csv():
 
 @app.route("/api/admin/faculty", methods=["GET"])
 @login_required
-@role_required("admin")
+@role_required("admin", "hod")
 def get_admin_faculty():
-    """Returns directory of faculty members with caseload statistics."""
+    current_role = session.get("role")
+    current_dept = session.get("department", "")
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM faculty ORDER BY name ASC")
+    if current_role == "hod":
+        if not current_dept:
+            return jsonify({"error": "Forbidden", "message": "No department assigned to HOD account"}), 403
+        cursor.execute("SELECT * FROM faculty WHERE department = ? COLLATE NOCASE ORDER BY name ASC", (current_dept,))
+    else:
+        cursor.execute("SELECT * FROM faculty ORDER BY name ASC")
     faculty_list = [dict(r) for r in cursor.fetchall()]
     
     # Enrich with active advisee counts
@@ -979,11 +1630,18 @@ def add_faculty():
         # 2. Hash password securely using PBKDF2 (never plain text)
         hashed = generate_password_hash(password)
 
-        # 3. Parameterized INSERT into users table for authentication
+        # 3. Parameterized INSERT into users table for authentication (Faculty or HOD)
+        user_role = (data.get("role") or "faculty").strip().lower()
+        if user_role not in ("faculty", "hod"):
+            user_role = "faculty"
+
         cursor.execute("""
         INSERT INTO users (user_id, password_hash, role, name, email, department)
-        VALUES (?, ?, 'faculty', ?, ?, ?)
-        """, (faculty_id, hashed, name, email, dept))
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (faculty_id, hashed, user_role, name, email, dept))
+
+        if user_role == "hod":
+            cursor.execute("UPDATE departments SET hod_name = ? WHERE code = ?", (name, dept))
 
         # 4. Parameterized INSERT into faculty table
         cursor.execute("""
@@ -1058,7 +1716,7 @@ def add_course():
 
 @app.route("/api/interventions", methods=["GET"])
 @login_required
-@role_required("admin", "faculty")
+@role_required("admin", "faculty", "hod")
 def get_interventions():
     """Returns recorded counseling interventions based on caller's role."""
     current_role = session.get("role")
@@ -1075,6 +1733,19 @@ def get_interventions():
         LEFT JOIN notifications n ON n.intervention_id = i.id
         ORDER BY i.created_at DESC
         """)
+    elif current_role == "hod":
+        current_dept = session.get("department", "")
+        if not current_dept:
+            return jsonify({"error": "Forbidden", "message": "No department assigned to HOD account"}), 403
+        cursor.execute("""
+        SELECT i.*, s.name as student_name, s.department as student_dept, s.risk_level as student_risk,
+               n.is_read as notif_is_read, n.read_at as notif_read_at
+        FROM interventions i
+        JOIN students s ON i.student_id = s.student_id
+        LEFT JOIN notifications n ON n.intervention_id = i.id
+        WHERE s.department = ? COLLATE NOCASE
+        ORDER BY i.created_at DESC
+        """, (current_dept,))
     else:
         cursor.execute("""
         SELECT i.*, s.name as student_name, s.department as student_dept, s.risk_level as student_risk,
@@ -1093,7 +1764,7 @@ def get_interventions():
 
 @app.route("/api/interventions/<int:id>", methods=["PUT"])
 @login_required
-@role_required("admin", "faculty")
+@role_required("admin", "faculty", "hod")
 def update_intervention_status(id):
     """Updates progress status, action taken, and implementation notes of an active intervention."""
     data = request.get_json(silent=True) or {}
@@ -1107,7 +1778,7 @@ def update_intervention_status(id):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Check permission: Faculty can update only their own assigned interventions
+    # Check permission: Faculty can update only their own assigned interventions; HOD only own department
     cursor.execute("SELECT * FROM interventions WHERE id = ?", (id,))
     intv = cursor.fetchone()
     if not intv:
@@ -1117,6 +1788,14 @@ def update_intervention_status(id):
     if current_role == "faculty" and intv["faculty_id"] != current_user_id:
         conn.close()
         return jsonify({"error": "Forbidden", "message": "You can only update interventions assigned to you"}), 403
+
+    if current_role == "hod":
+        cursor.execute("SELECT department FROM students WHERE student_id = ?", (intv["student_id"],))
+        st_row = cursor.fetchone()
+        dept = (session.get("department") or "").upper()
+        if not st_row or (st_row["department"] or "").upper() != dept:
+            conn.close()
+            return jsonify({"error": "Forbidden", "message": "You can only update interventions for students in your department"}), 403
 
     status_val = new_status if new_status else intv["status"]
     action_val = action_taken if action_taken is not None else intv["action_taken"]
@@ -2384,6 +3063,570 @@ def _generate_chat_reply(msg, s, metrics):
             f"• Placement readiness\n"
             f"• LMS and assignments\n\n"
             f"Try asking something like \"How can I improve my attendance?\" or \"Help me make a study plan.\"")
+
+
+
+
+# ==============================================================================
+# HOD (HEAD OF DEPARTMENT) API ENDPOINTS
+# ==============================================================================
+
+@app.route("/api/hod/overview", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_overview():
+    """
+    Returns verified department-level metrics, faculty overview,
+    risk monitoring statistics, and active interventions for the authenticated HOD.
+    Enforces strict backend isolation to session department.
+    """
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned to HOD account"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Department metadata
+    cursor.execute("SELECT * FROM departments WHERE code = ? COLLATE NOCASE", (dept_code,))
+    dept_row = cursor.fetchone()
+    dept_name = dept_row["name"] if dept_row else dept_code
+    hod_name = dept_row["hod_name"] if dept_row else current_user.get("name", "")
+
+    # Student aggregated metrics
+    cursor.execute("""
+        SELECT 
+            COUNT(*) as total_students,
+            AVG(CASE WHEN cgpa IS NOT NULL THEN cgpa END) as avg_cgpa,
+            AVG(CASE WHEN attendance_pct IS NOT NULL THEN attendance_pct END) as avg_attendance,
+            AVG(CASE WHEN academic_marks_pct IS NOT NULL THEN academic_marks_pct END) as avg_marks,
+            AVG(CASE WHEN success_score IS NOT NULL THEN success_score END) as avg_success_score,
+            SUM(CASE WHEN backlogs > 0 THEN backlogs ELSE 0 END) as total_backlogs,
+            SUM(CASE WHEN LOWER(risk_level) = 'high' THEN 1 ELSE 0 END) as high_risk_count,
+            SUM(CASE WHEN LOWER(risk_level) = 'medium' THEN 1 ELSE 0 END) as med_risk_count,
+            SUM(CASE WHEN LOWER(risk_level) = 'low' THEN 1 ELSE 0 END) as low_risk_count
+        FROM students
+        WHERE department = ? COLLATE NOCASE
+    """, (dept_code,))
+    s_stats = cursor.fetchone()
+
+    # Faculty members for this department
+    cursor.execute("""
+        SELECT faculty_id, name, email, department, designation, specialization, phone, courses_count
+        FROM faculty
+        WHERE department = ? COLLATE NOCASE
+        ORDER BY name ASC
+    """, (dept_code,))
+    faculty_list = [dict(f) for f in cursor.fetchall()]
+
+    # Interventions for students of this department
+    cursor.execute("""
+        SELECT i.*, s.name as student_name, s.department as student_dept, s.risk_level as student_risk,
+               n.is_read as notif_is_read, n.read_at as notif_read_at
+        FROM interventions i
+        JOIN students s ON i.student_id = s.student_id
+        LEFT JOIN notifications n ON n.intervention_id = i.id
+        WHERE s.department = ? COLLATE NOCASE
+        ORDER BY i.created_at DESC
+    """, (dept_code,))
+    intv_rows = [dict(r) for r in cursor.fetchall()]
+
+    active_intvs = [i for i in intv_rows if (i.get("status") or "").lower() != "completed"]
+    completed_intvs = [i for i in intv_rows if (i.get("status") or "").lower() == "completed"]
+
+    # Student records list
+    cursor.execute("""
+        SELECT * FROM students
+        WHERE department = ? COLLATE NOCASE
+        ORDER BY 
+            CASE LOWER(risk_level) 
+                WHEN 'high' THEN 1 
+                WHEN 'medium' THEN 2 
+                WHEN 'low' THEN 3 
+                ELSE 4 
+            END, name ASC
+    """, (dept_code,))
+    students_list = [dict(s) for s in cursor.fetchall()]
+
+    # Query academic_records to attach backlog subjects and structured details
+    cursor.execute("""
+        SELECT student_id, course_name, course_code, semester, academic_year, grade, status
+        FROM academic_records
+        WHERE LOWER(status) NOT IN ('passed', 'pass', 'completed', 'clear')
+        ORDER BY semester ASC, id ASC
+    """)
+    backlogs_details_map = {}
+    backlogs_subjects_map = {}
+    for r in cursor.fetchall():
+        sid = r["student_id"]
+        c_code = r["course_code"] or ""
+        disp = f"{r['course_name']} — {c_code}" if c_code else r["course_name"]
+        item = {
+            "course_name": r["course_name"],
+            "course_code": c_code,
+            "semester": r["semester"],
+            "academic_year": r["academic_year"] or "",
+            "grade": r["grade"] or "F",
+            "display": disp
+        }
+        backlogs_details_map.setdefault(sid, []).append(item)
+        backlogs_subjects_map.setdefault(sid, []).append(r["course_name"])
+
+    for s in students_list:
+        sid = s.get("student_id")
+        b_items = backlogs_details_map.get(sid, [])
+        s["backlog_details"] = b_items
+        s["backlog_subjects"] = ", ".join(backlogs_subjects_map.get(sid, []))
+        if b_items:
+            s["backlogs"] = max(s.get("backlogs") or 0, len(b_items))
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "department": {
+            "code": dept_code,
+            "name": dept_name,
+            "hod_name": hod_name
+        },
+        "metrics": {
+            "total_students": s_stats["total_students"] or 0,
+            "total_faculty": len(faculty_list),
+            "at_risk_students": (s_stats["high_risk_count"] or 0) + (s_stats["med_risk_count"] or 0),
+            "high_risk_count": s_stats["high_risk_count"] or 0,
+            "med_risk_count": s_stats["med_risk_count"] or 0,
+            "low_risk_count": s_stats["low_risk_count"] or 0,
+            "avg_attendance": round(s_stats["avg_attendance"] or 0.0, 1),
+            "avg_cgpa": round(s_stats["avg_cgpa"] or 0.0, 2),
+            "avg_marks": round(s_stats["avg_marks"] or 0.0, 1),
+            "avg_success_score": round(s_stats["avg_success_score"] or 0.0, 1),
+            "total_backlogs": s_stats["total_backlogs"] or 0,
+            "active_interventions": len(active_intvs),
+            "completed_interventions": len(completed_intvs),
+            "total_interventions": len(intv_rows)
+        },
+        "faculty": {
+            "list": faculty_list,
+            "attendance_notice": "Faculty attendance data is not available in the current system."
+        },
+        "students": students_list,
+        "interventions": intv_rows
+    }), 200
+
+
+
+# ==============================================================================
+# HOD EXPORT REPORT ENDPOINTS (CSV & EXCEL .XLSX)
+# ==============================================================================
+
+@app.route("/api/hod/export/students/csv", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_export_students_csv():
+    """Exports CSV roster of students strictly filtered to authenticated HOD's department."""
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or session.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT student_id, name, department, semester, section, mentor_name,
+               attendance_pct, cgpa, academic_marks_pct, backlogs,
+               success_score, risk_level
+        FROM students
+        WHERE department = ? COLLATE NOCASE
+        ORDER BY name ASC
+    """, (dept_code,))
+    students = [dict(r) for r in cursor.fetchall()]
+
+    # Fetch active interventions to populate intervention status
+    cursor.execute("SELECT student_id, status FROM interventions")
+    intv_map = {}
+    for row in cursor.fetchall():
+        s_id = row["student_id"]
+        if s_id not in intv_map or row["status"] in ("In Progress", "Assigned", "Active"):
+            intv_map[s_id] = row["status"]
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    headers = [
+        "Student ID", "Full Name", "Department", "Semester", "Section", "Faculty Advisor",
+        "Attendance (%)", "CGPA", "Exam Marks (%)", "Active Backlogs",
+        "Success Score", "Risk Level", "Intervention Status"
+    ]
+    writer.writerow(headers)
+
+    for s in students:
+        s_id = s["student_id"]
+        status = intv_map.get(s_id, "None")
+        writer.writerow([
+            _sanitize_csv_cell(s["student_id"]),
+            _sanitize_csv_cell(s["name"]),
+            _sanitize_csv_cell(s["department"]),
+            _sanitize_csv_cell(s.get("semester", "")),
+            _sanitize_csv_cell(s.get("section", "")),
+            _sanitize_csv_cell(s.get("mentor_name", "Unassigned")),
+            s.get("attendance_pct", 0),
+            s.get("cgpa", 0.0),
+            s.get("academic_marks_pct", 0),
+            s.get("backlogs", 0),
+            s.get("success_score", 0),
+            _sanitize_csv_cell(s.get("risk_level", "Low")),
+            _sanitize_csv_cell(status)
+        ])
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"{dept_code}_Student_Report_{today_str}.csv"
+    return _make_csv_response(output.getvalue(), filename)
+
+
+@app.route("/api/hod/export/students/xlsx", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_export_students_xlsx():
+    """Exports formatted Excel (.xlsx) roster of students strictly filtered to authenticated HOD's department."""
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or session.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT student_id, name, department, semester, section, mentor_name,
+               attendance_pct, cgpa, academic_marks_pct, backlogs,
+               success_score, risk_level
+        FROM students
+        WHERE department = ? COLLATE NOCASE
+        ORDER BY name ASC
+    """, (dept_code,))
+    students = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT student_id, status FROM interventions")
+    intv_map = {}
+    for row in cursor.fetchall():
+        s_id = row["student_id"]
+        if s_id not in intv_map or row["status"] in ("In Progress", "Assigned", "Active"):
+            intv_map[s_id] = row["status"]
+    conn.close()
+
+    headers = [
+        "Student ID", "Full Name", "Department", "Semester", "Section", "Faculty Advisor",
+        "Attendance (%)", "CGPA", "Exam Marks (%)", "Active Backlogs",
+        "Success Score", "Risk Level", "Intervention Status"
+    ]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"{dept_code} Students"
+
+    for s in students:
+        s_id = s["student_id"]
+        status = intv_map.get(s_id, "None")
+        ws.append([
+            _sanitize_csv_cell(s["student_id"]),
+            _sanitize_csv_cell(s["name"]),
+            _sanitize_csv_cell(s["department"]),
+            _sanitize_csv_cell(s.get("semester", "")),
+            _sanitize_csv_cell(s.get("section", "")),
+            _sanitize_csv_cell(s.get("mentor_name", "Unassigned")),
+            s.get("attendance_pct", 0),
+            s.get("cgpa", 0.0),
+            s.get("academic_marks_pct", 0),
+            s.get("backlogs", 0),
+            s.get("success_score", 0),
+            _sanitize_csv_cell(s.get("risk_level", "Low")),
+            _sanitize_csv_cell(status)
+        ])
+
+    _style_excel_sheet(ws, f"{dept_code} Department - Student Cohort Performance & Risk Report", headers)
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"{dept_code}_Student_Report_{today_str}.xlsx"
+    return _make_excel_response(wb, filename)
+
+
+@app.route("/api/hod/export/faculty/csv", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_export_faculty_csv():
+    """Exports CSV directory of faculty members in the authenticated HOD's department."""
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or session.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT faculty_id, name, email, phone, department, designation, specialization, courses_count
+        FROM faculty
+        WHERE department = ? COLLATE NOCASE
+        ORDER BY name ASC
+    """, (dept_code,))
+    faculty = [dict(r) for r in cursor.fetchall()]
+
+    for f in faculty:
+        cursor.execute("SELECT COUNT(*) as cnt FROM students WHERE faculty_id = ? OR department = ?", (f["faculty_id"], f["department"]))
+        f["advisee_count"] = cursor.fetchone()["cnt"]
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    headers = [
+        "Faculty ID", "Full Name", "Designation", "Department", "Email Address", "Phone",
+        "Specialization", "Courses Count", "Assigned Advisees", "Attendance Tracking Status"
+    ]
+    writer.writerow(headers)
+
+    for f in faculty:
+        writer.writerow([
+            _sanitize_csv_cell(f["faculty_id"]),
+            _sanitize_csv_cell(f["name"]),
+            _sanitize_csv_cell(f.get("designation", "Faculty Mentor")),
+            _sanitize_csv_cell(f["department"]),
+            _sanitize_csv_cell(f.get("email", "")),
+            _sanitize_csv_cell(f.get("phone", "")),
+            _sanitize_csv_cell(f.get("specialization", "General")),
+            f.get("courses_count", 0),
+            f.get("advisee_count", 0),
+            "Attendance tracking not active in current system"
+        ])
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"{dept_code}_Faculty_Report_{today_str}.csv"
+    return _make_csv_response(output.getvalue(), filename)
+
+
+@app.route("/api/hod/export/faculty/xlsx", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_export_faculty_xlsx():
+    """Exports formatted Excel (.xlsx) directory of faculty members in the authenticated HOD's department."""
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or session.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT faculty_id, name, email, phone, department, designation, specialization, courses_count
+        FROM faculty
+        WHERE department = ? COLLATE NOCASE
+        ORDER BY name ASC
+    """, (dept_code,))
+    faculty = [dict(r) for r in cursor.fetchall()]
+
+    for f in faculty:
+        cursor.execute("SELECT COUNT(*) as cnt FROM students WHERE faculty_id = ? OR department = ?", (f["faculty_id"], f["department"]))
+        f["advisee_count"] = cursor.fetchone()["cnt"]
+    conn.close()
+
+    headers = [
+        "Faculty ID", "Full Name", "Designation", "Department", "Email Address", "Phone",
+        "Specialization", "Courses Count", "Assigned Advisees", "Attendance Tracking Status"
+    ]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"{dept_code} Faculty"
+
+    for f in faculty:
+        ws.append([
+            _sanitize_csv_cell(f["faculty_id"]),
+            _sanitize_csv_cell(f["name"]),
+            _sanitize_csv_cell(f.get("designation", "Faculty Mentor")),
+            _sanitize_csv_cell(f["department"]),
+            _sanitize_csv_cell(f.get("email", "")),
+            _sanitize_csv_cell(f.get("phone", "")),
+            _sanitize_csv_cell(f.get("specialization", "General")),
+            f.get("courses_count", 0),
+            f.get("advisee_count", 0),
+            "Attendance tracking not active in current system"
+        ])
+
+    _style_excel_sheet(ws, f"{dept_code} Department - Faculty Directory & Workload Report", headers)
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"{dept_code}_Faculty_Report_{today_str}.xlsx"
+    return _make_excel_response(wb, filename)
+
+
+@app.route("/api/hod/export/summary/csv", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_export_summary_csv():
+    """Exports departmental executive summary KPIs in CSV format."""
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or session.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM departments WHERE code = ? COLLATE NOCASE", (dept_code,))
+    dept_row = cursor.fetchone()
+    dept_name = dept_row["name"] if dept_row else dept_code
+    hod_name = dept_row["hod_name"] if dept_row else current_user.get("name", "")
+
+    cursor.execute("""
+        SELECT 
+            COUNT(*) as total_students,
+            AVG(CASE WHEN cgpa IS NOT NULL THEN cgpa END) as avg_cgpa,
+            AVG(CASE WHEN attendance_pct IS NOT NULL THEN attendance_pct END) as avg_attendance,
+            AVG(CASE WHEN academic_marks_pct IS NOT NULL THEN academic_marks_pct END) as avg_marks,
+            AVG(CASE WHEN success_score IS NOT NULL THEN success_score END) as avg_success_score,
+            SUM(CASE WHEN backlogs > 0 THEN backlogs ELSE 0 END) as total_backlogs,
+            SUM(CASE WHEN LOWER(risk_level) = 'high' THEN 1 ELSE 0 END) as high_risk_count,
+            SUM(CASE WHEN LOWER(risk_level) = 'medium' THEN 1 ELSE 0 END) as med_risk_count,
+            SUM(CASE WHEN LOWER(risk_level) = 'low' THEN 1 ELSE 0 END) as low_risk_count
+        FROM students
+        WHERE department = ? COLLATE NOCASE
+    """, (dept_code,))
+    stats = dict(cursor.fetchone())
+
+    cursor.execute("SELECT COUNT(*) as cnt FROM faculty WHERE department = ? COLLATE NOCASE", (dept_code,))
+    total_faculty = cursor.fetchone()["cnt"]
+
+    cursor.execute("""
+        SELECT COUNT(*) as total_intv,
+               SUM(CASE WHEN status IN ('Active', 'In Progress', 'Assigned') THEN 1 ELSE 0 END) as active_intv,
+               SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed_intv
+        FROM interventions
+        WHERE student_id IN (SELECT student_id FROM students WHERE department = ? COLLATE NOCASE)
+    """, (dept_code,))
+    intv_stats = dict(cursor.fetchone())
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Metric Category", "Metric Name", "Value", "Operational Description"])
+
+    metrics_rows = [
+        ("Institutional Profile", "Department Code", dept_code, "Official department acronym"),
+        ("Institutional Profile", "Department Name", dept_name, "Full department name"),
+        ("Institutional Profile", "Head of Department (HOD)", hod_name, "Designated department administrator"),
+        ("Institutional Profile", "Report Date", datetime.date.today().strftime("%Y-%m-%d"), "Snapshot generation date"),
+        ("Student Cohort", "Total Enrolled Students", stats.get("total_students", 0), "Total student records in department"),
+        ("Student Risk", "High Risk Students", stats.get("high_risk_count", 0) or 0, "Attendance < 75% or CGPA < 6.0 or severe backlogs"),
+        ("Student Risk", "Medium Risk Students", stats.get("med_risk_count", 0) or 0, "Moderate academic or attendance risk flags"),
+        ("Student Risk", "Low Risk Students", stats.get("low_risk_count", 0) or 0, "Good standing across attendance and academics"),
+        ("Academic Performance", "Average Attendance (%)", round(stats.get("avg_attendance") or 0.0, 1), "Mean class attendance percentage"),
+        ("Academic Performance", "Average CGPA", round(stats.get("avg_cgpa") or 0.0, 2), "Cumulative Grade Point Average across cohort"),
+        ("Academic Performance", "Average Exam Marks (%)", round(stats.get("avg_marks") or 0.0, 1), "Mean internal and external marks"),
+        ("Academic Performance", "Average Success Score", round(stats.get("avg_success_score") or 0.0, 1), "Weighted predictive success index (0-100)"),
+        ("Academic Performance", "Total Active Backlogs", stats.get("total_backlogs", 0) or 0, "Sum of active backlogs across all students"),
+        ("Faculty & Advising", "Total Department Faculty", total_faculty, "Faculty members allocated to department"),
+        ("Faculty & Advising", "Faculty Attendance Tracking", "Data not available", "Faculty attendance module is not tracked in system"),
+        ("Interventions", "Total Interventions", intv_stats.get("total_intv", 0) or 0, "Cumulative logged interventions"),
+        ("Interventions", "Active / Pending Interventions", intv_stats.get("active_intv", 0) or 0, "Interventions currently in progress"),
+        ("Interventions", "Completed Interventions", intv_stats.get("completed_intv", 0) or 0, "Interventions successfully closed")
+    ]
+
+    for cat, name, val, desc in metrics_rows:
+        writer.writerow([
+            _sanitize_csv_cell(cat),
+            _sanitize_csv_cell(name),
+            val if isinstance(val, (int, float)) else _sanitize_csv_cell(val),
+            _sanitize_csv_cell(desc)
+        ])
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"{dept_code}_Department_Summary_{today_str}.csv"
+    return _make_csv_response(output.getvalue(), filename)
+
+
+@app.route("/api/hod/export/summary/xlsx", methods=["GET"])
+@login_required
+@role_required("hod")
+def hod_export_summary_xlsx():
+    """Exports departmental executive summary KPIs in formatted Excel (.xlsx) format."""
+    current_user = get_current_user()
+    dept_code = (current_user.get("department") or session.get("department") or "").strip().upper()
+    if not dept_code:
+        return jsonify({"error": "Forbidden", "message": "No department assigned"}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM departments WHERE code = ? COLLATE NOCASE", (dept_code,))
+    dept_row = cursor.fetchone()
+    dept_name = dept_row["name"] if dept_row else dept_code
+    hod_name = dept_row["hod_name"] if dept_row else current_user.get("name", "")
+
+    cursor.execute("""
+        SELECT 
+            COUNT(*) as total_students,
+            AVG(CASE WHEN cgpa IS NOT NULL THEN cgpa END) as avg_cgpa,
+            AVG(CASE WHEN attendance_pct IS NOT NULL THEN attendance_pct END) as avg_attendance,
+            AVG(CASE WHEN academic_marks_pct IS NOT NULL THEN academic_marks_pct END) as avg_marks,
+            AVG(CASE WHEN success_score IS NOT NULL THEN success_score END) as avg_success_score,
+            SUM(CASE WHEN backlogs > 0 THEN backlogs ELSE 0 END) as total_backlogs,
+            SUM(CASE WHEN LOWER(risk_level) = 'high' THEN 1 ELSE 0 END) as high_risk_count,
+            SUM(CASE WHEN LOWER(risk_level) = 'medium' THEN 1 ELSE 0 END) as med_risk_count,
+            SUM(CASE WHEN LOWER(risk_level) = 'low' THEN 1 ELSE 0 END) as low_risk_count
+        FROM students
+        WHERE department = ? COLLATE NOCASE
+    """, (dept_code,))
+    stats = dict(cursor.fetchone())
+
+    cursor.execute("SELECT COUNT(*) as cnt FROM faculty WHERE department = ? COLLATE NOCASE", (dept_code,))
+    total_faculty = cursor.fetchone()["cnt"]
+
+    cursor.execute("""
+        SELECT COUNT(*) as total_intv,
+               SUM(CASE WHEN status IN ('Active', 'In Progress', 'Assigned') THEN 1 ELSE 0 END) as active_intv,
+               SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed_intv
+        FROM interventions
+        WHERE student_id IN (SELECT student_id FROM students WHERE department = ? COLLATE NOCASE)
+    """, (dept_code,))
+    intv_stats = dict(cursor.fetchone())
+    conn.close()
+
+    headers = ["Metric Category", "Metric Name", "Value", "Operational Description"]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"{dept_code} Executive Summary"
+
+    metrics_rows = [
+        ("Institutional Profile", "Department Code", dept_code, "Official department acronym"),
+        ("Institutional Profile", "Department Name", dept_name, "Full department name"),
+        ("Institutional Profile", "Head of Department (HOD)", hod_name, "Designated department administrator"),
+        ("Institutional Profile", "Report Date", datetime.date.today().strftime("%Y-%m-%d"), "Snapshot generation date"),
+        ("Student Cohort", "Total Enrolled Students", stats.get("total_students", 0), "Total student records in department"),
+        ("Student Risk", "High Risk Students", stats.get("high_risk_count", 0) or 0, "Attendance < 75% or CGPA < 6.0 or severe backlogs"),
+        ("Student Risk", "Medium Risk Students", stats.get("med_risk_count", 0) or 0, "Moderate academic or attendance risk flags"),
+        ("Student Risk", "Low Risk Students", stats.get("low_risk_count", 0) or 0, "Good standing across attendance and academics"),
+        ("Academic Performance", "Average Attendance (%)", round(stats.get("avg_attendance") or 0.0, 1), "Mean class attendance percentage"),
+        ("Academic Performance", "Average CGPA", round(stats.get("avg_cgpa") or 0.0, 2), "Cumulative Grade Point Average across cohort"),
+        ("Academic Performance", "Average Exam Marks (%)", round(stats.get("avg_marks") or 0.0, 1), "Mean internal and external marks"),
+        ("Academic Performance", "Average Success Score", round(stats.get("avg_success_score") or 0.0, 1), "Weighted predictive success index (0-100)"),
+        ("Academic Performance", "Total Active Backlogs", stats.get("total_backlogs", 0) or 0, "Sum of active backlogs across all students"),
+        ("Faculty & Advising", "Total Department Faculty", total_faculty, "Faculty members allocated to department"),
+        ("Faculty & Advising", "Faculty Attendance Tracking", "Data not available", "Faculty attendance module is not tracked in system"),
+        ("Interventions", "Total Interventions", intv_stats.get("total_intv", 0) or 0, "Cumulative logged interventions"),
+        ("Interventions", "Active / Pending Interventions", intv_stats.get("active_intv", 0) or 0, "Interventions currently in progress"),
+        ("Interventions", "Completed Interventions", intv_stats.get("completed_intv", 0) or 0, "Interventions successfully closed")
+    ]
+
+    for cat, name, val, desc in metrics_rows:
+        ws.append([
+            _sanitize_csv_cell(cat),
+            _sanitize_csv_cell(name),
+            val if isinstance(val, (int, float)) else _sanitize_csv_cell(val),
+            _sanitize_csv_cell(desc)
+        ])
+
+    _style_excel_sheet(ws, f"{dept_code} Department - Executive Summary & Institutional Metrics", headers)
+
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    filename = f"{dept_code}_Department_Summary_{today_str}.xlsx"
+    return _make_excel_response(wb, filename)
 
 
 # ==============================================================================

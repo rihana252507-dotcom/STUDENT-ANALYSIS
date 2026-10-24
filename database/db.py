@@ -352,6 +352,26 @@ def init_db(force=False):
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (f_user, f_user, fname, femail, fdept, fdesig, fphone, fspec))
 
+        # -------------------------------------------------------------
+        # SEED 4b: HOD (HEAD OF DEPARTMENT) ACCOUNTS
+        # -------------------------------------------------------------
+        hod_data = [
+            ("hod_cse", "Hod@123", "Dr. Sunita Rao (HOD CSE)", "hod.cse@campusiq.edu", "CSE"),
+            ("hod_aiml", "Hod@123", "Dr. Priya Krishnaswamy (HOD AIML)", "hod.aiml@campusiq.edu", "AIML"),
+            ("hod_ece", "Hod@123", "Dr. Amit Verma (HOD ECE)", "hod.ece@campusiq.edu", "ECE"),
+            ("hod_it", "Hod@123", "Dr. Meenakshi Sundaram (HOD IT)", "hod.it@campusiq.edu", "IT"),
+            ("hod_aids", "Hod@123", "Prof. Neha Gupta (HOD AI&DS)", "hod.aids@campusiq.edu", "AI&DS"),
+            ("hod_me", "Hod@123", "Dr. K. S. Pillai (HOD ME)", "hod.me@campusiq.edu", "ME"),
+        ]
+        for h_user, h_pass, h_name, h_email, h_dept in hod_data:
+            cursor.execute("SELECT COUNT(*) as count FROM users WHERE user_id = ?", (h_user,))
+            if cursor.fetchone()["count"] == 0:
+                h_pass_hash = generate_password_hash(h_pass)
+                cursor.execute("""
+                INSERT INTO users (user_id, password_hash, role, name, email, department)
+                VALUES (?, ?, 'hod', ?, ?, ?)
+                """, (h_user, h_pass_hash, h_name, h_email, h_dept))
+
         mentor_map = {
             "Dr. Sunita Rao": "faculty001",
             "Dr. Meenakshi Sundaram": "faculty002",

@@ -67,6 +67,7 @@ def authenticate_user(user_id, password):
 def login_user(user):
     """Stores user information securely in Flask session."""
     session.clear()
+    session.permanent = True
     session["user_id"] = user["user_id"]
     session["role"] = user["role"]
     session["name"] = user["name"]
@@ -138,6 +139,8 @@ def role_required(*allowed_roles):
                 # Redirect user to their own dashboard
                 if user_role == "admin":
                     return redirect(url_for("admin_dashboard"))
+                elif user_role == "hod":
+                    return redirect(url_for("hod_dashboard"))
                 elif user_role == "faculty":
                     return redirect(url_for("faculty_dashboard"))
                 elif user_role == "student":

@@ -26,7 +26,7 @@
           </svg>
         </div>
         <h1 class="login-hero-title">Campus<span class="text-gradient-pink">IQ</span></h1>
-        <p style="color: #DDD6FE; font-size: 0.88rem; margin-top: 6px;">
+        <p style="color: #EBF4FF; font-size: 0.88rem; margin-top: 6px;">
           AI-Powered Student Analytics & Early Academic Risk Intervention Engine
         </p>
       </div>
@@ -58,7 +58,7 @@
         </div>
       </div>
 
-      <div style="font-size: 0.72rem; color: #DDD6FE; opacity: 0.85;">
+      <div style="font-size: 0.72rem; color: #EBF4FF; opacity: 0.85;">
         &copy; 2026 CampusIQ &bull; NAAC & NIRF Institutional Intelligence Ready
       </div>
     </div>
@@ -74,18 +74,29 @@
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div style="background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.45); color: #FECDD3; padding: 10px 14px; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; margin-bottom: 16px;">
-              {{ message }}
+            <div class="ciq-flash-notification {{ category }}" style="background:#FFFFFF; border:1px solid #DCE4EE; border-left:4px solid {% if category == 'success' %}#6D28D9{% elif category == 'danger' %}#DC2626{% else %}#D97706{% endif %}; color:#172B4D; padding:12px 14px; border-radius:8px; font-size:0.8125rem; font-weight:600; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 6px rgba(18,59,102,0.05);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                {% if category == 'success' %}
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                {% elif category == 'danger' %}
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                {% else %}
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D97706" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                {% endif %}
+                <span style="color:#172B4D;">{{ message }}</span>
+              </div>
+              <button type="button" class="btn-flash-close" onclick="this.parentElement.remove()" style="background:none; border:none; color:#5B6B82; font-size:1.1rem; cursor:pointer; line-height:1;" title="Dismiss">&times;</button>
             </div>
           {% endfor %}
         {% endif %}
       {% endwith %}
 
-      <!-- 3 Role Options -->
+      <!-- 4 Role Options -->
       <div class="login-role-tabs" role="tablist">
-        <button type="button" class="login-role-tab active" data-role="admin" onclick="selectLoginRole('admin')">Admin Login</button>
-        <button type="button" class="login-role-tab" data-role="faculty" onclick="selectLoginRole('faculty')">Faculty Login</button>
-        <button type="button" class="login-role-tab" data-role="student" onclick="selectLoginRole('student')">Student Login</button>
+        <button type="button" class="login-role-tab active" data-role="admin" onclick="selectLoginRole('admin')">Admin</button>
+        <button type="button" class="login-role-tab" data-role="hod" onclick="selectLoginRole('hod')">HOD</button>
+        <button type="button" class="login-role-tab" data-role="faculty" onclick="selectLoginRole('faculty')">Faculty</button>
+        <button type="button" class="login-role-tab" data-role="student" onclick="selectLoginRole('student')">Student</button>
       </div>
 
       <form action="{{ url_for('login') }}" method="POST" id="portalLoginForm">
@@ -116,12 +127,17 @@
       <details class="demo-accounts-card" open>
         <summary class="demo-title-text" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
           <span>🔑 Quick Demo Access Panel (1-Click Auto-Fill)</span>
-          <span style="font-size:0.75rem; color:#DDD6FE; font-weight:normal;">[Toggle]</span>
+          <span style="font-size:0.75rem; color:#5B6B82; font-weight:normal;">[Toggle]</span>
         </summary>
         <div class="demo-pills-row" style="margin-top:10px;">
           <div class="demo-pill-btn" onclick="fillDemo('admin001', 'Admin@123', 'admin')" title="Sign in as Administrator Dean">
             <strong>Admin Login</strong>
             <code>admin001 / Admin@123</code>
+          </div>
+
+          <div class="demo-pill-btn" onclick="fillDemo('hod_cse', 'Hod@123', 'hod')" title="Sign in as HOD CSE (Dr. Sunita Rao)">
+            <strong>HOD Login (CSE)</strong>
+            <code>hod_cse / Hod@123</code>
           </div>
 
           <div class="demo-pill-btn" onclick="fillDemo('faculty001', 'Faculty@123', 'faculty')" title="Sign in as Faculty Mentor (Dr. Sunita Rao)">
@@ -146,6 +162,7 @@
       });
       const u = document.getElementById('username');
       if (role === 'admin') u.placeholder = 'e.g. admin001';
+      else if (role === 'hod') u.placeholder = 'e.g. hod_cse or hod_aiml';
       else if (role === 'faculty') u.placeholder = 'e.g. faculty001 or faculty002';
       else if (role === 'student') u.placeholder = 'e.g. student001 or student002';
     }
